@@ -1,4 +1,4 @@
-from edc_constants.constants import YES, OTHER
+from edc_constants.constants import YES
 from edc_form_validators import FormValidator
 
 
