@@ -1,2 +1,3 @@
 from .child_assent_form_validator import ChildAssentFormValidator
 from .child_medical_history_form_validator import ChildMedicalHistoryFormValidator
+from .form_validator_mixin import ChildFormValidatorMixin
