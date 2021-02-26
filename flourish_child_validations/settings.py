@@ -9,8 +9,10 @@ https://docs.djangoproject.com/en/3.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
-
 import os
+import sys
+
+APP_NAME = 'flourish_child_validations'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -35,8 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'edc_device.apps.AppConfig',
+    'flourish_child_validations.apps.AppConfig'
 ]
 
 MIDDLEWARE = [
@@ -113,8 +118,28 @@ USE_L10N = True
 
 USE_TZ = True
 
+DASHBOARD_URL_NAMES = {
+    'subject_listboard_url': 'flourish_dashboard:child_subject_listboard_url',
+    'subject_dashboard_url': 'flourish_dashboard:child_subject_dashboard_url',
+}
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+if 'test' in sys.argv:
+
+    class DisableMigrations:
+
+        def __contains__(self, item):
+            return True
+
+        def __getitem__(self, item):
+            return None
+
+    MIGRATION_MODULES = DisableMigrations()
+    PASSWORD_HASHERS = ('django.contrib.auth.hashers.MD5PasswordHasher',)
+    DEFAULT_FILE_STORAGE = 'inmemorystorage.InMemoryStorage'
+
