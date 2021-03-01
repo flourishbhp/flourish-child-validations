@@ -19,6 +19,6 @@ class ChildPreviousHospitalisationFormValidator(FormValidator):
         self.m2m_other_specify(OTHER, m2m_field='reason_hospitalized',
                                field_other='reason_hospitalized_other')
 
-        self.m2m_other_specify('Surgical_reason',
+        self.m2m_other_specify('surgical_reason',
                                m2m_field='reason_hospitalized',
                                field_other='surgical_reason')
