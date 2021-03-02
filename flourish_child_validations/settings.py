@@ -40,7 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_crypto_fields.apps.AppConfig',
     'edc_device.apps.AppConfig',
+    'edc_protocol.apps.AppConfig',
     'flourish_child_validations.apps.AppConfig'
 ]
 
