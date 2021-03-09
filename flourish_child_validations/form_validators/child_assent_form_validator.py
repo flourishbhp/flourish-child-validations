@@ -1,4 +1,5 @@
 import re
+from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
 from edc_base.utils import relativedelta
 from edc_constants.constants import NO
@@ -20,6 +21,10 @@ class ChildAssentFormValidator(FormValidator):
         self.clean_initials_with_full_name()
         self.validate_identity_number(cleaned_data)
         self.validate_dob(cleaned_data)
+
+    @property
+    def assent_cls(self):
+        return django_apps.get_model('flourish_child.childassent')
 
     def clean_full_name_syntax(self):
         cleaned_data = self.cleaned_data
@@ -101,27 +106,46 @@ class ChildAssentFormValidator(FormValidator):
                 raise ValidationError(msg)
 
     def validate_dob(self, cleaned_data=None):
-        consent_datetime = cleaned_data.get('consent_datetime')
-        consent_age = relativedelta(
-            consent_datetime.date(), cleaned_data.get('dob')).years
+
+        if self.consent_model_obj.child_dob != cleaned_data.get('dob'):
+            msg = {'dob':
+                   'Child dob must match dob specified for the adult participation'
+                   f' consent {self.consent_model_obj.child_dob}.'}
+            self._errors.update(msg)
+            raise ValidationError(msg)
+
+        assent_datetime = cleaned_data.get('consent_datetime')
+        assent_age = relativedelta(
+            assent_datetime.date(), cleaned_data.get('dob')).years
         age_in_years = None
 
         try:
-            consent_obj = self.subject_consent_cls.objects.get(
+            assent_obj = self.assent_cls.objects.get(
                 screening_identifier=self.cleaned_data.get('screening_identifier'),)
-        except self.subject_consent_cls.DoesNotExist:
-            if consent_age < 7:
+        except self.assent_cls.DoesNotExist:
+            if assent_age < 7:
                 msg = {'dob':
                        'Participant is younger than 7 years of age. Assent is not needed.'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
         else:
             age_in_years = relativedelta(
-                consent_datetime.date(), consent_obj.dob).years
-            if consent_age != age_in_years:
+                assent_datetime.date(), assent_obj.dob).years
+            if assent_age != age_in_years:
                 message = {'dob':
                            'In previous consent the derived age of the '
                            f'participant is {age_in_years}, but age derived '
-                           f'from the DOB is {consent_age}.'}
+                           f'from the DOB is {assent_age}.'}
                 self._errors.update(message)
                 raise ValidationError(message)
+
+    @property
+    def consent_model_obj(self):
+        consent_cls = django_apps.get_model('flourish_caregiver.subjectconsent')
+        try:
+            subject_consent = consent_cls.objects.get(
+                screening_identifier=self.cleaned_data.get('screening_identifier'))
+        except consent_cls.DoesNotExist:
+            raise ValidationError('Please complete the subject consent form first.')
+        else:
+            return subject_consent
