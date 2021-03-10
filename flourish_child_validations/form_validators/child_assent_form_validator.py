@@ -2,7 +2,7 @@ import re
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
 from edc_base.utils import relativedelta
-from edc_constants.constants import NO
+from edc_constants.constants import NO, FEMALE, MALE
 from edc_form_validators import FormValidator
 
 
@@ -19,6 +19,7 @@ class ChildAssentFormValidator(FormValidator):
 
         self.clean_full_name_syntax()
         self.clean_initials_with_full_name()
+        self.validate_gender()
         self.validate_identity_number(cleaned_data)
         self.validate_dob(cleaned_data)
 
@@ -98,10 +99,15 @@ class ChildAssentFormValidator(FormValidator):
                        'Please correct.'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
-            if cleaned_data.get('identity')[4] != '2':
+            gender = cleaned_data.get('gender')
+            if gender == FEMALE and cleaned_data.get('identity')[4] != '2':
                 msg = {'identity':
-                       'Identity provided indicates participant is Male. Please '
-                       'correct.'}
+                       'Participant is Female. Please correct the identity number.'}
+                self._errors.update(msg)
+                raise ValidationError(msg)
+            if gender == MALE and cleaned_data.get('identity')[4] != '1':
+                msg = {'identity':
+                       'Participant is Male. Please correct the identity number.'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
 
@@ -138,6 +144,30 @@ class ChildAssentFormValidator(FormValidator):
                            f'from the DOB is {assent_age}.'}
                 self._errors.update(message)
                 raise ValidationError(message)
+
+    def validate_gender(self):
+        bhp_prior_cls = django_apps.get_model(
+            'flourish_caregiver.screeningpriorbhpparticipants')
+        child_dataset_cls = django_apps.get_model('flourish_child.childdataset')
+        try:
+            bhp_prior = bhp_prior_cls.objects.get(
+                screening_identifier=self.cleaned_data.get('screening_identifier'))
+        except bhp_prior_cls.DoesNotExist:
+            pass
+        else:
+            try:
+                child_dataset = child_dataset_cls.objects.get(
+                    study_child_identifier=bhp_prior.study_child_identifier)
+            except child_dataset_cls.DoesNotExist:
+                pass
+            else:
+                gender = self.cleaned_data.get('gender')
+                if gender != child_dataset.infant_sex[0].upper():
+                    msg = {'gender':
+                           f'Child\'s gender is {child_dataset.infant_sex} from '
+                           'the child dataset. Please correct.'}
+                    self._errors.update(msg)
+                    raise ValidationError(msg)
 
     @property
     def consent_model_obj(self):
