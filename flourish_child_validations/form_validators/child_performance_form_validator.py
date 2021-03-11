@@ -6,6 +6,10 @@ class ChildPerformanceFormValidator(FormValidator):
 
     def clean(self):
 
+        self.validate_other_specify(field='education_level',
+                                    other_specify_field='education_level_other'
+                                    )
+
         if self.cleaned_data.get('education_level') == 'no_schooling':
             not_required_fields = ['mathematics_marks', 'science_marks',
                                    'setswana_marks', 'english_marks',
