@@ -31,6 +31,30 @@ class CaregiverConsent(UpdatesOrCreatesRegistrationModelMixin, BaseUuidModel):
         max_length=10,
         editable=False)
 
+    child_dob = models.DateField(blank=True, null=True)
+
+
+class ChildAssent(BaseUuidModel):
+
+    subject_identifier = models.CharField(max_length=25)
+
+    screening_identifier = models.CharField(max_length=50)
+
+    consent_datetime = models.DateTimeField()
+
+    dob = models.DateField()
+
+    version = models.CharField(
+        max_length=10,
+        editable=False)
+
+
+class ChildDataset(BaseUuidModel):
+
+    study_child_identifier = models.CharField(max_length=36)
+
+    infant_sex = models.CharField(max_length=7)
+
 
 class ChildVisit(BaseUuidModel):
 
@@ -51,3 +75,12 @@ class RegisteredSubject(BaseUuidModel):
         max_length=36,
         null=True,
         blank=True)
+
+
+class ScreeningPriorBhpParticipants(BaseUuidModel):
+
+    screening_identifier = models.CharField(max_length=50)
+
+    report_datetime = models.DateTimeField()
+
+    study_child_identifier = models.CharField(max_length=50)

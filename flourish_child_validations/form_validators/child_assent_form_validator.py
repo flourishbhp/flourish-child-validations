@@ -8,6 +8,30 @@ from edc_form_validators import FormValidator
 
 class ChildAssentFormValidator(FormValidator):
 
+    prior_screening_model = 'flourish_caregiver.screeningpriorbhpparticipants'
+
+    subject_consent_model = 'flourish_caregiver.subjectconsent'
+
+    child_dataset_model = 'flourish_child.childdataset'
+
+    child_assent_model = 'flourish_child.childassent'
+
+    @property
+    def bhp_prior_screening_cls(self):
+        return django_apps.get_model(self.prior_screening_model)
+
+    @property
+    def subject_consent_cls(self):
+        return django_apps.get_model(self.subject_consent_model)
+
+    @property
+    def child_dataset_cls(self):
+        return django_apps.get_model(self.child_dataset_model)
+
+    @property
+    def assent_cls(self):
+        return django_apps.get_model(self.child_assent_model)
+
     def clean(self):
 
         cleaned_data = self.cleaned_data
@@ -21,11 +45,8 @@ class ChildAssentFormValidator(FormValidator):
         self.clean_initials_with_full_name()
         self.validate_gender()
         self.validate_identity_number(cleaned_data)
+        self.validate_preg_testing()
         self.validate_dob(cleaned_data)
-
-    @property
-    def assent_cls(self):
-        return django_apps.get_model('flourish_child.childassent')
 
     def clean_full_name_syntax(self):
         cleaned_data = self.cleaned_data
@@ -87,25 +108,32 @@ class ChildAssentFormValidator(FormValidator):
             raise ValidationError('Initials do not match fullname.')
 
     def validate_identity_number(self, cleaned_data=None):
-        if cleaned_data.get('identity') != cleaned_data.get('confirm_identity'):
+        identity = cleaned_data.get('identity')
+        confirm_identity = cleaned_data.get('confirm_identity')
+        identity_type = cleaned_data.get('identity_type')
+        if not re.match('[0-9]+$', identity):
+            message = {'identity': 'Identity number must be digits.'}
+            self._errors.update(message)
+            raise ValidationError(message)
+        if identity != confirm_identity:
             msg = {'identity':
                    '\'Identity\' must match \'confirm identity\'.'}
             self._errors.update(msg)
             raise ValidationError(msg)
-        if cleaned_data.get('identity_type') == 'country_id':
-            if len(cleaned_data.get('identity')) != 9:
+        if identity_type in ['country_id', 'birth_cert']:
+            if len(identity) != 9:
                 msg = {'identity':
-                       'Country identity provided should contain 9 values. '
+                       f'{identity_type} provided should contain 9 values. '
                        'Please correct.'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
             gender = cleaned_data.get('gender')
-            if gender == FEMALE and cleaned_data.get('identity')[4] != '2':
+            if gender == FEMALE and identity[4] != '2':
                 msg = {'identity':
                        'Participant is Female. Please correct the identity number.'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
-            if gender == MALE and cleaned_data.get('identity')[4] != '1':
+            if gender == MALE and identity[4] != '1':
                 msg = {'identity':
                        'Participant is Male. Please correct the identity number.'}
                 self._errors.update(msg)
@@ -146,36 +174,50 @@ class ChildAssentFormValidator(FormValidator):
                 raise ValidationError(message)
 
     def validate_gender(self):
-        bhp_prior_cls = django_apps.get_model(
-            'flourish_caregiver.screeningpriorbhpparticipants')
-        child_dataset_cls = django_apps.get_model('flourish_child.childdataset')
-        try:
-            bhp_prior = bhp_prior_cls.objects.get(
-                screening_identifier=self.cleaned_data.get('screening_identifier'))
-        except bhp_prior_cls.DoesNotExist:
-            pass
-        else:
-            try:
-                child_dataset = child_dataset_cls.objects.get(
-                    study_child_identifier=bhp_prior.study_child_identifier)
-            except child_dataset_cls.DoesNotExist:
-                pass
-            else:
-                gender = self.cleaned_data.get('gender')
-                if gender != child_dataset.infant_sex[0].upper():
-                    msg = {'gender':
-                           f'Child\'s gender is {child_dataset.infant_sex} from '
-                           'the child dataset. Please correct.'}
-                    self._errors.update(msg)
-                    raise ValidationError(msg)
+        if self.child_dataset:
+            infant_sex = self.child_dataset.infant_sex.upper()
+            gender = self.cleaned_data.get('gender')
+            if gender != infant_sex[:1]:
+                msg = {'gender':
+                       f'Child\'s gender is {self.child_dataset.infant_sex} from '
+                       'the child dataset. Please correct.'}
+                self._errors.update(msg)
+                raise ValidationError(msg)
+
+    def validate_preg_testing(self):
+        self.required_if(
+            FEMALE,
+            field='gender',
+            field_required='preg_testing')
 
     @property
     def consent_model_obj(self):
-        consent_cls = django_apps.get_model('flourish_caregiver.subjectconsent')
         try:
-            subject_consent = consent_cls.objects.get(
+            subject_consent = self.subject_consent_cls.objects.get(
                 screening_identifier=self.cleaned_data.get('screening_identifier'))
-        except consent_cls.DoesNotExist:
+        except self.subject_consent_cls.DoesNotExist:
             raise ValidationError('Please complete the subject consent form first.')
         else:
             return subject_consent
+
+    @property
+    def prior_screening(self):
+        try:
+            bhp_prior = self.bhp_prior_screening_cls.objects.get(
+                screening_identifier=self.cleaned_data.get('screening_identifier'))
+        except self.bhp_prior_screening_cls.DoesNotExist:
+            return None
+        else:
+            return bhp_prior
+
+    @property
+    def child_dataset(self):
+        if self.prior_screening:
+            try:
+                child_dataset = self.child_dataset_cls.objects.get(
+                    study_child_identifier=self.prior_screening.study_child_identifier)
+            except self.child_dataset_cls.DoesNotExist:
+                return None
+            else:
+                return child_dataset
+        return None
