@@ -141,7 +141,7 @@ class ChildAssentFormValidator(FormValidator):
 
     def validate_dob(self, cleaned_data=None):
 
-        if self.consent_model_obj.child_dob != cleaned_data.get('dob'):
+        if self.caregiver_child_consent.child_dob != cleaned_data.get('dob'):
             msg = {'dob':
                    'Child dob must match dob specified for the adult participation'
                    f' consent {self.consent_model_obj.child_dob}.'}
@@ -194,11 +194,26 @@ class ChildAssentFormValidator(FormValidator):
     def consent_model_obj(self):
         try:
             subject_consent = self.subject_consent_cls.objects.get(
-                screening_identifier=self.cleaned_data.get('screening_identifier'))
+                screening_identifier=self.cleaned_data.get('screening_identifier'),
+                version=self.cleaned_data.get('version'))
         except self.subject_consent_cls.DoesNotExist:
             raise ValidationError('Please complete the subject consent form first.')
         else:
             return subject_consent
+
+    @property
+    def caregiver_child_consent(self):
+        caregiver_child_consent_cls = django_apps.get_model(
+            'flourish_caregiver.caregiverchildconsent')
+        try:
+            child_consent = caregiver_child_consent_cls.objects.get(
+                first_name=self.cleaned_data.get('first_name'),
+                last_name=self.cleaned_data.get('last_name'),
+                identity=self.cleaned_data.get('identity'))
+        except caregiver_child_consent_cls.DoesNotExist:
+            raise ValidationError('Caregiver child consent matching query does not exist.')
+        else:
+            return child_consent
 
     @property
     def prior_screening(self):
