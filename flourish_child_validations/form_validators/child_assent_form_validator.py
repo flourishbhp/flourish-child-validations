@@ -43,7 +43,7 @@ class ChildAssentFormValidator(FormValidator):
 
         self.clean_full_name_syntax()
         self.clean_initials_with_full_name()
-        self.validate_gender()
+#         self.validate_gender()
         self.validate_identity_number(cleaned_data)
         self.validate_preg_testing()
         self.validate_dob(cleaned_data)
@@ -230,7 +230,7 @@ class ChildAssentFormValidator(FormValidator):
         if self.prior_screening:
             try:
                 child_dataset = self.child_dataset_cls.objects.get(
-                    study_child_identifier=self.prior_screening.study_maternal_identifier)
+                    study_maternal_identifier=self.prior_screening.study_maternal_identifier)
             except self.child_dataset_cls.DoesNotExist:
                 return None
             else:
