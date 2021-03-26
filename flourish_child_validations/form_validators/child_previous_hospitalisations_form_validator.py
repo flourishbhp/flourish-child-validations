@@ -1,3 +1,5 @@
+from django.core.exceptions import ValidationError
+
 from edc_constants.constants import YES, OTHER
 from edc_form_validators import FormValidator
 
@@ -24,4 +26,3 @@ class ChildPreHospitalisationInlineFormValidator(FormValidator):
         self.m2m_other_specify('surgical_reason',
                                m2m_field='reason_hospitalized',
                                field_other='surgical_reason')
-
