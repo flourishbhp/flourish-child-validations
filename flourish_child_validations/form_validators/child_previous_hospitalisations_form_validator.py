@@ -6,11 +6,13 @@ class ChildPreviousHospitalisationFormValidator(FormValidator):
 
     def clean(self):
 
-        required_fields = ['hospitalized_count', 'aprox_date']
+        self.required_if(YES, field='child_hospitalized',
+                         field_required='hospitalized_count')
 
-        for required in required_fields:
-            self.required_if(YES, field='child_hospitalized',
-                             field_required=required)
+
+class ChildPreHospitalisationInlineFormValidator(FormValidator):
+
+    def clean(self):
 
         self.validate_other_specify(field='name_hospital')
 
@@ -22,3 +24,4 @@ class ChildPreviousHospitalisationFormValidator(FormValidator):
         self.m2m_other_specify('surgical_reason',
                                m2m_field='reason_hospitalized',
                                field_other='surgical_reason')
+
