@@ -43,7 +43,7 @@ class ChildAssentFormValidator(FormValidator):
 
         self.clean_full_name_syntax()
         self.clean_initials_with_full_name()
-        self.validate_gender()
+#         self.validate_gender()
         self.validate_identity_number(cleaned_data)
         self.validate_preg_testing()
         self.validate_dob(cleaned_data)
