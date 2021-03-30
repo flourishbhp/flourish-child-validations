@@ -230,7 +230,7 @@ class ChildAssentFormValidator(FormValidator):
         if self.prior_screening:
             try:
                 child_dataset = self.child_dataset_cls.objects.get(
-                    study_child_identifier=self.prior_screening.study_child_identifier)
+                    study_maternal_identifier=self.prior_screening.study_maternal_identifier)
             except self.child_dataset_cls.DoesNotExist:
                 return None
             else:
