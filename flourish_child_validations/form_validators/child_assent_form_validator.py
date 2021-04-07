@@ -10,8 +10,6 @@ class ChildAssentFormValidator(FormValidator):
 
     prior_screening_model = 'flourish_caregiver.screeningpriorbhpparticipants'
 
-    subject_consent_model = 'flourish_caregiver.subjectconsent'
-
     child_dataset_model = 'flourish_child.childdataset'
 
     child_assent_model = 'flourish_child.childassent'
@@ -19,10 +17,6 @@ class ChildAssentFormValidator(FormValidator):
     @property
     def bhp_prior_screening_cls(self):
         return django_apps.get_model(self.prior_screening_model)
-
-    @property
-    def subject_consent_cls(self):
-        return django_apps.get_model(self.subject_consent_model)
 
     @property
     def child_dataset_cls(self):
@@ -41,9 +35,10 @@ class ChildAssentFormValidator(FormValidator):
             field='is_literate',
             field_required='witness_name')
 
+        self.validate_against_child_consent()
         self.clean_full_name_syntax()
         self.clean_initials_with_full_name()
-#         self.validate_gender()
+        self.validate_gender()
         self.validate_identity_number(cleaned_data)
         self.validate_preg_testing()
         self.validate_dob(cleaned_data)
@@ -143,8 +138,8 @@ class ChildAssentFormValidator(FormValidator):
 
         if self.caregiver_child_consent.child_dob != cleaned_data.get('dob'):
             msg = {'dob':
-                   'Child dob must match dob specified for the adult participation'
-                   f' consent {self.consent_model_obj.child_dob}.'}
+                   'Child dob must match dob specified for the caregiver consent '
+                   f' on behalf of child {self.caregiver_child_consent.child_dob}.'}
             self._errors.update(msg)
             raise ValidationError(msg)
 
@@ -174,13 +169,13 @@ class ChildAssentFormValidator(FormValidator):
                 raise ValidationError(message)
 
     def validate_gender(self):
-        if self.child_dataset:
-            infant_sex = self.child_dataset.infant_sex.upper()
+        if self.caregiver_child_consent:
+            infant_sex = self.caregiver_child_consent.gender
             gender = self.cleaned_data.get('gender')
-            if gender != infant_sex[:1]:
+            if gender != infant_sex:
                 msg = {'gender':
-                       f'Child\'s gender is {self.child_dataset.infant_sex} from '
-                       'the child dataset. Please correct.'}
+                       f'Child\'s gender is {self.caregiver_child_consent.infant_sex} from '
+                       'the caregiver consent on behalf of child. Please correct.'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
 
@@ -190,16 +185,19 @@ class ChildAssentFormValidator(FormValidator):
             field='gender',
             field_required='preg_testing')
 
-    @property
-    def consent_model_obj(self):
-        try:
-            subject_consent = self.subject_consent_cls.objects.get(
-                screening_identifier=self.cleaned_data.get('screening_identifier'),
-                version=self.cleaned_data.get('version'))
-        except self.subject_consent_cls.DoesNotExist:
-            raise ValidationError('Please complete the subject consent form first.')
-        else:
-            return subject_consent
+    def validate_against_child_consent(self):
+        cleaned_data = self.cleaned_data
+        fields = [key for key in cleaned_data.keys() if key != 'consent_datetime']
+        for field in fields:
+            child_consent_value = getattr(self.caregiver_child_consent, field, None)
+            field_value = cleaned_data.get(field)
+            if child_consent_value and child_consent_value != field_value:
+                message = {field:
+                           f'{field_value} does not match {child_consent_value} '
+                           'from the caregiver consent on behalf of child. Please '
+                           'correct this.'}
+                self._errors.update(message)
+                raise ValidationError(message)
 
     @property
     def caregiver_child_consent(self):
@@ -207,9 +205,7 @@ class ChildAssentFormValidator(FormValidator):
             'flourish_caregiver.caregiverchildconsent')
         try:
             child_consent = caregiver_child_consent_cls.objects.get(
-                first_name=self.cleaned_data.get('first_name'),
-                last_name=self.cleaned_data.get('last_name'),
-                identity=self.cleaned_data.get('identity'))
+                subject_identifier=self.cleaned_data.get('subject_identifier'))
         except caregiver_child_consent_cls.DoesNotExist:
             raise ValidationError('Caregiver child consent matching query does not exist.')
         else:
