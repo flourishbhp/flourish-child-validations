@@ -32,8 +32,9 @@ class AcademicPerformanceFormValidator(FormValidator):
             cleaned_data=self.cleaned_data)
         if self.cleaned_data.get('education_level') == 'pre_school':
             self.validate_pre_school()
-        elif self.cleaned_data.get('education_level') == 'no_schooling':
-            self.validate_no_schooling()
+        elif self.cleaned_data.get('education_level') in ['no_schooling',
+                                                          'university']:
+            self.validate_no_schooling_and_university()
         else:
             self.validate_commonly_required_fields()
             self.validate_standard1_through_standard7()
@@ -49,8 +50,8 @@ class AcademicPerformanceFormValidator(FormValidator):
 
         try:
             child_socio_model_obj = \
-                self.child_socio_demographic_cls.objects.get(
-                    child_visit__appointment__subject_identifier=self.subject_identifier)
+                self.child_socio_demographic_cls.objects.filter(
+                    child_visit__appointment__subject_identifier=self.subject_identifier)[0]
         except self.child_socio_demographic_cls.DoesNotExist:
             raise ValidationError('Please complete the child socio '
                                   'demographic data form')
@@ -58,12 +59,13 @@ class AcademicPerformanceFormValidator(FormValidator):
             if child_socio_model_obj.education_level != cleaned_data.get(
                     'education_level'):
                 msg = {'education_level':
-                       'Response should match the response provided on the '
-                       'child socio demographic data form'}
+                       f'Response should match the response provided on the '
+                       f'child socio demographic data form '
+                       f'({child_socio_model_obj.education_level})'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
 
-    def validate_no_schooling(self):
+    def validate_no_schooling_and_university(self):
         not_required_fields = ['mathematics_marks', 'science_marks',
                                'setswana_marks', 'english_marks',
                                'physical_edu_marks', 'cultural_stds_marks',
@@ -73,7 +75,7 @@ class AcademicPerformanceFormValidator(FormValidator):
                                'double_scie_marks', 'overall_performance',
                                'num_days']
         for field in not_required_fields:
-            self.not_required_if('no_schooling', field='education_level',
+            self.not_required_if(*['no_schooling', 'university'], field='education_level',
                                  field_required=field)
 
     def validate_pre_school(self):
