@@ -1,10 +1,21 @@
+from django.apps import apps as django_apps
+from django.core.exceptions import ValidationError
+
 from edc_constants.constants import OTHER
 from edc_form_validators import FormValidator
 
 
 class AcademicPerformanceFormValidator(FormValidator):
 
+    child_socio_demographic_model = 'flourish_child.childsociodemographic'
+
+    @property
+    def child_socio_demographic_cls(self):
+        return django_apps.get_model(self.child_socio_demographic_model)
+
     def clean(self):
+        self.subject_identifier = self.cleaned_data.get(
+            'child_visit').appointment.subject_identifier
         self.commonly_required = ['mathematics_marks', 'science_marks',
                                   'setswana_marks', 'overall_performance']
         self.commonly_not_required = ['single_scie_marks', 'biology_marks',
@@ -16,6 +27,9 @@ class AcademicPerformanceFormValidator(FormValidator):
         self.form1_to_form3 = ['form_1', 'form_2', 'form_3']
 
         super().clean()
+
+        self.validate_edu_level_against_socio_demographic(
+            cleaned_data=self.cleaned_data)
         if self.cleaned_data.get('education_level') == 'pre_school':
             self.validate_pre_school()
         elif self.cleaned_data.get('education_level') == 'no_schooling':
@@ -30,6 +44,24 @@ class AcademicPerformanceFormValidator(FormValidator):
 
             self.validate_other_specify(field='education_level',
                                         other_specify_field='education_level_other')
+
+    def validate_edu_level_against_socio_demographic(self, cleaned_data=None):
+
+        try:
+            child_socio_model_obj = \
+                self.child_socio_demographic_cls.objects.get(
+                    child_visit__appointment__subject_identifier=self.subject_identifier)
+        except self.child_socio_demographic_cls.DoesNotExist:
+            raise ValidationError('Please complete the child socio '
+                                  'demographic data form')
+        else:
+            if child_socio_model_obj.education_level != cleaned_data.get(
+                    'education_level'):
+                msg = {'education_level':
+                       'Response should match the response provided on the '
+                       'child socio demographic data form'}
+                self._errors.update(msg)
+                raise ValidationError(msg)
 
     def validate_no_schooling(self):
         not_required_fields = ['mathematics_marks', 'science_marks',
