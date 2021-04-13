@@ -33,6 +33,10 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
         self.validate_other_specify(field='ethnicity')
         self.validate_child_stay_with_caregiver(cleaned_data=self.cleaned_data)
         self.validate_other_specify(field='toilet_facility')
+
+        self.validate_number_of_people_living_in_the_household(
+            cleaned_data=self.cleaned_data)
+
         self.required_if(YES, field='attend_school',
                          field_required='education_level')
         self.validate_child_not_schooling()
@@ -64,6 +68,19 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
                        'caregiver socio demographic data form'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
+
+    def validate_number_of_people_living_in_the_household(self,
+                                                          cleaned_data=None):
+        older_than18 = cleaned_data.get('older_than18')
+        house_people_number = cleaned_data.get('house_people_number')
+        if older_than18 > house_people_number:
+            msg = {'older_than18':
+                   f'Number of people ({older_than18}) who are older than 18 '
+                   f'and live in the household cannot be more than the total '
+                   f'number ({house_people_number}) of people living in the '
+                   f'household'}
+            self._errors.update(msg)
+            raise ValidationError(msg)
 
     def validate_child_not_schooling(self):
         attend_school = self.cleaned_data.get('attend_school')
