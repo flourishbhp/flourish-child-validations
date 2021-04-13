@@ -17,28 +17,20 @@ class ChildTannerStagingFormValidator(ChildFormValidatorMixin, FormValidator):
             field='assessment_done',
             field_required='reasons_not_done')
 
-        not_applicable = ['breast_stage', 'manarche_dt_avail', 'menarche_dt_est',
-                          'male_gen_stage', 'testclr_vol_measrd']
-        for field in not_applicable:
-            self.not_applicable_only_if(
-                NO,
-                field='assessment_done',
-                field_applicable=field)
-
-        not_required = ['menarche_dt', 'rgt_testclr_vol', 'lft_testclr_vol']
-        for field in not_required:
-            self.not_required_if(
-                NO,
-                field='assessment_done',
-                field_required=field,
-                inverse=False)
-
         fields = ['child_gender', 'pubic_hair_stage']
         for field in fields:
             self.applicable_if(
                 YES,
                 field='assessment_done',
                 field_applicable=field)
+
+        not_required = ['rgt_testclr_vol', 'lft_testclr_vol']
+        for field in not_required:
+            self.not_required_if(
+                NO,
+                field='assessment_done',
+                field_required=field,
+                inverse=False)
 
         female_fields = ['breast_stage', 'manarche_dt_avail']
         for field in female_fields:
