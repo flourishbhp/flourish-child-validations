@@ -121,8 +121,8 @@ USE_L10N = True
 USE_TZ = True
 
 DASHBOARD_URL_NAMES = {
-    'subject_listboard_url': 'flourish_dashboard:child_subject_listboard_url',
-    'subject_dashboard_url': 'flourish_dashboard:child_subject_dashboard_url',
+    'subject_listboard_url': 'flourish_dashboard:child_listboard_url',
+    'subject_dashboard_url': 'flourish_dashboard:child_dashboard_url',
 }
 
 

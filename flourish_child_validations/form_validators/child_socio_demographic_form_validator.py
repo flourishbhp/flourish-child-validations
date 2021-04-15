@@ -73,7 +73,8 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
                                                           cleaned_data=None):
         older_than18 = cleaned_data.get('older_than18')
         house_people_number = cleaned_data.get('house_people_number')
-        if older_than18 > house_people_number:
+        if older_than18 and (older_than18 >
+                             house_people_number):
             msg = {'older_than18':
                    f'Number of people ({older_than18}) who are older than 18 '
                    f'and live in the household cannot be more than the total '
