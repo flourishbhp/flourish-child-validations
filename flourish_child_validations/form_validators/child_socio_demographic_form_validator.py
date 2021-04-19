@@ -59,7 +59,7 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
                     maternal_visit__appointment__subject_identifier=caregiver_subject_identifier)
         except self.caregiver_socio_demographic_cls.DoesNotExist:
             raise ValidationError('Please complete the caregiver socio '
-                                  'demographic data form')
+                                  'demographic data form first')
         else:
             if caregiver_model_obj.stay_with_child != cleaned_data.get(
                     'stay_with_caregiver'):
