@@ -48,20 +48,25 @@ class AcademicPerformanceFormValidator(FormValidator):
 
     def validate_edu_level_against_socio_demographic(self, cleaned_data=None):
 
+        current_visit = self.cleaned_data.get('child_visit')
+        education_level = self.cleaned_data.get('education_level')
         try:
             child_socio_model_obj = \
-                self.child_socio_demographic_cls.objects.filter(
-                    child_visit__appointment__subject_identifier=self.subject_identifier)[0]
+                self.child_socio_demographic_cls.objects.get(
+                    child_visit=current_visit)
         except self.child_socio_demographic_cls.DoesNotExist:
             raise ValidationError('Please complete the child socio '
-                                  'demographic data form')
+                                  f'demographic data form for visit'
+                                  f' {current_visit.visit_code}')
         else:
             if child_socio_model_obj.education_level != cleaned_data.get(
                     'education_level'):
                 msg = {'education_level':
                        f'Response should match the response provided on the '
-                       f'child socio demographic data form '
-                       f'({child_socio_model_obj.education_level})'}
+                       f'child socio demographic data form for visit'
+                       f' {current_visit.visit_code}. Expected '
+                       f'\'{child_socio_model_obj.education_level}\' Got '
+                       f'\'{education_level}\''}
                 self._errors.update(msg)
                 raise ValidationError(msg)
 
