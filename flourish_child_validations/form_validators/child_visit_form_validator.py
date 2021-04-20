@@ -16,6 +16,12 @@ from .crf_offstudy_form_validator import CrfOffStudyFormValidator
 class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
                               FormValidator):
 
+    caregiver_child_consent_model = 'flourish_caregiver.caregiverchildconsent'
+
+    @property
+    def caregiver_child_consent_cls(self):
+        return django_apps.get_model(self.caregiver_child_consent_model)
+
     def clean(self):
         cleaned_data = self.cleaned_data
         self.report_datetime = cleaned_data.get('report_datetime')
@@ -79,12 +85,10 @@ class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
         """Returns an instance of the current maternal consent or
         raises an exception if not found."""
 
-        child_consent_cls = django_apps.get_model('flourish_caregiver.caregiverchildconsent')
-
         try:
-            child_consent_obj = child_consent_cls.objects.get(
+            child_consent_obj = self.caregiver_child_consent_cls.objects.get(
                 subject_identifier=self.cleaned_data.get('appointment').subject_identifier)
-        except child_consent_cls.DoesNotExist:
+        except self.caregiver_child_consent_cls.DoesNotExist:
             raise forms.ValidationError('Missing Consent on Behalf of Child form for this'
                                         ' participant')
         else:

@@ -14,6 +14,8 @@ class ChildAssentFormValidator(FormValidator):
 
     child_assent_model = 'flourish_child.childassent'
 
+    caregiver_child_consent_model = 'flourish_caregiver.caregiverchildconsent'
+
     @property
     def bhp_prior_screening_cls(self):
         return django_apps.get_model(self.prior_screening_model)
@@ -25,6 +27,10 @@ class ChildAssentFormValidator(FormValidator):
     @property
     def assent_cls(self):
         return django_apps.get_model(self.child_assent_model)
+
+    @property
+    def caregiver_child_consent_cls(self):
+        return django_apps.get_model(self.caregiver_child_consent_model)
 
     def clean(self):
 
@@ -138,7 +144,7 @@ class ChildAssentFormValidator(FormValidator):
 
         if self.caregiver_child_consent.child_dob != cleaned_data.get('dob'):
             msg = {'dob':
-                   'Child dob must match dob specified for the caregiver consent '
+                   'Child dob must match dob specified for the caregiver consent'
                    f' on behalf of child {self.caregiver_child_consent.child_dob}.'}
             self._errors.update(msg)
             raise ValidationError(msg)
@@ -201,12 +207,11 @@ class ChildAssentFormValidator(FormValidator):
 
     @property
     def caregiver_child_consent(self):
-        caregiver_child_consent_cls = django_apps.get_model(
-            'flourish_caregiver.caregiverchildconsent')
+
         try:
-            child_consent = caregiver_child_consent_cls.objects.get(
+            child_consent = self.caregiver_child_consent_cls.objects.get(
                 subject_identifier=self.cleaned_data.get('subject_identifier'))
-        except caregiver_child_consent_cls.DoesNotExist:
+        except self.caregiver_child_consent_cls.DoesNotExist:
             raise ValidationError('Caregiver child consent matching query does not exist.')
         else:
             return child_consent
