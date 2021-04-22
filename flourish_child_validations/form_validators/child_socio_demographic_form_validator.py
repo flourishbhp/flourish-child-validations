@@ -51,17 +51,23 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
         return caregiver_subject_identifier
 
     def validate_child_stay_with_caregiver(self, cleaned_data=None):
-
+        import pdb; pdb.set_trace()
         caregiver_subject_identifier = self.caregiver_subject_identifier
+        child_visit_code_sequence = self.cleaned_data.get('child_visit').visit_code_sequence
+        child_visit = self.cleaned_data.get('child_visit').appointment.visit_code
+        maternal_visit_code = str(child_visit) + 'M'
         try:
             caregiver_model_obj = \
                 self.caregiver_socio_demographic_cls.objects.get(
-                    maternal_visit__appointment__subject_identifier=caregiver_subject_identifier)
+                    maternal_visit__visit_code=maternal_visit_code,
+                    maternal_visit__visit_code_sequence=child_visit_code_sequence,
+                    maternal_visit__subject_identifier=caregiver_subject_identifier,
+                )
         except self.caregiver_socio_demographic_cls.DoesNotExist:
-            raise ValidationError('Please complete the caregiver socio '
-                                  'demographic data form first')
+            pass
         else:
-            if caregiver_model_obj.stay_with_child != cleaned_data.get(
+            if caregiver_model_obj.stay_with_child and \
+                    caregiver_model_obj.stay_with_child != cleaned_data.get(
                     'stay_with_caregiver'):
                 msg = {'stay_with_caregiver':
                        'Response should match the response provided on the '
