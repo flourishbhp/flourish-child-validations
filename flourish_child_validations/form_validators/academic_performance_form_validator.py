@@ -55,9 +55,7 @@ class AcademicPerformanceFormValidator(FormValidator):
                 self.child_socio_demographic_cls.objects.get(
                     child_visit=current_visit)
         except self.child_socio_demographic_cls.DoesNotExist:
-            raise ValidationError('Please complete the child socio '
-                                  f'demographic data form for visit'
-                                  f' {current_visit.visit_code}')
+            pass
         else:
             if child_socio_model_obj.education_level != cleaned_data.get(
                     'education_level'):
