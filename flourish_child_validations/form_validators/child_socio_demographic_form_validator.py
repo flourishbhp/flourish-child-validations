@@ -51,7 +51,6 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
         return caregiver_subject_identifier
 
     def validate_child_stay_with_caregiver(self, cleaned_data=None):
-        import pdb; pdb.set_trace()
         caregiver_subject_identifier = self.caregiver_subject_identifier
         child_visit_code_sequence = self.cleaned_data.get('child_visit').visit_code_sequence
         child_visit = self.cleaned_data.get('child_visit').appointment.visit_code
