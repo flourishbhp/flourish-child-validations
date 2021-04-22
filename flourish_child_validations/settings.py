@@ -14,13 +14,13 @@ import sys
 
 APP_NAME = 'flourish_child_validations'
 
+ETC_DIR = os.path.join('/etc/', APP_NAME)
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '$d(@jsoci23er^e)kt_*-)uz((ae!f9&8&8jpnhrb_mbf1pth0'
 
@@ -28,7 +28,6 @@ SECRET_KEY = '$d(@jsoci23er^e)kt_*-)uz((ae!f9&8&8jpnhrb_mbf1pth0'
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -42,7 +41,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_crypto_fields.apps.AppConfig',
     'edc_device.apps.AppConfig',
-    'edc_protocol.apps.AppConfig',
     'flourish_child_validations.apps.AppConfig'
 ]
 
@@ -76,7 +74,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'flourish_child_validations.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
@@ -86,7 +83,6 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -106,7 +102,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
@@ -124,7 +119,6 @@ DASHBOARD_URL_NAMES = {
     'subject_listboard_url': 'flourish_dashboard:child_listboard_url',
     'subject_dashboard_url': 'flourish_dashboard:child_dashboard_url',
 }
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/

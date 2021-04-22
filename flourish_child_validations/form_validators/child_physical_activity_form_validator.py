@@ -41,12 +41,6 @@ class ChildPhysicalActivityFormValidator(FormValidator):
             self.required_if('days_per_week', field='walking_days',
                              field_required=field)
 
-        vig_fields_req = ['specify_vig_days', 'mod_activity_days',
-                          'walking_days', 'sitting_time']
-        for field in vig_fields_req:
-            self.required_if('days_per_week', field='vig_activity_days',
-                             field_required=field, inverse=False)
-
     def time_validator(self, time=None, hrs=None, mins=None,
                        display_msg_at=''):
 
