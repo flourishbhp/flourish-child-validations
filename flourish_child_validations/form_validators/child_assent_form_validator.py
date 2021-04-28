@@ -158,9 +158,10 @@ class ChildAssentFormValidator(FormValidator):
             assent_obj = self.assent_cls.objects.get(
                 screening_identifier=self.cleaned_data.get('screening_identifier'),)
         except self.assent_cls.DoesNotExist:
-            if assent_age < 7:
+            if assent_age < 7 or assent_age >= 18:
                 msg = {'dob':
-                       'Participant is younger than 7 years of age. Assent is not needed.'}
+                       f'Participant is {assent_age} years of age. Child assent'
+                       ' is not required.'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
         else:
@@ -186,10 +187,10 @@ class ChildAssentFormValidator(FormValidator):
                 raise ValidationError(msg)
 
     def validate_preg_testing(self):
-        self.required_if(
+        self.applicable_if(
             FEMALE,
             field='gender',
-            field_required='preg_testing')
+            field_applicable='preg_testing')
 
     def validate_against_child_consent(self):
         cleaned_data = self.cleaned_data

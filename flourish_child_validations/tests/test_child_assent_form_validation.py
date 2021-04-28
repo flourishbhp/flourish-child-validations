@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from edc_base.utils import get_utcnow, relativedelta
-from edc_constants.constants import YES, FEMALE, MALE
+from edc_constants.constants import YES, FEMALE, MALE, NOT_APPLICABLE
 
 from ..form_validators import ChildAssentFormValidator
 from .models import CaregiverConsent, ChildDataset, ScreeningPriorBhpParticipants
@@ -111,7 +111,7 @@ class TestChildAssentForm(TestCase):
             self.fail(f'ValidationError unexpectedly raised. Got{e}')
 
     def test_preg_testing_for_female_invalid(self):
-        self.child_assent_options.update({'preg_testing': None})
+        self.child_assent_options.update({'preg_testing': NOT_APPLICABLE})
         form_validator = ChildAssentFormValidator(
             cleaned_data=self.child_assent_options)
         self.assertRaises(ValidationError, form_validator.validate)
