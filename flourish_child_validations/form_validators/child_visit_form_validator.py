@@ -2,7 +2,7 @@ from django import forms
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
 from edc_action_item.site_action_items import site_action_items
-from edc_constants.constants import ON_STUDY, NEW, OFF_STUDY, YES, OTHER
+from edc_constants.constants import ON_STUDY, NEW, OFF_STUDY, YES, OTHER, NO
 from edc_constants.constants import PARTICIPANT, ALIVE, DEAD
 from edc_form_validators import FormValidator
 from edc_visit_tracking.constants import COMPLETED_PROTOCOL_VISIT
@@ -64,6 +64,15 @@ class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
                 raise forms.ValidationError(
                     {'info_source': 'Source of information must be from '
                      'participant if participant is present.'})
+
+        information_provider = self.cleaned_data.get('information_provider')
+        if (information_provider == 'self' and
+                self.cleaned_data.get('is_present') == NO):
+            msg = {'is_present':
+                   'The child provided most of the information, participant is '
+                   'present can not be `No`'}
+            self._errors.update(msg)
+            raise ValidationError(msg)
 
     def validate_death(self):
         if (self.cleaned_data.get('survival_status') == DEAD
