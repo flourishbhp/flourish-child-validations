@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 
 from edc_base.utils import age, get_utcnow
 from edc_constants.choices import NO, YES
+from edc_constants.constants import NOT_APPLICABLE
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
@@ -37,8 +38,6 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
         self.validate_number_of_people_living_in_the_household(
             cleaned_data=self.cleaned_data)
 
-        self.required_if(YES, field='attend_school',
-                         field_required='education_level')
         self.validate_child_not_schooling()
 
         self.validate_other_specify(field='education_level')
@@ -92,26 +91,32 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
         attend_school = self.cleaned_data.get('attend_school')
         working = self.cleaned_data.get('working')
 
+        if (attend_school == YES and
+                self.cleaned_data.get('education_level') == 'no_schooling'):
+            msg = {'education_level':
+                   'This child is said to be attending school, Please specify '
+                   'education level.'}
+            self._errors.update(msg)
+            raise ValidationError(msg)
+
+        if (attend_school == NO and
+                self.cleaned_data.get('education_level') != 'no_schooling'):
+            msg = {'education_level':
+                   'This child is not attending school, Please specify '
+                   'education level as `No schooling` to indicate this.'}
+            self._errors.update(msg)
+            raise ValidationError(msg)
+
         if self.child_age > 16:
-            self.applicable_if(NO, field='attend_school',
-                               field_applicable='working')
-
-        if attend_school == NO:
-            if self.child_age > 16 and working is None:
-                msg = {'working':
-                       'Adolescent is more than 16 years, This field is '
-                       'applicable'}
-                self._errors.update(msg)
-                raise ValidationError(msg)
-
-            elif self.child_age < 16 and working is not None:
-                msg = {'working':
-                       'Child is less than 16, This field is not applicable'}
-                self._errors.update(msg)
-                raise ValidationError(msg)
+            self.applicable_if(
+                NO,
+                field='attend_school',
+                field_applicable='working')
         else:
-            self.not_required_if(YES, field='attend_school',
-                                 field_required='working')
+            self.not_applicable_if(
+                YES,
+                field='attend_school',
+                field_applicable='working')
 
     @property
     def child_assent_obj(self):
