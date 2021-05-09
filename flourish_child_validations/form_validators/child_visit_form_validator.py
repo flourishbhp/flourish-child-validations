@@ -6,7 +6,7 @@ from edc_constants.constants import ON_STUDY, NEW, OFF_STUDY, YES, OTHER, NO
 from edc_constants.constants import PARTICIPANT, ALIVE, DEAD
 from edc_form_validators import FormValidator
 from edc_visit_tracking.constants import COMPLETED_PROTOCOL_VISIT
-from edc_visit_tracking.constants import SCHEDULED, LOST_VISIT, MISSED_VISIT, UNSCHEDULED
+from edc_visit_tracking.constants import LOST_VISIT, MISSED_VISIT, UNSCHEDULED
 from edc_visit_tracking.form_validators import VisitFormValidator
 from flourish_prn.action_items import CHILDOFF_STUDY_ACTION
 
