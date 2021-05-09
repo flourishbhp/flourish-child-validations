@@ -14,4 +14,9 @@ class AcademicPerformanceFormValidator(FormValidator):
         self.subject_identifier = self.cleaned_data.get(
             'child_visit').appointment.subject_identifier
 
+        self.required_if(
+            'points',
+            field='overall_performance',
+            field_required='grade_points')
+
         super().clean()
