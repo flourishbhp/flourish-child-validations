@@ -47,6 +47,8 @@ class TestChildAssentForm(TestCase):
             child_dob=(get_utcnow() - relativedelta(years=8)).date(),
             gender=FEMALE,
             identity='123425678',
+            identity_type='birth_cert',
+            confirm_identity='123425678',
             version='1',)
 
         self.child_assent_options = {
@@ -130,6 +132,7 @@ class TestChildAssentForm(TestCase):
     def test_preg_testing_for_male_invalid(self):
         self.caregiver_child_consent.gender = MALE
         self.caregiver_child_consent.identity = '123415678'
+        self.caregiver_child_consent.confirm_identity = '123415678'
         self.caregiver_child_consent.save_base(raw=True)
         self.child_assent_options.update(
             {'gender': MALE,
@@ -141,14 +144,70 @@ class TestChildAssentForm(TestCase):
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn('preg_testing', form_validator._errors)
 
-    def test_identity_does_not_match(self):
+    def test_identity_does_not_match_consent(self):
         self.child_assent_options.update(
             {'preg_testing': YES,
              'confirm_identity': '123421678'})
         form_validator = ChildAssentFormValidator(
             cleaned_data=self.child_assent_options)
         self.assertRaises(ValidationError, form_validator.validate)
-        self.assertIn('identity', form_validator._errors)
+        self.assertIn('confirm_identity', form_validator._errors)
+
+    def test_identity_not_none_identity_type_invalid(self):
+        self.child_assent_options.update(
+            {'preg_testing': YES,
+             'identity_type': None,
+             'confirm_identity': '123425678'})
+        form_validator = ChildAssentFormValidator(
+            cleaned_data=self.child_assent_options)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('identity_type', form_validator._errors)
+
+    def test_identity_none_identity_type_invalid(self):
+        self.caregiver_child_consent.identity = None
+        self.caregiver_child_consent.confirm_identity = None
+        self.caregiver_child_consent.save_base(raw=True)
+        self.child_assent_options.update(
+            {'preg_testing': YES,
+             'identity': None,
+             'identity_type': 'birth certificate',
+             'confirm_identity': None})
+        form_validator = ChildAssentFormValidator(
+            cleaned_data=self.child_assent_options)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('identity_type', form_validator._errors)
+
+    def test_identity_none_confirm_id_invalid(self):
+        self.caregiver_child_consent.identity = None
+        self.caregiver_child_consent.confirm_identity = None
+        self.caregiver_child_consent.identity_type = None
+        self.caregiver_child_consent.save_base(raw=True)
+        self.child_assent_options.update(
+            {'preg_testing': YES,
+             'identity': None,
+             'identity_type': None,
+             'confirm_identity': 'None'})
+        form_validator = ChildAssentFormValidator(
+            cleaned_data=self.child_assent_options)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('confirm_identity', form_validator._errors)
+
+    def test_identity_none_valid(self):
+        self.caregiver_child_consent.identity = None
+        self.caregiver_child_consent.identity_type = None
+        self.caregiver_child_consent.confirm_identity = None
+        self.caregiver_child_consent.save_base(raw=True)
+        self.child_assent_options.update(
+            {'preg_testing': YES,
+             'identity': None,
+             'identity_type':  None,
+             'confirm_identity': None})
+        form_validator = ChildAssentFormValidator(
+            cleaned_data=self.child_assent_options)
+        try:
+            form_validator.validate()
+        except ValidationError as e:
+            self.fail(f'ValidationError unexpectedly raised. Got{e}')
 
     def test_first_name_last_name_valid(self):
         self.child_assent_options.update(

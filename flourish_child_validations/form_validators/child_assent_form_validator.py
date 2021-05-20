@@ -113,22 +113,28 @@ class ChildAssentFormValidator(FormValidator):
         identity = cleaned_data.get('identity')
         confirm_identity = cleaned_data.get('confirm_identity')
         identity_type = cleaned_data.get('identity_type')
-        if not re.match('[0-9]+$', identity):
-            message = {'identity': 'Identity number must be digits.'}
-            self._errors.update(message)
-            raise ValidationError(message)
-        if identity != confirm_identity:
-            msg = {'identity':
-                   '\'Identity\' must match \'confirm identity\'.'}
-            self._errors.update(msg)
-            raise ValidationError(msg)
-        if identity_type in ['country_id', 'birth_cert']:
-            if len(identity) != 9:
+        required_fields = ['identity_type', 'confirm_identity', ]
+        for required in required_fields:
+            self.required_if_true(
+                identity is not None and identity != '',
+                field_required=required)
+        if identity:
+            if not re.match('[0-9]+$', identity):
+                message = {'identity': 'Identity number must be digits.'}
+                self._errors.update(message)
+                raise ValidationError(message)
+            if identity != confirm_identity:
                 msg = {'identity':
-                       f'{identity_type} provided should contain 9 values. '
-                       'Please correct.'}
+                       '\'Identity\' must match \'confirm identity\'.'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
+            if identity_type in ['country_id', 'birth_cert']:
+                if len(identity) != 9:
+                    msg = {'identity':
+                           f'{identity_type} provided should contain 9 values. '
+                           'Please correct.'}
+                    self._errors.update(msg)
+                    raise ValidationError(msg)
             gender = cleaned_data.get('gender')
             if gender == FEMALE and identity[4] != '2':
                 msg = {'identity':
@@ -199,6 +205,14 @@ class ChildAssentFormValidator(FormValidator):
         for field in fields:
             child_consent_value = getattr(self.caregiver_child_consent, field, None)
             field_value = cleaned_data.get(field)
+            if field in ['identity', 'confirm_identity', 'identity_type']:
+                if child_consent_value != field_value:
+                    message = {field:
+                               f'{field_value} does not match {child_consent_value} '
+                               'from the caregiver consent on behalf of child. Please '
+                               'correct this.'}
+                    self._errors.update(message)
+                    raise ValidationError(message)
             if child_consent_value and child_consent_value != field_value:
                 message = {field:
                            f'{field_value} does not match {child_consent_value} '
