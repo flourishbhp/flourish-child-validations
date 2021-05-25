@@ -6,13 +6,13 @@ from edc_constants.constants import NO, FEMALE, MALE
 from edc_form_validators import FormValidator
 
 
-class ChildAssentFormValidator(FormValidator):
+class ChildContinuedConsentFormValidator(FormValidator):
 
     prior_screening_model = 'flourish_caregiver.screeningpriorbhpparticipants'
 
     child_dataset_model = 'flourish_child.childdataset'
 
-    child_assent_model = 'flourish_child.childassent'
+    childcontinued_consent_model = 'flourish_child.childcontinuedconsent'
 
     caregiver_child_consent_model = 'flourish_caregiver.caregiverchildconsent'
 
@@ -25,8 +25,8 @@ class ChildAssentFormValidator(FormValidator):
         return django_apps.get_model(self.child_dataset_model)
 
     @property
-    def assent_cls(self):
-        return django_apps.get_model(self.child_assent_model)
+    def childcontinued_consent_cls(self):
+        return django_apps.get_model(self.childcontinued_consent_model)
 
     @property
     def caregiver_child_consent_cls(self):
@@ -56,8 +56,7 @@ class ChildAssentFormValidator(FormValidator):
 
         if not re.match(r'^[A-Z]+$|^([A-Z]+[ ][A-Z]+)$', first_name):
             message = {'first_name': 'Ensure first name is letters (A-Z) in '
-                       'upper case, no special characters, except spaces. Maximum 2 first '
-                       'names allowed.'}
+                       'upper case, no special characters, except spaces.'}
             self._errors.update(message)
             raise ValidationError(message)
 
@@ -113,28 +112,22 @@ class ChildAssentFormValidator(FormValidator):
         identity = cleaned_data.get('identity')
         confirm_identity = cleaned_data.get('confirm_identity')
         identity_type = cleaned_data.get('identity_type')
-        required_fields = ['identity_type', 'confirm_identity', ]
-        for required in required_fields:
-            self.required_if_true(
-                identity is not None and identity != '',
-                field_required=required)
-        if identity:
-            if not re.match('[0-9]+$', identity):
-                message = {'identity': 'Identity number must be digits.'}
-                self._errors.update(message)
-                raise ValidationError(message)
-            if identity != confirm_identity:
+        if not re.match('[0-9]+$', identity):
+            message = {'identity': 'Identity number must be digits.'}
+            self._errors.update(message)
+            raise ValidationError(message)
+        if identity != confirm_identity:
+            msg = {'identity':
+                   '\'Identity\' must match \'confirm identity\'.'}
+            self._errors.update(msg)
+            raise ValidationError(msg)
+        if identity_type in ['country_id', 'birth_cert']:
+            if len(identity) != 9:
                 msg = {'identity':
-                       '\'Identity\' must match \'confirm identity\'.'}
+                       f'{identity_type} provided should contain 9 values. '
+                       'Please correct.'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
-            if identity_type in ['country_id', 'birth_cert']:
-                if len(identity) != 9:
-                    msg = {'identity':
-                           f'{identity_type} provided should contain 9 values. '
-                           'Please correct.'}
-                    self._errors.update(msg)
-                    raise ValidationError(msg)
             gender = cleaned_data.get('gender')
             if gender == FEMALE and identity[4] != '2':
                 msg = {'identity':
@@ -156,29 +149,29 @@ class ChildAssentFormValidator(FormValidator):
             self._errors.update(msg)
             raise ValidationError(msg)
 
-        assent_datetime = cleaned_data.get('consent_datetime')
-        assent_age = relativedelta(
-            assent_datetime.date(), cleaned_data.get('dob')).years if assent_datetime else None
+        consent_datetime = cleaned_data.get('consent_datetime')
+        consent_age = relativedelta(
+            consent_datetime.date(), cleaned_data.get('dob')).years if consent_datetime else None
         age_in_years = None
 
         try:
-            assent_obj = self.assent_cls.objects.get(
+            consent_obj = self.childcontinued_consent_cls.objects.get(
                 subject_identifier=self.cleaned_data.get('subject_identifier'),)
-        except self.assent_cls.DoesNotExist:
-            if assent_age and (assent_age < 7 or assent_age >= 18):
+        except self.childcontinued_consent_cls.DoesNotExist:
+            if consent_age and consent_age < 18:
                 msg = {'dob':
-                       f'Participant is {assent_age} years of age. Child assent'
-                       ' is not required.'}
+                       f'Participant is {consent_age} years of age. Child '
+                        'continued consent is not required.'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
         else:
             age_in_years = relativedelta(
-                assent_datetime.date(), assent_obj.dob).years if assent_datetime else None
-            if age_in_years and assent_age != age_in_years:
+                consent_datetime.date(), consent_obj.dob).years if consent_datetime else None
+            if age_in_years and consent_obj != age_in_years:
                 message = {'dob':
                            'In previous consent the derived age of the '
                            f'participant is {age_in_years}, but age derived '
-                           f'from the DOB is {assent_age}.'}
+                           f'from the DOB is {consent_obj}.'}
                 self._errors.update(message)
                 raise ValidationError(message)
 
@@ -205,14 +198,6 @@ class ChildAssentFormValidator(FormValidator):
         for field in fields:
             child_consent_value = getattr(self.caregiver_child_consent, field, None)
             field_value = cleaned_data.get(field)
-            if field in ['identity', 'confirm_identity', 'identity_type']:
-                if child_consent_value != field_value:
-                    message = {field:
-                               f'{field_value} does not match {child_consent_value} '
-                               'from the caregiver consent on behalf of child. Please '
-                               'correct this.'}
-                    self._errors.update(message)
-                    raise ValidationError(message)
             if child_consent_value and child_consent_value != field_value:
                 message = {field:
                            f'{field_value} does not match {child_consent_value} '

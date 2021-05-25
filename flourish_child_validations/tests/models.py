@@ -46,7 +46,19 @@ class CaregiverChildConsent(BaseUuidModel):
     gender = models.CharField(max_length=10)
 
     identity = IdentityField(
-        verbose_name='Identity number')
+        verbose_name='Identity number',
+        null=True, blank=True)
+
+    identity_type = models.CharField(
+        verbose_name='What type of identity number is this?',
+        max_length=25,
+        null=True,
+        blank=True)
+
+    confirm_identity = IdentityField(
+        help_text='Retype the identity number',
+        null=True,
+        blank=True)
 
     version = models.CharField(
         max_length=10,
@@ -64,7 +76,8 @@ class ChildAssent(BaseUuidModel):
     dob = models.DateField()
 
     identity = IdentityField(
-        verbose_name='Identity number')
+        verbose_name='Identity number',
+        null=True, blank=True)
 
     version = models.CharField(
         max_length=10,
