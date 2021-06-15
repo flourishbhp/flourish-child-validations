@@ -17,27 +17,10 @@ class VaccinesReceivedFormValidator(FormValidator):
         self.subject_identifier = self.cleaned_data.get(
             'child_immunization_history').subject_identifier
         cleaned_data = self.cleaned_data
-        first_dose_age = cleaned_data.get('first_dose_age')
-        second_dose_age = cleaned_data.get('second_dose_age')
-        third_dose_age = cleaned_data.get('third_dose_age')
-        ages = {'first_dose_age': first_dose_age,
-                'second_dose_age': second_dose_age,
-                'third_dose_age': third_dose_age}
-        self.validate_hpv_vaccine(cleaned_data, ages)
         self.validate_vaccine_received(cleaned_data)
         self.validate_received_vaccine_fields(cleaned_data)
-        self.validate_vaccination_at_birth(cleaned_data, ages)
-        self.validate_hepatitis_vaccine(cleaned_data, ages)
-        self.validate_dpt_vaccine(cleaned_data, ages)
-        self.validate_haemophilus_vaccine(cleaned_data, ages)
-        self.validate_pcv_vaccine(cleaned_data, ages)
-        self.validate_polio_vaccine(cleaned_data, ages)
-        self.validate_rotavirus_vaccine(cleaned_data, ages)
-        self.validate_measles_vaccine(cleaned_data, ages)
-        self.validate_pentavalent_vaccine(cleaned_data, ages)
-        self.validate_vitamin_a_vaccine(cleaned_data, ages)
-        self.validate_ipv_vaccine(cleaned_data, ages)
-        self.validate_diptheria_tetanus_vaccine(cleaned_data, ages)
+        self.validate_hpv_vaccine(cleaned_data)
+        self.validate_dates(cleaned_data)
 
     @property
     def caregiver_child_consent_model(self):
@@ -78,17 +61,7 @@ class VaccinesReceivedFormValidator(FormValidator):
                 self._errors.update(message)
                 raise ValidationError(message)
 
-        fields = {'first_dose_dt': 'first_dose_age',
-                  'second_dose_dt': 'second_dose_age',
-                  'third_dose_dt': 'third_dose_age'}
-        for field, field_required in fields.items():
-            self.required_if_not_none(
-                field=field,
-                field_required=field_required,
-                required_msg=('Please provide the age at which this dose was '
-                              'administered'))
-
-    def validate_hpv_vaccine(self, cleaned_data, ages={}):
+    def validate_hpv_vaccine(self, cleaned_data):
         received_vaccine_name = cleaned_data.get('received_vaccine_name')
         if self.caregiver_child_consent_model:
             child_dob = self.caregiver_child_consent_model.child_dob
@@ -99,6 +72,35 @@ class VaccinesReceivedFormValidator(FormValidator):
                 self._errors.update(message)
                 raise ValidationError(message)
 
+    def validate_dates(self, cleaned_data):
+        first_dose_dt = cleaned_data.get('first_dose_dt')
+        second_dose_dt = cleaned_data.get('second_dose_dt')
+        third_dose_dt = cleaned_data.get('third_dose_dt')
+        dates = [first_dose_dt, second_dose_dt, third_dose_dt]
+
+        for date in dates:
+            dates.remove(date)
+            for counter in range(0, len(dates)):
+                if dates[counter] == date:
+                    message = f'Duplicate entry for date {date}, please correct.'
+                    raise ValidationError(message)
+
+        if first_dose_dt > second_dose_dt or first_dose_dt > third_dose_dt:
+            message = {'first_dose_dt':
+                       'The date of the first dose can not be after the '
+                       'second/third dose date.'}
+            self._errors.update(message)
+            raise ValidationError(message)
+
+        if second_dose_dt > third_dose_dt:
+            message = {'second_dose_dt':
+                       'The date of the second dose can not be after the '
+                       'third dose date.'}
+            self._errors.update(message)
+            raise ValidationError(message)
+
+    def validate_hpv_vaccine_adolescent(self, cleaned_data, ages={}):
+        received_vaccine_name = cleaned_data.get('received_vaccine_name')
         if 'adolescent' in ages.values():
             if received_vaccine_name != 'hpv_vaccine':
                 msg = {'received_vaccine_name':
