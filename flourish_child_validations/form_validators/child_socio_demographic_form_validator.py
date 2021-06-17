@@ -107,6 +107,11 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
             self._errors.update(msg)
             raise ValidationError(msg)
 
+        self.applicable_if(
+            YES,
+            field='attend_school',
+            field_applicable='school_type')
+
         if self.child_age > 16:
             self.applicable_if(
                 NO,
