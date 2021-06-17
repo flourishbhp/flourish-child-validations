@@ -156,7 +156,8 @@ class ChildContinuedConsentFormValidator(FormValidator):
 
         try:
             consent_obj = self.childcontinued_consent_cls.objects.get(
-                subject_identifier=self.cleaned_data.get('subject_identifier'),)
+                subject_identifier=self.cleaned_data.get('subject_identifier'),
+                version='1')
         except self.childcontinued_consent_cls.DoesNotExist:
             if consent_age and consent_age < 18:
                 msg = {'dob':
@@ -167,11 +168,11 @@ class ChildContinuedConsentFormValidator(FormValidator):
         else:
             age_in_years = relativedelta(
                 consent_datetime.date(), consent_obj.dob).years if consent_datetime else None
-            if age_in_years and consent_obj != age_in_years:
+            if age_in_years and consent_age != age_in_years:
                 message = {'dob':
                            'In previous consent the derived age of the '
                            f'participant is {age_in_years}, but age derived '
-                           f'from the DOB is {consent_obj}.'}
+                           f'from the DOB is {consent_age}.'}
                 self._errors.update(message)
                 raise ValidationError(message)
 
@@ -208,10 +209,10 @@ class ChildContinuedConsentFormValidator(FormValidator):
 
     @property
     def caregiver_child_consent(self):
-
         try:
             child_consent = self.caregiver_child_consent_cls.objects.get(
-                subject_identifier=self.cleaned_data.get('subject_identifier'))
+                subject_identifier=self.cleaned_data.get('subject_identifier'),
+                version='1')
         except self.caregiver_child_consent_cls.DoesNotExist:
             raise ValidationError('Caregiver child consent matching query does not exist.')
         else:
