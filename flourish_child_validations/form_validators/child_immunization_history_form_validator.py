@@ -33,28 +33,30 @@ class VaccinesReceivedFormValidator(FormValidator):
             return caregiver_child
 
     def validate_vaccine_received(self, cleaned_data=None):
-        condition = cleaned_data.get(
-            'child_immunization_history').vaccines_received == YES
-        self.required_if_true(
-            condition,
-            field_required='received_vaccine_name',
-            required_msg=('You mentioned that vaccines were received. Please '
-                          'indicate which ones on the table.'))
+        vaccines_received = cleaned_data.get('child_immunization_history').vaccines_received
+        if vaccines_received:
+            self.required_if_true(
+                (vaccines_received == YES),
+                field_required='received_vaccine_name',
+                required_msg=('You mentioned that vaccines were received. Please '
+                              'indicate which ones on the table.'))
 
     def validate_received_vaccine_fields(self, cleaned_data=None):
         received_vaccine_name = cleaned_data.get('received_vaccine_name')
         first_dose_dt = cleaned_data.get('first_dose_dt')
         second_dose_dt = cleaned_data.get('second_dose_dt')
         third_dose_dt = cleaned_data.get('third_dose_dt')
+        booster_dose_dt = cleaned_data.get('booster_dose_dt')
         if received_vaccine_name:
-            if not (first_dose_dt or second_dose_dt or third_dose_dt):
+            if not (first_dose_dt or second_dose_dt or third_dose_dt or
+                    booster_dose_dt):
                 message = {'received_vaccine_name':
                            f'You provided a vaccine name {received_vaccine_name}.'
                            'Please provide details on the doses.'}
                 self._errors.update(message)
                 raise ValidationError(message)
         else:
-            if first_dose_dt or second_dose_dt or third_dose_dt:
+            if first_dose_dt or second_dose_dt or third_dose_dt or booster_dose_dt:
                 message = {'received_vaccine_name':
                            'Please provide the vaccine name before providing '
                            'details on the doses.'}
@@ -76,28 +78,29 @@ class VaccinesReceivedFormValidator(FormValidator):
         first_dose_dt = cleaned_data.get('first_dose_dt')
         second_dose_dt = cleaned_data.get('second_dose_dt')
         third_dose_dt = cleaned_data.get('third_dose_dt')
-        dates = [first_dose_dt, second_dose_dt, third_dose_dt]
+        booster_dose_dt = cleaned_data.get('booster_dose_dt')
+        dates = [first_dose_dt, second_dose_dt, third_dose_dt, booster_dose_dt]
 
         for date in dates:
             dates.remove(date)
             for counter in range(0, len(dates)):
-                if dates[counter] == date:
+                if date and dates[counter] == date:
                     message = f'Duplicate entry for date {date}, please correct.'
                     raise ValidationError(message)
 
-        if first_dose_dt > second_dose_dt or first_dose_dt > third_dose_dt:
-            message = {'first_dose_dt':
-                       'The date of the first dose can not be after the '
-                       'second/third dose date.'}
-            self._errors.update(message)
-            raise ValidationError(message)
+        self.compare_dates('first_dose_dt', ['second_dose_dt', 'third_dose_dt', 'booster_dose_dt'])
+        self.compare_dates('second_dose_dt', ['third_dose_dt', 'booster_dose_dt'])
+        self.compare_dates('third_dose_dt', ['booster_dose_dt'])
 
-        if second_dose_dt > third_dose_dt:
-            message = {'second_dose_dt':
-                       'The date of the second dose can not be after the '
-                       'third dose date.'}
-            self._errors.update(message)
-            raise ValidationError(message)
+    def compare_dates(self, date_field, compared_to=[]):
+        date = self.cleaned_data.get(date_field)
+        for compare in compared_to:
+            compare_dt = self.cleaned_data.get(compare)
+            if (date and compare_dt) and date > compare_dt:
+                message = {date_field:
+                           f'The {date_field} can not be after the {compare}'}
+                self._errors.update(message)
+                raise ValidationError(message)
 
     def validate_hpv_vaccine_adolescent(self, cleaned_data, ages={}):
         received_vaccine_name = cleaned_data.get('received_vaccine_name')
