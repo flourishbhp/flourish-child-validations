@@ -21,6 +21,8 @@ class VaccinesReceivedFormValidator(FormValidator):
         self.validate_received_vaccine_fields(cleaned_data)
         self.validate_hpv_vaccine(cleaned_data)
         self.validate_dates(cleaned_data)
+        dates = ['first_dose_dt', 'second_dose_dt', 'third_dose_dt', 'booster_dose_dt']
+        self.check_missing_date(cleaned_data, dates=dates)
 
     @property
     def caregiver_child_consent_model(self):
@@ -101,6 +103,21 @@ class VaccinesReceivedFormValidator(FormValidator):
                            f'The {date_field} can not be after the {compare}'}
                 self._errors.update(message)
                 raise ValidationError(message)
+
+    def check_missing_date(self, cleaned_data, dates=[]):
+        counter = 0
+        for date in dates:
+            curr_date = cleaned_data.get(date, '')
+            if curr_date and counter > 0:
+                for i in range(counter):
+                    prev_date = cleaned_data.get(dates[i], '')
+                    if not prev_date:
+                        message = {dates[i]:
+                                   f'Can not complete {date} before the '
+                                   f'previous dose(s). {dates[i]}'}
+                        self._errors.update(message)
+                        raise ValidationError(message)
+            counter += 1
 
     def validate_hpv_vaccine_adolescent(self, cleaned_data, ages={}):
         received_vaccine_name = cleaned_data.get('received_vaccine_name')
