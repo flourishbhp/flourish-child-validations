@@ -9,9 +9,15 @@ class VaccinesReceivedFormValidator(FormValidator):
 
     caregiver_child_consent = 'flourish_caregiver.caregiverchildconsent'
 
+    vaccines_received = 'flourish_child.vaccinesreceived'
+
     @property
     def caregiver_child_consent_cls(self):
         return django_apps.get_model(self.caregiver_child_consent)
+
+    @property
+    def vaccines_received_cls(self):
+        return django_apps.get_model(self.vaccines_received)
 
     def clean(self):
         self.subject_identifier = self.cleaned_data.get(
@@ -23,6 +29,7 @@ class VaccinesReceivedFormValidator(FormValidator):
         self.validate_dates(cleaned_data)
         dates = ['first_dose_dt', 'second_dose_dt', 'third_dose_dt', 'booster_dose_dt']
         self.check_missing_date(cleaned_data, dates=dates)
+        self.validate_prev_immunization_received(cleaned_data)
 
     @property
     def caregiver_child_consent_model(self):
@@ -118,6 +125,32 @@ class VaccinesReceivedFormValidator(FormValidator):
                         self._errors.update(message)
                         raise ValidationError(message)
             counter += 1
+
+    def validate_prev_immunization_received(self, cleaned_data=None):
+        received_vaccine_name = cleaned_data.get('received_vaccine_name')
+        first_dose_dt = cleaned_data.get('first_dose_dt')
+        second_dose_dt = cleaned_data.get('second_dose_dt')
+        third_dose_dt = cleaned_data.get('third_dose_dt')
+        booster_dose_dt = cleaned_data.get('booster_dose_dt')
+        try:
+            received_vaccine = self.vaccines_received_cls.objects.get(
+                received_vaccine_name=received_vaccine_name,
+                first_dose_dt=first_dose_dt,
+                second_dose_dt=second_dose_dt,
+                third_dose_dt=third_dose_dt,
+                booster_dose_dt=booster_dose_dt)
+        except self.vaccines_received_cls.DoesNotExist:
+            pass
+        else:
+            visit_code = received_vaccine.visit.visit_code
+            current_visit = self.instance.visit.visit_code if self.instance else ''
+            if current_visit != visit_code:
+                timepoint = received_vaccine.visit.visit_code_sequence
+                message = {'received_vaccine_name':
+                           f'{received_vaccine_name} vaccine with the same dates '
+                           f'has already been captured at visit {visit_code}.{timepoint}'}
+                self._errors.update(message)
+                raise ValidationError(message)
 
     def validate_hpv_vaccine_adolescent(self, cleaned_data, ages={}):
         received_vaccine_name = cleaned_data.get('received_vaccine_name')
