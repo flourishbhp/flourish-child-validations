@@ -1,3 +1,5 @@
+
+from django.db.models import Q
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
 from edc_base.utils import age, get_utcnow
@@ -134,6 +136,9 @@ class VaccinesReceivedFormValidator(FormValidator):
         booster_dose_dt = cleaned_data.get('booster_dose_dt')
         try:
             received_vaccine = self.vaccines_received_cls.objects.get(
+                ~Q(child_immunization_history=cleaned_data.get('child_immunization_history')),
+                child_immunization_history__child_visit__subject_identifier=cleaned_data.get(
+                    'child_immunization_history').child_visit.subject_identifier,
                 received_vaccine_name=received_vaccine_name,
                 first_dose_dt=first_dose_dt,
                 second_dose_dt=second_dose_dt,
@@ -143,8 +148,8 @@ class VaccinesReceivedFormValidator(FormValidator):
             pass
         else:
             visit_code = received_vaccine.visit.visit_code
-            current_visit = self.instance.visit.visit_code if self.instance else ''
-            if current_visit != visit_code:
+            current_visit = cleaned_data.get('child_immunization_history').child_visit.visit_code
+            if current_visit and current_visit != visit_code:
                 timepoint = received_vaccine.visit.visit_code_sequence
                 message = {'received_vaccine_name':
                            f'{received_vaccine_name} vaccine with the same dates '
