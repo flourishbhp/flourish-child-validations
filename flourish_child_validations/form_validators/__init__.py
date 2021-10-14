@@ -22,3 +22,4 @@ from .form_validator_mixin import ChildFormValidatorMixin
 from .birth_exam_form_validation import BirthExamFormValidator
 from .infant_arv_exposure_form_validation import InfantArvExposureFormValidator
 from .infant_congenital_anomalies_form_validation import *
+from .infant_feeding_form_validator import InfantFeedingFormValidator
