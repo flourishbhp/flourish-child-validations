@@ -93,15 +93,23 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
 
         solid_foods = self.cleaned_data.get('solid_foods')
         selected = [solid.short_name for solid in solid_foods]
-        field_value = {'grain_intake_freq': 'grains_roots_tubers',
-                       'legumes_intake_freq': 'legumes_nuts',
-                       'dairy_intake_freq': 'dairy_products',
-                       'flesh_foods_freq': 'flesh_foods',
-                       'eggs_intake_freq': 'eggs',
-                       'porridge_intake_freq': 'porridge',
-                       'vitamin_a_fruits_freq': 'vitamin_a_rich_fruits_vegies'}
+        value_field = {'grains_roots_tubers': 'grain_intake_freq',
+                       'legumes_nuts': 'legumes_intake_freq',
+                       'dairy_products': 'dairy_intake_freq',
+                       'flesh_foods': 'flesh_foods_freq',
+                       'eggs': 'eggs_intake_freq',
+                       'porridge': 'porridge_intake_freq',
+                       'vitamin_a_rich_fruits_vegies': 'vitamin_a_fruits_freq',
+                       'other_fruits_vegies': ['other_fruits_vegies', 'other_fruits_freq'],
+                       'other_solid_foods': ['other_solids', 'other_solids_freq']}
 
-        for field, value in field_value.items():
-            self.required_if_true(
-                value in selected,
-                field_required=field)
+        for value, field in value_field.items():
+            if isinstance(field, list):
+                for required in field:
+                    self.required_if_true(
+                        value in selected,
+                        field_required=required)
+            else:
+                self.required_if_true(
+                    value in selected,
+                    field_required=field)
