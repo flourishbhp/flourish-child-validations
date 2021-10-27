@@ -188,7 +188,7 @@ class ChildAssentFormValidator(FormValidator):
             gender = self.cleaned_data.get('gender')
             if gender != infant_sex:
                 msg = {'gender':
-                       f'Child\'s gender is {self.caregiver_child_consent.infant_sex} from '
+                       f'Child\'s gender is {infant_sex} from '
                        'the caregiver consent on behalf of child. Please correct.'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
