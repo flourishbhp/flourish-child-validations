@@ -44,10 +44,9 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
                 self._errors.update(msg)
                 raise ValidationError(msg)
 
-        skin_folds_fields = ['skin_folds_triceps', 'skin_folds_subscapular',
-                             'skin_folds_suprailiac']
+        circ_fields = ['child_waist_circ', 'child_hip_circ']
 
-        for field in skin_folds_fields:
+        for field in circ_fields:
             self.required_if_true(
                 self.child_caregiver_consent_obj.gender == FEMALE and self.child_age >= 12,
                 field_required=field,)
