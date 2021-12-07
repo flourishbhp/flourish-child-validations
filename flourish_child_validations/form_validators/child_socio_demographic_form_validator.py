@@ -3,7 +3,6 @@ from django.core.exceptions import ValidationError
 
 from edc_base.utils import age, get_utcnow
 from edc_constants.choices import NO, YES
-from edc_constants.constants import NOT_APPLICABLE
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
@@ -89,7 +88,6 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
 
     def validate_child_not_schooling(self):
         attend_school = self.cleaned_data.get('attend_school')
-        working = self.cleaned_data.get('working')
 
         if (attend_school == YES and
                 self.cleaned_data.get('education_level') == 'no_schooling'):
@@ -112,16 +110,10 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
             field='attend_school',
             field_applicable='school_type')
 
-        if self.child_age > 16:
-            self.applicable_if(
-                NO,
-                field='attend_school',
-                field_applicable='working')
-        else:
-            self.not_applicable_if(
-                YES,
-                field='attend_school',
-                field_applicable='working')
+        self.applicable_if_true(
+            self.child_age > 16 and attend_school == NO,
+            field='attend_school',
+            field_applicable='working')
 
     @property
     def child_assent_obj(self):

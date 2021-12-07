@@ -1,7 +1,7 @@
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
-
 from edc_base.utils import get_utcnow, age
+from edc_constants.constants import FEMALE
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
@@ -43,6 +43,14 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
                 msg = {'child_diastolic_bp': 'This field is not required.'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
+
+        skin_folds_fields = ['skin_folds_triceps', 'skin_folds_subscapular',
+                             'skin_folds_suprailiac']
+
+        for field in skin_folds_fields:
+            self.required_if_true(
+                self.child_caregiver_consent_obj.gender == FEMALE and self.child_age >= 12,
+                field_required=field,)
 
         if child_systolic_bp and child_diastolic_bp:
             if child_systolic_bp < child_diastolic_bp:

@@ -102,10 +102,11 @@ class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
                                         ' participant')
         else:
             last_alive_date = self.cleaned_data.get('last_alive_date')
-            if last_alive_date and last_alive_date < child_consent_obj.child_dob:
-                msg = {'last_alive_date': 'Date cannot be before birth date'}
-                self._errors.update(msg)
-                raise ValidationError(msg)
+            if last_alive_date and child_consent_obj.child_dob:
+                if last_alive_date < child_consent_obj.child_dob:
+                    msg = {'last_alive_date': 'Date cannot be before birth date'}
+                    self._errors.update(msg)
+                    raise ValidationError(msg)
 
     def validate_reason_and_info_source(self):
         pass
