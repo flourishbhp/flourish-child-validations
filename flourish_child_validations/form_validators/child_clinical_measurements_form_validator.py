@@ -44,9 +44,9 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
                 self._errors.update(msg)
                 raise ValidationError(msg)
 
-        self.required_if_true(
+        self.applicable_if_true(
             self.child_caregiver_consent_obj.gender == FEMALE and self.child_age >= 12,
-            field_required='is_child_preg',)
+            field_applicable='is_child_preg',)
 
         if child_systolic_bp and child_diastolic_bp:
             if child_systolic_bp < child_diastolic_bp:
