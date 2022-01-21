@@ -33,8 +33,15 @@ class ChildBirthFormValidator(FormValidator):
                     'subject_identifier')).relative_identifier
             maternal_lab_del = self.maternal_del_cls.objects.get(
                 subject_identifier=maternal_identifier)
-            dob = cleaned_data.get('dob')
-            if dob != maternal_lab_del.delivery_datetime.date():
+
+            dob = cleaned_data.get('dob') # already a date
+            delivery_datetime = maternal_lab_del.delivery_datetime # date + utc time
+            local_tz = pytz.timezone('Africa/Harare') # get our zone
+            local_delivery_datetime= delivery_datetime.astimezone(local_tz) # convert to CAT
+
+
+            if dob != local_delivery_datetime.date(): 
+                #Get date only and remove the time fraction
                 msg = {'dob':
                        'Infant dob must match maternal delivery date. Expected'
                        f' {maternal_lab_del.delivery_datetime.date()}, '
