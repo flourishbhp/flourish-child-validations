@@ -36,7 +36,7 @@ class ChildBirthFormValidator(FormValidator):
 
             dob = cleaned_data.get('dob') # already a date
             delivery_datetime = maternal_lab_del.delivery_datetime # date + utc time
-            local_tz = pytz.timezone('Africa/Harare') # get our zone
+            local_tz = pytz.timezone('Africa/Gaborone') # get our zone
             local_delivery_datetime= delivery_datetime.astimezone(local_tz) # convert to CAT
 
 
