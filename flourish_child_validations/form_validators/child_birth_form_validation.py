@@ -31,8 +31,10 @@ class ChildBirthFormValidator(FormValidator):
             maternal_identifier = self.registered_subject_cls.objects.get(
                 subject_identifier=cleaned_data.get(
                     'subject_identifier')).relative_identifier
+
             maternal_lab_del = self.maternal_del_cls.objects.get(
                 subject_identifier=maternal_identifier)
+
             dob = cleaned_data.get('dob')
             if dob != maternal_lab_del.delivery_datetime.date():
                 msg = {'dob':
