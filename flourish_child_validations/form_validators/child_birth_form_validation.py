@@ -2,6 +2,7 @@ from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
 from django.utils.timezone import localtime
 from edc_form_validators import FormValidator
+import pytz
 
 
 class ChildBirthFormValidator(FormValidator):
