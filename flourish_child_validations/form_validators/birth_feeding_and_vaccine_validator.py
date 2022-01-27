@@ -1,4 +1,5 @@
 from edc_form_validators import FormValidator
+from flourish_child.constants import BREASTFEED_ONLY, BOTH_BREAST_FEEDING_AND_FORMULA, FORMULA_ONLY
 
 from .crf_offstudy_form_validator import CrfOffStudyFormValidator
 from .form_validator_mixin import ChildFormValidatorMixin
@@ -16,21 +17,21 @@ class BirthFeedingAndVaccineFormValidator(ChildFormValidatorMixin,
         self.validate_against_visit_datetime(
             self.cleaned_data.get('report_datetime'))
 
+        self.validate_feeding()
+
+    def validate_feeding(self):
+
         feeding_after_delivery = self.cleaned_data.get('feeding_after_delivery')
 
-        formulafeed_start_dt = self.cleaned_data.get('formulafeed_start_dt')
+        breast_feeding_condition = feeding_after_delivery == BREASTFEED_ONLY or \
+                                   feeding_after_delivery == BOTH_BREAST_FEEDING_AND_FORMULA
+        formula_feeding_condition = feeding_after_delivery == FORMULA_ONLY or \
+                                    feeding_after_delivery == BOTH_BREAST_FEEDING_AND_FORMULA
 
-        feeding_cond = feeding_after_delivery == 'Formula feeding only' or \
-            feeding_after_delivery == 'Both breastfeeding and formula feeding'
-
-        self.required_if_not_none(field='breastfeed_start_dt',
-                                  field_required='breastfeed_start_est',)
-
-        self.required_if_true(feeding_cond,
-                              field_required='formulafeed_start_dt')
-
-        feeding_cond = feeding_cond and formulafeed_start_dt != ''
-
-        self.required_if_true(feeding_cond,
-                              field_required='formulafeed_start_est')
-
+        # feeding conditions
+        self.required_if_true(condition=breast_feeding_condition, field_required='breastfeed_start_dt')
+        self.required_if_true(condition=formula_feeding_condition, field_required='formulafeed_start_dt')
+        
+        # required dates
+        self.required_if_not_none(field='breastfeed_start_dt', field_required='breastfeed_start_est')
+        self.required_if_not_none(field='formulafeed_start_dt', field_required='formulafeed_start_est')
