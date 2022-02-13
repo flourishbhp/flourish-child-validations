@@ -1,10 +1,10 @@
 
-from django.db.models import Q
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from edc_base.utils import age, get_utcnow
-from edc_form_validators import FormValidator
 from edc_constants.constants import YES
+from edc_form_validators import FormValidator
 
 
 class VaccinesReceivedFormValidator(FormValidator):
@@ -79,9 +79,9 @@ class VaccinesReceivedFormValidator(FormValidator):
         if self.caregiver_child_consent_model:
             child_dob = self.caregiver_child_consent_model.child_dob
             child_age = age(child_dob, get_utcnow().date()).years
-            if child_age <= 12 and received_vaccine_name == 'hpv_vaccine':
+            if child_age < 9 and received_vaccine_name == 'hpv_vaccine':
                 message = {'received_vaccine_name':
-                           'Child age is less than 12, cannot select HPV vaccine'}
+                           'Child age is less than 9, cannot select HPV vaccine'}
                 self._errors.update(message)
                 raise ValidationError(message)
 
