@@ -38,14 +38,14 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
         self.required_if(
             YES,
             field='rec_liquids',
-            field_required='taken_formula')
+            field_required='took_formula')
 
         fields_required = ['dt_formula_introduced', 'dt_formula_est',
                            'formula_feedng_completd']
         for field in fields_required:
             self.required_if(
                 YES,
-                field='taken_formula',
+                field='took_formula',
                 field_required=field)
 
         fields_required = ['dt_formula_stopd', 'dt_stopd_est']
@@ -72,7 +72,7 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
         self.applicable_if(
             YES,
             field='taken_cows_milk',
-            field_applicable='cows_milk_used')
+            field_applicable='cows_milk_prep')
 
         for field in ['animal_milk_specify', 'milk_boiled']:
             self.required_if(
