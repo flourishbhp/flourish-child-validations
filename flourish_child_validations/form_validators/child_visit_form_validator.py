@@ -94,19 +94,20 @@ class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
         """Returns an instance of the current maternal consent or
         raises an exception if not found."""
 
-        try:
-            child_consent_obj = self.caregiver_child_consent_cls.objects.get(
-                subject_identifier=self.cleaned_data.get('appointment').subject_identifier)
-        except self.caregiver_child_consent_cls.DoesNotExist:
-            raise forms.ValidationError('Missing Consent on Behalf of Child form for this'
-                                        ' participant')
-        else:
+        child_consents = self.caregiver_child_consent_cls.objects.filter(
+            subject_identifier=self.cleaned_data.get('appointment').subject_identifier)
+
+        if child_consents:
+            latest_consent = child_consents.latest('consent_datetime')
             last_alive_date = self.cleaned_data.get('last_alive_date')
-            if last_alive_date and child_consent_obj.child_dob:
-                if last_alive_date < child_consent_obj.child_dob:
+            if last_alive_date and latest_consent.child_dob:
+                if last_alive_date < latest_consent.child_dob:
                     msg = {'last_alive_date': 'Date cannot be before birth date'}
                     self._errors.update(msg)
                     raise ValidationError(msg)
+        else:
+            raise forms.ValidationError('Missing Consent on Behalf of Child form for this'
+                                        ' participant')
 
     def validate_reason_and_info_source(self):
         pass
