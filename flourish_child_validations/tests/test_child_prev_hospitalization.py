@@ -1,12 +1,31 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase, tag
-from edc_constants.constants import OTHER
+from edc_constants.constants import OTHER, YES
 
-from ..form_validators import ChildPreHospitalisationInlineFormValidator
+from ..form_validators import ChildPreHospitalisationInlineFormValidator, \
+    ChildPreviousHospitalisationFormValidator
 
 
 @tag('hoz1')
 class TestChildHospitalizationForm(TestCase):
+
+    def test_hospital_count_invalid(self):
+        """
+        Raise an error if the hospital name other is not captured.
+        """
+        cleaned_data = {
+            'hos_last_visit': YES,
+            'hospitalized_count': None
+            }
+
+        form_validator = ChildPreviousHospitalisationFormValidator(
+            cleaned_data=cleaned_data)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('hospitalized_count', form_validator._errors)
+
+
+@tag('hozinline')
+class TestChildHospitalizationFormInline(TestCase):
 
     def test_hospital_name_required_invalid(self):
         """
@@ -16,7 +35,7 @@ class TestChildHospitalizationForm(TestCase):
         cleaned_data = {
             'name_hospital': OTHER,
             'name_hospital_other': 'blah blah'
-        }
+            }
 
         form_validator = ChildPreHospitalisationInlineFormValidator(
             cleaned_data=cleaned_data)
@@ -29,7 +48,7 @@ class TestChildHospitalizationForm(TestCase):
             'reason_hospitalized': OTHER,
             'reason_hospitalized_other': 'surgical',
             'surgical_reason': None
-        }
+            }
 
         form_validator = ChildPreHospitalisationInlineFormValidator(
             cleaned_data=cleaned_data)
