@@ -5,9 +5,10 @@ from django.db.models import Q
 from edc_base.utils import age, get_utcnow
 from edc_constants.constants import YES
 from edc_form_validators import FormValidator
+from .form_validator_mixin import ChildFormValidatorMixin
 
 
-class VaccinesReceivedFormValidator(FormValidator):
+class VaccinesReceivedFormValidator(ChildFormValidatorMixin, FormValidator):
 
     caregiver_child_consent = 'flourish_caregiver.caregiverchildconsent'
 
@@ -25,6 +26,8 @@ class VaccinesReceivedFormValidator(FormValidator):
         self.subject_identifier = self.cleaned_data.get(
             'child_immunization_history').subject_identifier
         cleaned_data = self.cleaned_data
+
+        self.validate_consent_version_obj(self.subject_identifier)
         self.validate_vaccine_received(cleaned_data)
         self.validate_received_vaccine_fields(cleaned_data)
         self.validate_hpv_vaccine(cleaned_data)

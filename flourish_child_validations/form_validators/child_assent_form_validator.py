@@ -36,6 +36,8 @@ class ChildAssentFormValidator(FormValidator):
 
         cleaned_data = self.cleaned_data
 
+        self.validate_consent_version_obj(self.cleaned_data.get('subject_identifier'))
+
         self.required_if(
             NO,
             field='is_literate',

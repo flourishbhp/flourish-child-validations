@@ -3,14 +3,17 @@ from django.core.exceptions import ValidationError
 from edc_base.utils import get_utcnow
 from edc_constants.constants import YES
 from edc_form_validators import FormValidator
+from .form_validator_mixin import ChildFormValidatorMixin
 
 
-class ChildHIVRapidTestValidator(FormValidator):
+class ChildHIVRapidTestValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
         self.subject_identifier = self.cleaned_data.get(
             'child_visit').subject_identifier
         super().clean()
+
+        self.validate_consent_version_obj(self.subject_identifier)
 
         self.required_if(
             YES,
