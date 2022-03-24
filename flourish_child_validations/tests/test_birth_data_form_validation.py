@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import TestCase, tag
 from django.utils import timezone
 from edc_constants.constants import YES, NO
 
@@ -7,6 +7,7 @@ from ..form_validators import BirthDataFormValidator
 from .models import ChildVisit, Appointment
 
 
+@tag('birth_data')
 class TestInfantBirthDataFormValidator(TestCase):
 
     def setUp(self):
@@ -23,6 +24,7 @@ class TestInfantBirthDataFormValidator(TestCase):
 
         self.options = {
             'report_datetime': timezone.now(),
+            'gestational_age': 25,
             'child_visit': child_visit,
             'weight_kg': 3.61,
             'infant_length': 89.97,
