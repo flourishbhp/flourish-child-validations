@@ -5,11 +5,7 @@ from edc_form_validators import FormValidator
 class ChildPreviousHospitalisationFormValidator(FormValidator):
 
     def clean(self):
-
         self.required_if(YES, field='child_hospitalized',
-                         field_required='hospitalized_count')
-
-        self.required_if(YES, field='hos_last_visit',
                          field_required='hospitalized_count')
 
 
