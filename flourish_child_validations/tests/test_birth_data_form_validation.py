@@ -103,3 +103,17 @@ class TestInfantBirthDataFormValidator(TestCase):
             form_validator.validate()
         except ValidationError as e:
             self.fail(f'ValidationError unexpectedly raised. Got{e}')
+
+    def test_gestational_age_is_valid(self):
+        """
+        If gestational_age is less than 22 or more than 43, 
+        an exception should be raised
+        """
+        self.options['gestational_age'] = 4
+        
+        form_validator = BirthDataFormValidator(
+            cleaned_data=self.options
+        )
+
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('gestational_age', form_validator._errors)
