@@ -11,10 +11,11 @@ from edc_visit_tracking.form_validators import VisitFormValidator
 from flourish_prn.action_items import CHILDOFF_STUDY_ACTION
 
 from .crf_offstudy_form_validator import CrfOffStudyFormValidator
+from .form_validator_mixin import ChildFormValidatorMixin
 
 
 class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
-                              FormValidator):
+                              ChildFormValidatorMixin, FormValidator):
 
     caregiver_child_consent_model = 'flourish_caregiver.caregiverchildconsent'
 
@@ -37,6 +38,9 @@ class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
                 self.validate_study_status()
 
         self.validate_death()
+
+        self.validate_consent_version_obj(
+            self.cleaned_data.get('appointment').subject_identifier)
 
         self.validate_is_present()
 
