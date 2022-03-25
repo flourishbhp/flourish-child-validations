@@ -1,30 +1,35 @@
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import TestCase, tag
 from edc_base.utils import get_utcnow, relativedelta
 from edc_constants.constants import YES, FEMALE, MALE, NOT_APPLICABLE
 
 from ..form_validators import ChildAssentFormValidator
-from .models import CaregiverConsent, ChildDataset, ScreeningPriorBhpParticipants
 from .models import CaregiverChildConsent
+from .models import CaregiverConsent, ChildDataset, ScreeningPriorBhpParticipants
+from .test_model_mixin import TestModeMixin
 
 
-class TestChildAssentForm(TestCase):
+@tag('mm')
+class TestChildAssentForm(TestModeMixin, TestCase):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(ChildAssentFormValidator, *args, **kwargs)
 
     def setUp(self):
-        subject_consent_model = 'flourish_child_validations.caregiverconsent'
-        ChildAssentFormValidator.subject_consent_model = subject_consent_model
+        # subject_consent_model = 'flourish_child_validations.caregiverconsent'
+        # ChildAssentFormValidator.subject_consent_model = subject_consent_model
 
-        prior_screening_model = 'flourish_child_validations.screeningpriorbhpparticipants'
-        ChildAssentFormValidator.prior_screening_model = prior_screening_model
+        # prior_screening_model = 'flourish_child_validations.screeningpriorbhpparticipants'
+        # ChildAssentFormValidator.prior_screening_model = prior_screening_model
 
-        child_dataset_model = 'flourish_child_validations.childdataset'
-        ChildAssentFormValidator.child_dataset_model = child_dataset_model
-
-        child_assent_model = 'flourish_child_validations.childassent'
-        ChildAssentFormValidator.child_assent_model = child_assent_model
-
-        caregiver_child_consent_model = 'flourish_child_validations.caregiverchildconsent'
-        ChildAssentFormValidator.caregiver_child_consent_model = caregiver_child_consent_model
+        # child_dataset_model = 'flourish_child_validations.childdataset'
+        # ChildAssentFormValidator.child_dataset_model = child_dataset_model
+        #
+        # child_assent_model = 'flourish_child_validations.childassent'
+        # ChildAssentFormValidator.child_assent_model = child_assent_model
+        #
+        # caregiver_child_consent_model = 'flourish_child_validations.caregiverchildconsent'
+        # ChildAssentFormValidator.caregiver_child_consent_model = caregiver_child_consent_model
 
         self.screening_identifier = 'ABC12345'
         self.study_child_identifier = '1234DCD'
@@ -200,7 +205,7 @@ class TestChildAssentForm(TestCase):
         self.child_assent_options.update(
             {'preg_testing': YES,
              'identity': None,
-             'identity_type':  None,
+             'identity_type': None,
              'confirm_identity': None})
         form_validator = ChildAssentFormValidator(
             cleaned_data=self.child_assent_options)

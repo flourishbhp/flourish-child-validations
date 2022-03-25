@@ -1,6 +1,6 @@
-from django_crypto_fields.fields import IdentityField
 from django.db import models
 from django.db.models.deletion import PROTECT
+from django_crypto_fields.fields import IdentityField
 from edc_base.model_mixins import BaseUuidModel
 from edc_base.utils import get_utcnow
 
@@ -31,6 +31,30 @@ class CaregiverConsent(BaseUuidModel):
         editable=False)
 
     child_dob = models.DateField(blank=True, null=True)
+
+
+class SubjectConsent(BaseUuidModel):
+    subject_identifier = models.CharField(max_length=25)
+
+    screening_identifier = models.CharField(max_length=50)
+
+    gender = models.CharField(max_length=25)
+
+    is_literate = models.CharField(max_length=25,
+                                   blank=True,
+                                   null=True)
+
+    witness_name = models.CharField(max_length=25,
+                                    blank=True,
+                                    null=True)
+
+    dob = models.DateField()
+
+    consent_datetime = models.DateTimeField()
+
+    version = models.CharField(
+        max_length=10,
+        editable=False)
 
 
 class CaregiverChildConsent(BaseUuidModel):

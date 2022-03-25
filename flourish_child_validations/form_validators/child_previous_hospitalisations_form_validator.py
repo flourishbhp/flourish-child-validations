@@ -14,6 +14,9 @@ class ChildPreviousHospitalisationFormValidator(ChildFormValidatorMixin, FormVal
         self.required_if(YES, field='child_hospitalized',
                          field_required='hospitalized_count')
 
+        self.required_if(YES, field='hos_last_visit',
+                         field_required='hospitalized_count')
+
 
 class ChildPreHospitalisationInlineFormValidator(FormValidator):
 

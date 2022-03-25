@@ -1,5 +1,5 @@
 from edc_form_validators import FormValidator
-from flourish_child.constants import BREASTFEED_ONLY, BOTH_BREAST_FEEDING_AND_FORMULA, FORMULA_ONLY
+from ..constants import BREASTFEED_ONLY, BOTH_BREAST_FEEDING_AND_FORMULA, FORMULA_ONLY
 
 from .crf_offstudy_form_validator import CrfOffStudyFormValidator
 from .form_validator_mixin import ChildFormValidatorMixin

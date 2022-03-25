@@ -4,9 +4,10 @@ from django.core.exceptions import ValidationError
 from edc_base.utils import relativedelta
 from edc_constants.constants import NO, FEMALE, MALE
 from edc_form_validators import FormValidator
+from .form_validator_mixin import ChildFormValidatorMixin
 
 
-class ChildAssentFormValidator(FormValidator):
+class ChildAssentFormValidator(ChildFormValidatorMixin, FormValidator):
 
     prior_screening_model = 'flourish_caregiver.screeningpriorbhpparticipants'
 

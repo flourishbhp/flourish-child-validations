@@ -22,7 +22,8 @@ class BirthDataFormValidator(ChildFormValidatorMixin, CrfOffStudyFormValidator,
         self.validate_apgar_score()
 
         gestational_age = self.cleaned_data.get('gestational_age')
-        if 22 > gestational_age > 43:
+
+        if gestational_age and 22 > gestational_age > 43:
             raise forms.ValidationError(
                     {'gestational_age': 'Gestational age should be between 22 and 43.'})
 
