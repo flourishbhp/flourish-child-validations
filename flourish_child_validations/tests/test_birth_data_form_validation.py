@@ -5,10 +5,13 @@ from edc_constants.constants import YES, NO
 
 from ..form_validators import BirthDataFormValidator
 from .models import ChildVisit, Appointment
+from .test_model_mixin import TestModeMixin
 
 
-@tag('birth_data')
-class TestInfantBirthDataFormValidator(TestCase):
+class TestInfantBirthDataFormValidator(TestModeMixin, TestCase):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(BirthDataFormValidator, *args, **kwargs)
 
     def setUp(self):
 

@@ -1,11 +1,18 @@
 from django.core.exceptions import ValidationError
-from edc_form_validators import FormValidator
 from edc_constants.constants import DONT_KNOW
+from edc_form_validators import FormValidator
+
+from .form_validator_mixin import ChildFormValidatorMixin
 
 
-class ChildPhysicalActivityFormValidator(FormValidator):
+class ChildPhysicalActivityFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
+
+        self.subject_identifier = self.cleaned_data.get(
+            'child_visit').appointment.subject_identifier
+
+        self.validate_consent_version_obj(self.subject_identifier)
 
         vig_fields_req = ['specify_vig_days', 'vig_activity_time']
 

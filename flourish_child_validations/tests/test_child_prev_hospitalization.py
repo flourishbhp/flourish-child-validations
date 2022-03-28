@@ -5,7 +5,6 @@ from edc_constants.constants import OTHER
 from ..form_validators import ChildPreHospitalisationInlineFormValidator
 
 
-@tag('hoz1')
 class TestChildHospitalizationForm(TestCase):
 
     def test_hospital_name_required_invalid(self):

@@ -1,8 +1,9 @@
 from django.apps import apps as django_apps
 from edc_form_validators import FormValidator
+from .form_validator_mixin import ChildFormValidatorMixin
 
 
-class AcademicPerformanceFormValidator(FormValidator):
+class AcademicPerformanceFormValidator(ChildFormValidatorMixin, FormValidator):
 
     child_socio_demographic_model = 'flourish_child.childsociodemographic'
 
@@ -13,6 +14,8 @@ class AcademicPerformanceFormValidator(FormValidator):
     def clean(self):
         self.subject_identifier = self.cleaned_data.get(
             'child_visit').appointment.subject_identifier
+
+        self.validate_consent_version_obj(self.subject_identifier)
 
         self.required_if(
             'points',
