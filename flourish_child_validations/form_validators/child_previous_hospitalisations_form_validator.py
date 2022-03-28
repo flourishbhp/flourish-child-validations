@@ -5,7 +5,14 @@ from edc_form_validators import FormValidator
 class ChildPreviousHospitalisationFormValidator(FormValidator):
 
     def clean(self):
+        self.subject_identifier = self.cleaned_data.get(
+            'child_visit').appointment.subject_identifier
+
+        self.validate_consent_version_obj(self.subject_identifier)
         self.required_if(YES, field='child_hospitalized',
+                         field_required='hospitalized_count')
+
+        self.required_if(YES, field='hos_last_visit',
                          field_required='hospitalized_count')
 
 
