@@ -19,7 +19,6 @@ from .child_previous_hospitalisations_form_validator import (
     ChildPreviousHospitalisationFormValidator,
     ChildPreHospitalisationInlineFormValidator)
 from .child_referral_form_validator import ChildReferralFormValidator
-from .child_requisitions_form_validator import ChildRequisitionsFormValidations
 from .child_socio_demographic_form_validator import ChildSocioDemographicFormValidator
 from .child_tanner_staging_form_validator import ChildTannerStagingFormValidator
 from .child_visit_form_validator import ChildVisitFormValidator
