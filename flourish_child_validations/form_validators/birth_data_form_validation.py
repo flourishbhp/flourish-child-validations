@@ -20,8 +20,6 @@ class BirthDataFormValidator(ChildFormValidatorMixin, CrfOffStudyFormValidator,
         self.validate_apgar_score()
         self.validate_gestational_age()
 
-        
-
     def validate_gestational_age(self):
         """
         Gestional age should be between age of 22 and 43 for the purpose
