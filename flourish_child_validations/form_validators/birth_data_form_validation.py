@@ -14,6 +14,8 @@ class BirthDataFormValidator(ChildFormValidatorMixin, CrfOffStudyFormValidator,
             'child_visit').appointment.subject_identifier
         super().clean()
 
+        self.validate_consent_version_obj(self.subject_identifier)
+
         self.validate_against_visit_datetime(
             self.cleaned_data.get('report_datetime'))
         self.validate_metrics_avail()
@@ -26,6 +28,7 @@ class BirthDataFormValidator(ChildFormValidatorMixin, CrfOffStudyFormValidator,
         of this study
         """
         gestational_age = self.cleaned_data.get('gestational_age')
+
 
         if 22 > gestational_age or gestational_age > 43:
             raise forms.ValidationError(

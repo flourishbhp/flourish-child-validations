@@ -22,6 +22,8 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
             'child_visit').subject_identifier
         super().clean()
 
+        self.validate_consent_version_obj(self.subject_identifier)
+
         child_systolic_bp = cleaned_data.get('child_systolic_bp')
         child_diastolic_bp = cleaned_data.get('child_diastolic_bp')
 

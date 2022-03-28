@@ -13,6 +13,8 @@ class BirthExamFormValidator(ChildFormValidatorMixin, CrfOffStudyFormValidator,
             'child_visit').appointment.subject_identifier
         super().clean()
 
+        self.validate_consent_version_obj(self.subject_identifier)
+
         self.validate_against_visit_datetime(
             self.cleaned_data.get('report_datetime'))
 

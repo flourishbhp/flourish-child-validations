@@ -6,7 +6,6 @@ from ..form_validators import ChildPreHospitalisationInlineFormValidator, \
     ChildPreviousHospitalisationFormValidator
 
 
-@tag('hoz1')
 class TestChildHospitalizationForm(TestCase):
 
     def test_hospital_count_invalid(self):

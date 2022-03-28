@@ -1,12 +1,16 @@
 from django.core.exceptions import ValidationError
-
 from edc_constants.constants import YES, NO, OTHER, NOT_APPLICABLE, NONE
 from edc_form_validators import FormValidator
+from .form_validator_mixin import ChildFormValidatorMixin
 
 
-class ChildMedicalHistoryFormValidator(FormValidator):
+class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
+        self.subject_identifier = self.cleaned_data.get(
+            'child_visit').appointment.subject_identifier
+
+        self.validate_consent_version_obj(self.subject_identifier)
 
         chronic_since = self.cleaned_data.get('chronic_since')
         child_chronic = self.cleaned_data.get('child_chronic')
