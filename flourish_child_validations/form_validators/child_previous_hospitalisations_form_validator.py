@@ -1,8 +1,9 @@
 from edc_constants.constants import YES, OTHER
 from edc_form_validators import FormValidator
+from .form_validator_mixin import ChildFormValidatorMixin
 
 
-class ChildPreviousHospitalisationFormValidator(FormValidator):
+class ChildPreviousHospitalisationFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
         self.subject_identifier = self.cleaned_data.get(
