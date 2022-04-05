@@ -2,7 +2,6 @@ from .academic_performance_form_validator import AcademicPerformanceFormValidato
 from .birth_data_form_validation import BirthDataFormValidator
 from .birth_exam_form_validation import BirthExamFormValidator
 from .birth_feeding_and_vaccine_validator import BirthFeedingAndVaccineFormValidator
-from .child_appointment_form_validator import ChildAppointmentFormValidator
 from .child_assent_form_validator import ChildAssentFormValidator
 from .child_birth_form_validation import ChildBirthFormValidator
 from .child_clinical_measurements_form_validator import \
