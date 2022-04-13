@@ -227,13 +227,13 @@ class ChildAssentFormValidator(ChildFormValidatorMixin, FormValidator):
     @property
     def caregiver_child_consent(self):
 
-        try:
-            child_consent = self.caregiver_child_consent_cls.objects.get(
-                subject_identifier=self.cleaned_data.get('subject_identifier'))
-        except self.caregiver_child_consent_cls.DoesNotExist:
+        child_consent = self.caregiver_child_consent_cls.objects.filter(
+            subject_identifier=self.cleaned_data.get('subject_identifier'))
+
+        if not child_consent:
             raise ValidationError('Caregiver child consent matching query does not exist.')
-        else:
-            return child_consent
+
+        return child_consent.latest('consent_datetime')
 
     @property
     def prior_screening(self):
