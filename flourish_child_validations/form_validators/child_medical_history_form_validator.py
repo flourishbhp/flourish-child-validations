@@ -1,12 +1,16 @@
+import django
 from django.core.exceptions import ValidationError
+from django.apps import apps as django_apps
 
 from edc_constants.constants import YES, NO, OTHER, NOT_APPLICABLE, NONE
 from edc_form_validators import FormValidator
 
 
 class ChildMedicalHistoryFormValidator(FormValidator):
-
+    
+        
     def clean(self):
+        super().clean()
 
         chronic_since = self.cleaned_data.get('chronic_since')
         child_chronic = self.cleaned_data.get('child_chronic')
@@ -22,6 +26,9 @@ class ChildMedicalHistoryFormValidator(FormValidator):
 
         self.not_applicable_not_allowed(NOT_APPLICABLE, field=chronic_since,
                                         m2m_field=child_chronic)
+        
+        self.is_pregnant_required_fields()
+        
 
     def not_applicable_not_allowed(self, *selections, field=None, m2m_field=None):
 
@@ -54,3 +61,12 @@ class ChildMedicalHistoryFormValidator(FormValidator):
             self.m2m_single_selection_if(
                 NOT_APPLICABLE,
                 m2m_field=m2m_field)
+
+    def is_pregnant_required_fields(self):
+        required_fields = ['pregnancy_test_result','last_menstrual_period', 'is_lmp_date_estimated']
+
+        for required_field in required_fields:
+            self.required_if(YES,
+                             field='is_pregnant',
+                             field_required=required_field) 
+        
