@@ -5,7 +5,7 @@ from edc_constants.choices import POS_NEG
 from flourish_child_validations import form_validators
 from flourish_child_validations.form_validators import ChildMedicalHistoryFormValidator
 
-@tag('cmh')
+
 class TestChildMedicalHistoryFormValidator(TestCase):
     
     def setUp(self):
