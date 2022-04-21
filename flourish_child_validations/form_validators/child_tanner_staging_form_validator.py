@@ -7,7 +7,6 @@ from .form_validator_mixin import ChildFormValidatorMixin
 
 
 class ChildTannerStagingFormValidator(ChildFormValidatorMixin, FormValidator):
-
     child_assent_model = 'flourish_child.childassent'
 
     @property
@@ -17,6 +16,10 @@ class ChildTannerStagingFormValidator(ChildFormValidatorMixin, FormValidator):
     def clean(self):
         super().clean()
         report_datetime = self.cleaned_data.get('report_datetime')
+
+        subject_identifier = self.cleaned_data.get('child_visit').subject_identifier
+
+        self.validate_consent_version_obj(subject_identifier)
 
         self.validate_against_visit_datetime(report_datetime)
 
@@ -79,8 +82,8 @@ class ChildTannerStagingFormValidator(ChildFormValidatorMixin, FormValidator):
         if assent:
             if gender != assent.gender:
                 msg = {'child_gender':
-                       f'Child gender does not match `{assent.gender}` from '
-                       'the Assent form. Please correct.'}
+                           f'Child gender does not match `{assent.gender}` from '
+                           'the Assent form. Please correct.'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
 

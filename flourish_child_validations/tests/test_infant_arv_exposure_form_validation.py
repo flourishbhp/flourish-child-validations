@@ -1,14 +1,19 @@
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import TestCase, tag
 from django.utils import timezone
 from edc_base.utils import get_utcnow
 from edc_constants.constants import YES, NO, NOT_APPLICABLE
 
 from ..form_validators import InfantArvExposureFormValidator
 from .models import ChildVisit, Appointment
+from .test_model_mixin import TestModeMixin
 
 
-class TestInfantArvExposureFormValidator(TestCase):
+@tag('mm')
+class TestInfantArvExposureFormValidator(TestModeMixin, TestCase):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(InfantArvExposureFormValidator, *args, **kwargs)
 
     def setUp(self):
         appointment = Appointment.objects.create(

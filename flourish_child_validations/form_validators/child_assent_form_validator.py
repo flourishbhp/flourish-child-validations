@@ -4,9 +4,10 @@ from django.core.exceptions import ValidationError
 from edc_base.utils import relativedelta
 from edc_constants.constants import NO, FEMALE, MALE
 from edc_form_validators import FormValidator
+from .form_validator_mixin import ChildFormValidatorMixin
 
 
-class ChildAssentFormValidator(FormValidator):
+class ChildAssentFormValidator(ChildFormValidatorMixin, FormValidator):
 
     prior_screening_model = 'flourish_caregiver.screeningpriorbhpparticipants'
 
@@ -35,6 +36,8 @@ class ChildAssentFormValidator(FormValidator):
     def clean(self):
 
         cleaned_data = self.cleaned_data
+
+        self.validate_consent_version_obj(self.cleaned_data.get('subject_identifier'))
 
         self.required_if(
             NO,
@@ -224,13 +227,13 @@ class ChildAssentFormValidator(FormValidator):
     @property
     def caregiver_child_consent(self):
 
-        try:
-            child_consent = self.caregiver_child_consent_cls.objects.get(
-                subject_identifier=self.cleaned_data.get('subject_identifier'))
-        except self.caregiver_child_consent_cls.DoesNotExist:
+        child_consent = self.caregiver_child_consent_cls.objects.filter(
+            subject_identifier=self.cleaned_data.get('subject_identifier'))
+
+        if not child_consent:
             raise ValidationError('Caregiver child consent matching query does not exist.')
-        else:
-            return child_consent
+
+        return child_consent.latest('consent_datetime')
 
     @property
     def prior_screening(self):

@@ -4,8 +4,10 @@ from django.utils.timezone import localtime
 from edc_form_validators import FormValidator
 import pytz
 
+from .form_validator_mixin import ChildFormValidatorMixin
 
-class ChildBirthFormValidator(FormValidator):
+
+class ChildBirthFormValidator(ChildFormValidatorMixin, FormValidator):
 
     registered_subject_model = 'edc_registration.registeredsubject'
 
@@ -22,6 +24,8 @@ class ChildBirthFormValidator(FormValidator):
     def clean(self):
         self.subject_identifier = self.cleaned_data.get('subject_identifier')
         super().clean()
+
+        self.validate_consent_version_obj(self.subject_identifier)
 
         self.validate_dob()
         self.validate_report_datetime()

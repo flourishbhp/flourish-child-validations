@@ -7,9 +7,21 @@ class ChildFormValidatorMixin:
 
     infant_birth_model = None
 
+    subject_consent_model = 'flourish_caregiver.subjectconsent'
+
+    consent_version_model = 'flourish_caregiver.flourishconsentversion'
+
     @property
     def infant_birth_cls(self):
         return django_apps.get_model(self.infant_birth_model)
+
+    @property
+    def subject_consent_cls(self):
+        return django_apps.get_model(self.subject_consent_model)
+
+    @property
+    def consent_version_cls(self):
+        return django_apps.get_model(self.consent_version_model)
 
     def validate_against_birth_date(self, infant_identifier=None,
                                     report_datetime=None):
@@ -41,3 +53,24 @@ class ChildFormValidatorMixin:
                 'offstudy_date':
                 'offstudy date cannot be before visit date.'
             })
+
+    def validate_consent_version_obj(self, subject_identifier):
+
+        latest_consent_obj = self.latest_consent_obj(subject_identifier)
+
+        if latest_consent_obj:
+            try:
+                self.consent_version_cls.objects.get(
+                    screening_identifier=latest_consent_obj.screening_identifier)
+            except self.consent_version_cls.DoesNotExist:
+                raise forms.ValidationError(
+                    'Consent version form has not been completed, kindly complete it before'
+                    ' continuing.')
+
+    def latest_consent_obj(self, subject_identifier):
+
+        subject_consents = self.subject_consent_cls.objects.filter(
+            subject_identifier=subject_identifier[:-3])
+
+        if subject_consents:
+            return subject_consents.latest('consent_datetime')
