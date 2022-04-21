@@ -38,13 +38,14 @@ class VaccinesReceivedFormValidator(ChildFormValidatorMixin, FormValidator):
 
     @property
     def caregiver_child_consent_model(self):
+        caregiver_consent = self.latest_consent_obj(self.subject_identifier)
         try:
-            caregiver_child = self.caregiver_child_consent_cls.objects.get(
+            child_consent = caregiver_consent.caregiverchildconsent_set.get(
                 subject_identifier=self.subject_identifier)
         except self.caregiver_child_consent_cls.DoesNotExist:
             return None
         else:
-            return caregiver_child
+            return child_consent
 
     def validate_vaccine_received(self, cleaned_data=None):
         vaccines_received = cleaned_data.get('child_immunization_history').vaccines_received
