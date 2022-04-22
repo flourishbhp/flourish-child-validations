@@ -27,9 +27,8 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
 
         self.not_applicable_not_allowed(NOT_APPLICABLE, field=chronic_since,
                                         m2m_field=child_chronic)
-        
-        self.is_pregnant_required_fields()
-        
+
+        # self.is_pregnant_required_fields()
 
     def not_applicable_not_allowed(self, *selections, field=None, m2m_field=None):
 
@@ -64,10 +63,9 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
                 m2m_field=m2m_field)
 
     def is_pregnant_required_fields(self):
-        required_fields = ['pregnancy_test_result','last_menstrual_period', 'is_lmp_date_estimated']
+        required_fields = ['pregnancy_test_result', 'last_menstrual_period', 'is_lmp_date_estimated']
 
         for required_field in required_fields:
             self.required_if(YES,
                              field='is_pregnant',
-                             field_required=required_field) 
-        
+                             field_required=required_field)
