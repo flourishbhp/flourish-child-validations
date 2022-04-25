@@ -3,6 +3,7 @@ from django.db.models.deletion import PROTECT
 from django_crypto_fields.fields import IdentityField
 from edc_base.model_mixins import BaseUuidModel
 from edc_base.utils import get_utcnow
+from django.utils import timezone
 
 
 class Appointment(BaseUuidModel):
@@ -143,3 +144,15 @@ class ScreeningPriorBhpParticipants(BaseUuidModel):
     report_datetime = models.DateTimeField()
 
     study_child_identifier = models.CharField(max_length=50)
+
+
+class FlourishConsentVersion(BaseUuidModel):
+
+    screening_identifier = models.CharField(
+        max_length=50,)
+
+    version = models.CharField(
+        max_length=3)
+
+    report_datetime = models.DateTimeField(
+        default=timezone.now,)

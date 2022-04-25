@@ -68,6 +68,6 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
 
         for required_field in required_fields:
             self.required_if(YES,
-                             field='is_pregnant',
+                             field='preg_test_performed',
                              field_required=required_field) 
         
