@@ -67,7 +67,7 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
                 m2m_field=m2m_field)
 
     def is_pregnant_required_fields(self):
-        required_fields = ['pregnancy_test_result','last_menstrual_period', 'is_lmp_date_estimated']
+        required_fields = ['pregnancy_test_result', 'last_menstrual_period', 'is_lmp_date_estimated']
 
         for required_field in required_fields:
             self.required_if(YES,
