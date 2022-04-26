@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase,tag
 from django.core.exceptions import ValidationError
 from edc_constants.constants import NO, YES
 from flourish_child_validations.form_validators import ChildMedicalHistoryFormValidator
@@ -6,7 +6,7 @@ from .models import ChildVisit, Appointment
 from django.utils import timezone
 from edc_base.utils import get_utcnow
 
-
+@tag('lmp2')
 class TestChildMedicalHistoryFormValidator(TestCase):
     
     def setUp(self):
