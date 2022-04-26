@@ -1,14 +1,12 @@
-from django.test import TestCase, tag
+from django.test import TestCase
 from django.core.exceptions import ValidationError
 from edc_constants.constants import NO, YES
-from edc_constants.choices import POS_NEG
 from flourish_child_validations.form_validators import ChildMedicalHistoryFormValidator
 from .models import ChildVisit, Appointment
 from django.utils import timezone
+from edc_base.utils import get_utcnow
 
 
-
-@tag('cmh')  
 class TestChildMedicalHistoryFormValidator(TestCase):
     
     def setUp(self):
@@ -30,7 +28,7 @@ class TestChildMedicalHistoryFormValidator(TestCase):
 
         self.data = {
             'preg_test_performed': YES,
-            'last_menstrual_period': YES,
+            'last_menstrual_period': get_utcnow(),
             'is_lmp_date_estimated': NO,
             'pregnancy_test_result': 'Negative',   
             'child_visit': child_visit,  
@@ -64,3 +62,17 @@ class TestChildMedicalHistoryFormValidator(TestCase):
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn(field_name, form_validator._errors) 
         
+        
+    def test_lmp_dt_against_today_dt(self):
+        
+        field_name = 'last_menstrual_period'
+        self.data[field_name] = get_utcnow().date()
+        
+        form_validator = ChildMedicalHistoryFormValidator(cleaned_data=self.data)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn(field_name, form_validator._errors) 
+     
+        
+        
+     
+     

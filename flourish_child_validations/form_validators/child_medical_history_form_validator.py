@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from edc_constants.constants import YES, NO, OTHER, NOT_APPLICABLE, NONE
 from edc_form_validators import FormValidator
 from .form_validator_mixin import ChildFormValidatorMixin
+from edc_base.utils import get_utcnow
 
 
 class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
@@ -27,6 +28,8 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
 
         self.not_applicable_not_allowed(NOT_APPLICABLE, field=chronic_since,
                                         m2m_field=child_chronic)
+        
+        self.validate_lmp_dt_against_today_dt()
         
         self.is_pregnant_required_fields()
         
@@ -71,3 +74,12 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
                              field='preg_test_performed',
                              field_required=required_field) 
         
+       
+    def validate_lmp_dt_against_today_dt(self):        
+        lmp_date = self.cleaned_data.get('last_menstrual_period')
+        today_dt = get_utcnow().date()
+        
+        if  lmp_date == today_dt:
+            message = {'last_menstrual_period': ('Last Menstrual Period date cannot be today.'
+                       f' {today_dt}.')}
+            raise ValidationError(message)     
