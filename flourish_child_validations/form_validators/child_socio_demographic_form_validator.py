@@ -120,25 +120,17 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
     @property
     def child_assent_obj(self):
         child_assent_model_cls = django_apps.get_model(self.child_assent_model)
-        try:
-            model_obj = child_assent_model_cls.objects.get(
-                subject_identifier=self.subject_identifier)
-        except child_assent_model_cls.DoesNotExist:
-            return None
-        else:
-            return model_obj
+
+        return child_assent_model_cls.objects.filter(
+            subject_identifier=self.subject_identifier).latest('consent_datetime')
 
     @property
     def child_caregiver_consent_obj(self):
         child_caregiver_consent_model_cls = django_apps.get_model(
             self.child_caregiver_consent_model)
-        try:
-            model_obj = child_caregiver_consent_model_cls.objects.get(
-                subject_identifier=self.subject_identifier)
-        except child_caregiver_consent_model_cls.DoesNotExist:
-            return None
-        else:
-            return model_obj
+
+        return child_caregiver_consent_model_cls.objects.filter(
+            subject_identifier=self.subject_identifier).latest('consent_datetime')
 
     @property
     def maternal_delivery_obj(self):
