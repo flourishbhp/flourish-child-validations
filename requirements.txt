@@ -11,3 +11,4 @@ git+https://github.com/botswana-harvard/edc-protocol.git@develop#egg=edc_protoco
 git+https://github.com/botswana-harvard/edc-visit-schedule.git@develop#egg=edc_visit_schedule
 git+https://github.com/botswana-harvard/edc-visit-tracking.git@develop#egg=edc_visit_tracking
 git+https://github.com/flourishbhp/flourish-prn.git@develop#egg=flourish_prn
+django_revision
