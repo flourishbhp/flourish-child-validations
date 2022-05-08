@@ -41,7 +41,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_crypto_fields.apps.AppConfig',
     'edc_device.apps.AppConfig',
-    'flourish_child_validations.apps.AppConfig'
+    # 'flourish_caregiver.apps.AppConfig',
+    # 'edc_timepoint.apps.AppConfig',
+    'flourish_child_validations.apps.AppConfig',
 ]
 
 MIDDLEWARE = [
