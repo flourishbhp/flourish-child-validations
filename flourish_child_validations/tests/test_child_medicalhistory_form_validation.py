@@ -44,6 +44,15 @@ class TestChildMedicalHistoryFormValidator(TestCase):
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn(field_name, form_validator._errors)
         
+ 
+    def test_lmp_date_estimated_required(self):
+
+        field_name = 'is_lmp_date_estimated'
+        self.data[field_name] = None
+
+        form_validator = ChildMedicalHistoryFormValidator(cleaned_data=self.data)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn(field_name, form_validator._errors)    
 
         
     def test_lmp_required(self):
