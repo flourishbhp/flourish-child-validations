@@ -1,4 +1,4 @@
-from django.test import TestCase, tag
+from django.test import TestCase
 from django.core.exceptions import ValidationError
 from edc_constants.constants import NO, YES, NOT_APPLICABLE
 from flourish_child_validations.form_validators import ChildMedicalHistoryFormValidator
@@ -74,22 +74,23 @@ class TestChildMedicalHistoryFormValidator(TestCase):
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn(field_name, form_validator._errors) 
      
-      
+    
     def test_pregnacy_test_invalid(self):
         field_name = 'preg_test_performed'
-        self.data[field_name] = YES
+        self.data[field_name] = None
+        self.data['last_menstrual_period'] = (get_utcnow()- relativedelta(days=2)).date()
         
         form_validator = ChildMedicalHistoryFormValidator(
             cleaned_data=self.data)
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn(field_name, form_validator._errors)
-     
-    
+        
+         
     def test_pregnacy_test_valid(self):
         
         field_name = 'preg_test_performed'
         self.data[field_name] = YES
-        self.data['last_menstrual_period'] = (get_utcnow() - relativedelta(months=2))
+        self.data['last_menstrual_period'] = (get_utcnow() - relativedelta(months=2)).date()
         
         form_validator = ChildMedicalHistoryFormValidator(
             cleaned_data=self.data)
