@@ -1,11 +1,11 @@
-from django.test import TestCase
+from django.test import TestCase, tag
 from django.core.exceptions import ValidationError
-from edc_constants.constants import NO, YES
+from edc_constants.constants import NO, YES, NOT_APPLICABLE
 from flourish_child_validations.form_validators import ChildMedicalHistoryFormValidator
 from .models import ChildVisit, Appointment
 from django.utils import timezone
 from edc_base.utils import get_utcnow
-
+from dateutil.relativedelta import relativedelta
 
 class TestChildMedicalHistoryFormValidator(TestCase):
     
@@ -74,6 +74,32 @@ class TestChildMedicalHistoryFormValidator(TestCase):
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn(field_name, form_validator._errors) 
      
+      
+    def test_pregnacy_test_invalid(self):
+        field_name = 'preg_test_performed'
+        self.data[field_name] = YES
+        
+        form_validator = ChildMedicalHistoryFormValidator(
+            cleaned_data=self.data)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn(field_name, form_validator._errors)
+     
+    
+    def test_pregnacy_test_valid(self):
+        
+        field_name = 'preg_test_performed'
+        self.data[field_name] = YES
+        self.data['last_menstrual_period'] = (get_utcnow() - relativedelta(months=2))
+        
+        form_validator = ChildMedicalHistoryFormValidator(
+            cleaned_data=self.data)
+    
+        try:
+            form_validator.validate()
+        except ValidationError as e:
+            self.fail(f'ValidationError unexpectedly raised. Got{e}')
+         
+         
         
         
      
