@@ -1,12 +1,12 @@
-from django.test import TestCase,tag
+from django.test import TestCase
 from django.core.exceptions import ValidationError
-from edc_constants.constants import NO, YES
+from edc_constants.constants import NO, YES, NOT_APPLICABLE
 from flourish_child_validations.form_validators import ChildMedicalHistoryFormValidator
 from .models import ChildVisit, Appointment
 from django.utils import timezone
 from edc_base.utils import get_utcnow
+from dateutil.relativedelta import relativedelta
 
-@tag('lmp2')
 class TestChildMedicalHistoryFormValidator(TestCase):
     
     def setUp(self):
@@ -19,7 +19,7 @@ class TestChildMedicalHistoryFormValidator(TestCase):
         appointment = Appointment.objects.create(
             subject_identifier='2334432',
             appt_datetime=timezone.now(),
-            visit_code='2000',
+            visit_code='2001',
             visit_instance='0')
 
         child_visit = ChildVisit.objects.create(
@@ -44,14 +44,16 @@ class TestChildMedicalHistoryFormValidator(TestCase):
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn(field_name, form_validator._errors)
         
+ 
     def test_lmp_date_estimated_required(self):
-        
+
         field_name = 'is_lmp_date_estimated'
         self.data[field_name] = None
-        
+
         form_validator = ChildMedicalHistoryFormValidator(cleaned_data=self.data)
         self.assertRaises(ValidationError, form_validator.validate)
-        self.assertIn(field_name, form_validator._errors)
+        self.assertIn(field_name, form_validator._errors)    
+
         
     def test_lmp_required(self):
         
@@ -72,6 +74,33 @@ class TestChildMedicalHistoryFormValidator(TestCase):
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn(field_name, form_validator._errors) 
      
+    
+    def test_pregnacy_test_invalid(self):
+        field_name = 'preg_test_performed'
+        self.data[field_name] = None
+        self.data['last_menstrual_period'] = (get_utcnow()- relativedelta(days=2)).date()
+        
+        form_validator = ChildMedicalHistoryFormValidator(
+            cleaned_data=self.data)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn(field_name, form_validator._errors)
+        
+         
+    def test_pregnacy_test_valid(self):
+        
+        field_name = 'preg_test_performed'
+        self.data[field_name] = YES
+        self.data['last_menstrual_period'] = (get_utcnow() - relativedelta(months=2)).date()
+        
+        form_validator = ChildMedicalHistoryFormValidator(
+            cleaned_data=self.data)
+    
+        try:
+            form_validator.validate()
+        except ValidationError as e:
+            self.fail(f'ValidationError unexpectedly raised. Got{e}')
+         
+         
         
         
      
