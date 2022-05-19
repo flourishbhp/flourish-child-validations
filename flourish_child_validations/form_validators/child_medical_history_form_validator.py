@@ -3,6 +3,8 @@ from django.core.exceptions import ValidationError
 from edc_constants.constants import YES, NO, OTHER, NOT_APPLICABLE, NONE
 from edc_form_validators import FormValidator
 from .form_validator_mixin import ChildFormValidatorMixin
+from edc_base.utils import get_utcnow
+from dateutil.relativedelta import relativedelta
 
 
 class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
@@ -28,7 +30,9 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
         self.not_applicable_not_allowed(NOT_APPLICABLE, field=chronic_since,
                                         m2m_field=child_chronic)
         
-        self.is_pregnant_required_fields()
+        self.validate_lmp_dt_against_today_dt()
+        self.validate_lmp_date()
+        self.validate_pregnant_test_result_required()
         
 
     def not_applicable_not_allowed(self, *selections, field=None, m2m_field=None):
@@ -63,11 +67,31 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
                 NOT_APPLICABLE,
                 m2m_field=m2m_field)
 
-    def is_pregnant_required_fields(self):
-        required_fields = ['pregnancy_test_result','last_menstrual_period', 'is_lmp_date_estimated']
-
-        for required_field in required_fields:
+    def validate_pregnant_test_result_required(self):
+    
             self.required_if(YES,
-                             field='is_pregnant',
-                             field_required=required_field) 
+                             field='preg_test_performed',
+                             field_required='pregnancy_test_result') 
         
+       
+    def validate_lmp_dt_against_today_dt(self):        
+        lmp_date = self.cleaned_data.get('last_menstrual_period')
+        today_dt = get_utcnow().date()
+        
+        if  lmp_date == today_dt:
+            message = {'last_menstrual_period': ('Last Menstrual Period date cannot be today.'
+                       f' {today_dt}.')}
+            raise ValidationError(message)     
+        
+        
+    def validate_lmp_date(self):
+            threshold_date = (get_utcnow() - relativedelta(months=2)).date()
+            lmp_date = self.cleaned_data.get('last_menstrual_period')
+                
+            self.applicable_if_true(lmp_date <= threshold_date,
+                           field_applicable='preg_test_performed')    
+            
+            
+            
+            
+            

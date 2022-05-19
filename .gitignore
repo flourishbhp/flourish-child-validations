@@ -26,6 +26,11 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+ 
+
+# exclude all crypto keys
+**/crypto_fields/**
+
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
