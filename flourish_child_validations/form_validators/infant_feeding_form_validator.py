@@ -37,18 +37,6 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
             field='ever_breastfed',
             field_applicable='freq_milk_rec')
 
-        self.required_if(
-            YES,
-            field='rec_liquids',
-            field_required='took_formula')
-
-        fields_required = ['dt_formula_introduced', 'dt_formula_est',
-                           'formula_feedng_completd']
-        for field in fields_required:
-            self.required_if(
-                YES,
-                field='took_formula',
-                field_required=field)
 
         fields_required = ['dt_formula_stopd', 'dt_stopd_est']
         for field in fields_required:
