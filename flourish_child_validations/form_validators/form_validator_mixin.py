@@ -11,6 +11,7 @@ class ChildFormValidatorMixin:
 
     consent_version_model = 'flourish_caregiver.flourishconsentversion'
 
+
     @property
     def infant_birth_cls(self):
         return django_apps.get_model(self.infant_birth_model)
