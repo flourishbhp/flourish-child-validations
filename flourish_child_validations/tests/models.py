@@ -15,6 +15,7 @@ class Appointment(BaseUuidModel):
     visit_code = models.CharField(max_length=25)
 
     visit_instance = models.CharField(max_length=25)
+   
 
 
 class CaregiverConsent(BaseUuidModel):
@@ -123,6 +124,8 @@ class ChildVisit(BaseUuidModel):
     appointment = models.OneToOneField(Appointment, on_delete=PROTECT)
 
     report_datetime = models.DateTimeField(default=get_utcnow)
+    
+    schedule_name = models.CharField(max_length=25)
 
 
 class RegisteredSubject(BaseUuidModel):
