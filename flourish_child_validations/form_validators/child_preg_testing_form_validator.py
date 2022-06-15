@@ -1,3 +1,4 @@
+from attr import field
 from django.core.exceptions import ValidationError
 from edc_constants.constants import NO
 from edc_form_validators import FormValidator
@@ -17,18 +18,19 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         self.subject_identifier = self.cleaned_data.get(
             'child_visit').appointment.subject_identifier
         super().clean()
-
+        
+        self.visit_code = self.cleaned_data.get(
+            'child_visit').appointment.visit_code
+                
+        all_fields = [ 'last_menstrual_period', 'is_lmp_date_estimated',]
+        
+        for field in all_fields:
+            self.required_if(YES, field='menarche', field_required=field)
+            
+        self.required_if_true(self.visit_code == '2000', field_required='test_done') 
         test_done = self.cleaned_data.get('test_done')
-        if test_done == NO:
-            message = {'test_done':
-                       'A pregnancy test is needed'}
-            self._errors.update(message)
-            raise ValidationError(message)
-        
-        
-        self.required_if_not_none(field='last_menstrual_period',
-                                  field_required='is_lmp_date_estimated')
-
+        self.required_if_true(test_done==YES, field_required='test_date')  
+        self.required_if_true(test_done==YES, field_required='preg_test_result')   
         self.validate_consent_version_obj(self.subject_identifier)
         self.validate_preg_test_result_required()
         self.validate_lmp()
@@ -49,12 +51,13 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
          
     def validate_preg_test_result_required(self):
     
-            self.required_if(YES,
-                             field='test_done',
-                             field_required='preg_test_result')     
+        self.required_if(YES,
+                        field='test_done',
+                        field_required='preg_test_result')     
 
     def validate_lmp(self):
-        """A function to validate the lmp if it is below the 2months threshold
+        """A function to validate the participants menarche if it valid then 
+        the lmp is validated to check if its above the 2months threshold
         and if it is then the pregnancy test is required
         """
         threshold_date = (get_utcnow() - relativedelta(months=2)).date()
@@ -65,18 +68,40 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
 
         if consent:
             if any(item in childvisit.schedule_name for item in ['qt','quart']):
-                if lmp and lmp == today_dt:
-                    
-                    message = {'last_menstrual_period': (
-                        'Last Menstrual Period date cannot be today.')}
-                    self._errors.update(message)
-                    raise ValidationError(message)
-                elif lmp:
-                    self.applicable_if_true(lmp <= threshold_date,
-                                            field_applicable='test_done')
+                menarche = self.cleaned_data.get('menarche')
+                if menarche == YES:
+                    if lmp and lmp == today_dt:
+                        message = {'last_menstrual_period': (
+                            'Last Menstrual Period date cannot be today.')}
+                        self._errors.update(message)
+                        raise ValidationError(message)
+                    elif lmp and lmp >= threshold_date:
+                        self.required_if_true(lmp >= threshold_date,
+                                                field_required='test_done')
+                         
+                    # elif lmp and lmp <= threshold_date:
+                    #     self.not_required_if(lmp <= threshold_date,
+                    #                             field_required='test_done')    
 
-                elif lmp is None:
-                    message = {'last_menstrual_period': (
-                        'Last Menstrual Period date cannot be left blank.')}
-                    self._errors.update(message)
-                    raise ValidationError(message)
+
+                    elif lmp is None:
+                        message = {'last_menstrual_period': (
+                            'Last Menstrual Period date cannot be left blank.')}
+                        self._errors.update(message)
+                        raise ValidationError(message)
+                
+
+            
+
+            
+
+                 
+             
+             
+             
+             
+             
+            
+             
+        
+    
