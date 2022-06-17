@@ -51,44 +51,22 @@ class TestChildPregnacyFormValidator(TestCase):
         visit = ChildVisit.objects.create(
             subject_identifier='12345323',
             appointment=appointment2,
-            schedule_name='child_a_quart_schedule1',)
+            schedule_name='child_c_enrol_schedule1',
+            visit_code='2000',
+            )
         
         self.data = {
             'test_done': YES,
             'preg_test_result': 'Negative',   
             'child_visit': visit,  
+            'test_date': (get_utcnow() - relativedelta(months=1)).date()
             }
-        
-        field_name = 'test_done'
-        self.data[field_name] = YES
-        self.data['last_menstrual_period'] = (get_utcnow() - relativedelta(months=2)).date()
             
         form_validator = ChildPregTestingFormValidator(cleaned_data=self.data)
         try:
             form_validator.validate()
         except ValidationError as e:
             self.fail(f'ValidationError unexpectedly raised. Got{e}')    
-
-    def test_pregnacy_test_valid(self):
-            
-        field_name = 'test_done'
-        self.options[field_name] = YES
-        self.options.update({'last_menstrual_period': (get_utcnow() - relativedelta(months=4)).date() })
-        
-        form_validator = ChildPregTestingFormValidator(cleaned_data=self.options)
-        try:
-            form_validator.validate()
-        except ValidationError as e:
-            self.fail(f'ValidationError unexpectedly raised. Got{e}')
-
-    @tag('rr') 
-    def test_pregnancy_test_results_required(self):
-        self.options.update({'last_menstrual_period': (get_utcnow() - relativedelta(months=4)).date() })
-        self.options.update({'preg_test_result': None})
-        
-        form_validator = ChildPregTestingFormValidator(cleaned_data=self.options)
-        self.assertRaises(ValidationError, form_validator.validate)
-        self.assertIn('preg_test_result', form_validator._errors)
 
      
     def test_lmp_date_estimated_required(self):
