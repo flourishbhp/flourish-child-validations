@@ -126,6 +126,11 @@ class ChildVisit(BaseUuidModel):
     report_datetime = models.DateTimeField(default=get_utcnow)
     
     schedule_name = models.CharField(max_length=25)
+    
+    visit_code = models.CharField(
+        max_length=25,
+        null=True,
+        blank=True)
 
 
 class RegisteredSubject(BaseUuidModel):
