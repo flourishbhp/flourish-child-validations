@@ -1,4 +1,4 @@
-from edc_constants.constants import YES, OTHER
+from edc_constants.constants import YES
 from edc_form_validators import FormValidator
 from .form_validator_mixin import ChildFormValidatorMixin
 
@@ -23,9 +23,10 @@ class ChildPreHospitalisationInlineFormValidator(FormValidator):
         self.validate_other_specify(field='name_hospital',
                                     other_specify_field='name_hospital_other')
 
-        self.m2m_other_specify(OTHER, m2m_field='reason_hospitalized',
+        self.m2m_other_specify('chosp_other',
+                               m2m_field='reason_hospitalized',
                                field_other='reason_hospitalized_other')
 
-        self.m2m_other_specify('surgical_reason',
+        self.m2m_other_specify('chosp_surgical',
                                m2m_field='reason_hospitalized',
                                field_other='surgical_reason')
