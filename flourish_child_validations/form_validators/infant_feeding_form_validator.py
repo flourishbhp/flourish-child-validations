@@ -37,7 +37,6 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
             field='ever_breastfed',
             field_applicable='freq_milk_rec')
 
-
         fields_required = ['dt_formula_stopd', 'dt_stopd_est']
         for field in fields_required:
             self.required_if(
@@ -83,15 +82,15 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
 
         solid_foods = self.cleaned_data.get('solid_foods')
         selected = [solid.short_name for solid in solid_foods]
-        value_field = {'grains_roots_tubers': 'grain_intake_freq',
-                       'legumes_nuts': 'legumes_intake_freq',
-                       'dairy_products': 'dairy_intake_freq',
-                       'flesh_foods': 'flesh_foods_freq',
-                       'eggs': 'eggs_intake_freq',
-                       'porridge': 'porridge_intake_freq',
-                       'vitamin_a_rich_fruits_vegies': 'vitamin_a_fruits_freq',
-                       'other_fruits_vegies': ['other_fruits_vegies', 'other_fruits_freq'],
-                       'other_solid_foods': ['other_solids', 'other_solids_freq']}
+        value_field = {'food_grains': 'grain_intake_freq',
+                       'food_legume': 'legumes_intake_freq',
+                       'food_dairy': 'dairy_intake_freq',
+                       'food_flesh': 'flesh_foods_freq',
+                       'food_eggs': 'eggs_intake_freq',
+                       'food_porridge': 'porridge_intake_freq',
+                       'food_vita': 'vitamin_a_fruits_freq',
+                       'food_otherfruits': ['other_fruits_vegies', 'other_fruits_freq'],
+                       'food_othersolid': ['other_solids', 'other_solids_freq']}
 
         for value, field in value_field.items():
             if isinstance(field, list):
