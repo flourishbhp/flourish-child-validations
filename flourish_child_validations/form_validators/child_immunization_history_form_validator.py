@@ -40,8 +40,8 @@ class VaccinesReceivedFormValidator(ChildFormValidatorMixin, FormValidator):
     def caregiver_child_consent_model(self):
         caregiver_consent = self.latest_consent_obj(self.subject_identifier)
         try:
-            child_consent = caregiver_consent.caregiverchildconsent_set.get(
-                subject_identifier=self.subject_identifier)
+            child_consent = caregiver_consent.caregiverchildconsent_set.filter(
+                subject_identifier=self.subject_identifier).latest('consent_datetime')
         except self.caregiver_child_consent_cls.DoesNotExist:
             return None
         else:
