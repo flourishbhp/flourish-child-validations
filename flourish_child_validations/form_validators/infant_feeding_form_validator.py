@@ -19,6 +19,16 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
         self.validate_against_visit_datetime(
             self.cleaned_data.get('report_datetime'))
 
+        self.breastfeeding_validations()
+
+        self.formula_validations()
+
+        self.other_liquids_validations()
+
+        self.solid_foods_validations()
+
+    def breastfeeding_validations(self):
+
         fields_required = ['bf_start_dt', 'bf_start_dt_est', 'recent_bf_dt',
                            'continuing_to_bf']
         for field in fields_required:
@@ -37,6 +47,22 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
             field='ever_breastfed',
             field_applicable='freq_milk_rec')
 
+    def formula_validations(self):
+
+        self.required_if(
+            YES,
+            field='took_formula',
+            field_required='dt_formula_introduced')
+
+        self.required_if_not_none(
+            field='dt_formula_introduced',
+            field_required='dt_formula_est')
+
+        self.required_if(
+            YES,
+            field='took_formula',
+            field_required='formula_feedng_completd')
+
         fields_required = ['dt_formula_stopd', 'dt_stopd_est']
         for field in fields_required:
             self.required_if(
@@ -50,6 +76,8 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
             field_required='formula_water')
 
         self.validate_other_specify(field='formula_water')
+
+    def other_liquids_validations(self):
 
         for field in ['taken_water', 'taken_juice', 'taken_cows_milk',
                       'taken_animal_milk', 'taken_salts']:
@@ -68,6 +96,8 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
                 YES,
                 field='taken_animal_milk',
                 field_required=field)
+
+    def solid_foods_validations(self):
 
         for field in ['solid_foods_dt', 'solid_foods_age']:
             self.required_if(

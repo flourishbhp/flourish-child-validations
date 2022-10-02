@@ -14,6 +14,7 @@ from .child_immunization_history_form_validator import VaccinesReceivedFormValid
 from .child_medical_history_form_validator import ChildMedicalHistoryFormValidator
 from .child_physical_activity_form_validator import ChildPhysicalActivityFormValidator
 from .child_preg_testing_form_validator import ChildPregTestingFormValidator
+from .child_preg_testing_form_validator import ChildPregTestingFormValidator
 from .child_previous_hospitalisations_form_validator import (
     ChildPreviousHospitalisationFormValidator,
     ChildPreHospitalisationInlineFormValidator)
@@ -26,4 +27,3 @@ from .form_validator_mixin import ChildFormValidatorMixin
 from .infant_arv_exposure_form_validation import InfantArvExposureFormValidator
 from .infant_congenital_anomalies_form_validation import *
 from .infant_feeding_form_validator import InfantFeedingFormValidator
-from .child_preg_testing_form_validator import ChildPregTestingFormValidator
