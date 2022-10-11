@@ -47,20 +47,6 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
                 else:
                     return True
 
-        infant_feeding_model = 'flourish_child.infantfeeding'
-
-        infant_feeding_cls = django_apps.get_model(infant_feeding_model)
-
-        try:
-            infant_feeding_cls.objects.filter(
-                    child_visit__subject_identifier=self.subject_identifier,
-                    child_visit__visit_code__lt=self.cleaned_data.get(
-                        'child_visit').visit_code).latest('report_datetime')
-        except infant_feeding_cls.DoesNotExist:
-            return None
-        else:
-            return True
-
     def breastfeeding_validations(self):
 
         fields_required = ['bf_start_dt', 'bf_start_dt_est', 'recent_bf_dt',
