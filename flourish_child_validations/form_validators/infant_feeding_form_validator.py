@@ -29,6 +29,23 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
         self.solid_foods_validations()
 
     def previous_feeding_instance(self):
+        infant_feeding_cls = django_apps.get_model('flourish_child.infantfeeding')
+
+        appt = self.cleaned_data.get('child_visit').appointment
+
+        while appt.previous_by_timepoint:
+
+            appt = appt.previous_by_timepoint
+            prev_child_visit = appt.childvisit
+
+            if prev_child_visit:
+                try:
+                    infant_feeding_cls.objects.get(
+                        child_visit=prev_child_visit)
+                except infant_feeding_cls.DoesNotExist:
+                    continue
+                else:
+                    return True
 
         infant_feeding_model = 'flourish_child.infantfeeding'
 
