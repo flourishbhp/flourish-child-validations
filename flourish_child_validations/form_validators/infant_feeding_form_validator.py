@@ -1,3 +1,4 @@
+from django.apps import apps as django_apps
 from edc_constants.constants import YES, NO
 from edc_form_validators import FormValidator
 
@@ -27,6 +28,39 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
 
         self.solid_foods_validations()
 
+    def previous_feeding_instance(self):
+        infant_feeding_cls = django_apps.get_model('flourish_child.infantfeeding')
+
+        appt = self.cleaned_data.get('child_visit').appointment
+
+        while appt.previous_by_timepoint:
+
+            appt = appt.previous_by_timepoint
+            prev_child_visit = appt.childvisit
+
+            if prev_child_visit:
+                try:
+                    infant_feeding_cls.objects.get(
+                        child_visit=prev_child_visit)
+                except infant_feeding_cls.DoesNotExist:
+                    continue
+                else:
+                    return True
+
+        infant_feeding_model = 'flourish_child.infantfeeding'
+
+        infant_feeding_cls = django_apps.get_model(infant_feeding_model)
+
+        try:
+            infant_feeding_cls.objects.filter(
+                    child_visit__subject_identifier=self.subject_identifier,
+                    child_visit__visit_code__lt=self.cleaned_data.get(
+                        'child_visit').visit_code).latest('report_datetime')
+        except infant_feeding_cls.DoesNotExist:
+            return None
+        else:
+            return True
+
     def breastfeeding_validations(self):
 
         fields_required = ['bf_start_dt', 'bf_start_dt_est', 'recent_bf_dt',
@@ -37,10 +71,16 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
                 field='ever_breastfed',
                 field_required=field)
 
-        self.required_if(
-            NO,
-            field='continuing_to_bf',
-            field_required='dt_weaned')
+        if self.previous_feeding_instance():
+            self.required_if(
+                YES,
+                field='child_weaned',
+                field_required='dt_weaned')
+        else:
+            self.required_if(
+                NO,
+                field='continuing_to_bf',
+                field_required='dt_weaned')
 
         self.applicable_if(
             YES,

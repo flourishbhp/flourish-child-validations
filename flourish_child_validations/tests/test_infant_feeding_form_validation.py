@@ -9,7 +9,7 @@ from .models import ChildVisit, Appointment
 from .test_model_mixin import TestModeMixin
 
 
-@tag('inf')
+@tag('inff')
 class TestInfantFeedingFormValidator(TestModeMixin, TestCase):
 
     def __init__(self, *args, **kwargs):
