@@ -145,7 +145,7 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
                        'food_eggs': 'eggs_intake_freq',
                        'food_porridge': 'porridge_intake_freq',
                        'food_vita': 'vitamin_a_fruits_freq',
-                       'food_otherfruits': ['other_fruits_vegies', 'other_fruits_freq'],
+                       'food_fruitsvege': ['other_fruits_vegies', 'other_fruits_freq'],
                        'food_othersolid': ['other_solids', 'other_solids_freq']}
 
         for value, field in value_field.items():
