@@ -31,21 +31,19 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
     def previous_feeding_instance(self):
         infant_feeding_cls = django_apps.get_model('flourish_child.infantfeeding')
 
-        appt = self.cleaned_data.get('child_visit').appointment
+        child_visit = self.cleaned_data.get('child_visit')
 
-        while appt.previous_by_timepoint:
+        while child_visit.get_previous_by_report_datetime():
 
-            appt = appt.previous_by_timepoint
-            prev_child_visit = appt.childvisit
+            child_visit = child_visit.get_previous_by_report_datetime()
 
-            if prev_child_visit:
-                try:
-                    infant_feeding_cls.objects.get(
-                        child_visit=prev_child_visit)
-                except infant_feeding_cls.DoesNotExist:
-                    continue
-                else:
-                    return True
+            try:
+                infant_feeding_cls.objects.get(
+                    child_visit=child_visit)
+            except infant_feeding_cls.DoesNotExist:
+                continue
+            else:
+                return True
 
     def breastfeeding_validations(self):
 
