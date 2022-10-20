@@ -1,6 +1,6 @@
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
-from edc_constants.constants import NO, YES, FEMALE, MALE
+from edc_constants.constants import NO, YES, FEMALE, MALE, NOT_APPLICABLE
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
@@ -30,12 +30,15 @@ class ChildTannerStagingFormValidator(ChildFormValidatorMixin, FormValidator):
             field='assessment_done',
             field_required='reasons_not_done')
 
-        fields = ['child_gender', 'pubic_hair_stage']
-        for field in fields:
-            self.applicable_if(
-                YES,
-                field='assessment_done',
-                field_applicable=field)
+        self.applicable_if(
+            YES,
+            field='assessment_done',
+            field_applicable='pubic_hair_stage')
+
+        if (self.cleaned_data.get('assessment_done')
+                and self.cleaned_data.get('child_gender') == NOT_APPLICABLE):
+            message = {'child_gender': 'This field is applicable'}
+            self._errors.update(message)
 
         not_required = ['rgt_testclr_vol', 'lft_testclr_vol']
         for field in not_required:
@@ -45,12 +48,20 @@ class ChildTannerStagingFormValidator(ChildFormValidatorMixin, FormValidator):
                 field_required=field,
                 inverse=False)
 
-        female_fields = ['breast_stage', 'manarche_dt_avail']
-        for field in female_fields:
-            self.applicable_if(
-                FEMALE,
-                field='child_gender',
-                field_applicable=field)
+        if self.cleaned_data.get('assessment_done') == YES:
+            female_fields = ['breast_stage', 'manarche_dt_avail']
+            for field in female_fields:
+                self.applicable_if(
+                    FEMALE,
+                    field='child_gender',
+                    field_applicable=field)
+
+            male_fields = ['male_gen_stage', 'testclr_vol_measrd']
+            for field in male_fields:
+                self.applicable_if(
+                    MALE,
+                    field='child_gender',
+                    field_applicable=field)
 
         self.required_if(
             YES,
@@ -61,13 +72,6 @@ class ChildTannerStagingFormValidator(ChildFormValidatorMixin, FormValidator):
             YES,
             field='manarche_dt_avail',
             field_applicable='menarche_dt_est')
-
-        male_fields = ['male_gen_stage', 'testclr_vol_measrd']
-        for field in male_fields:
-            self.applicable_if(
-                MALE,
-                field='child_gender',
-                field_applicable=field)
 
         vol_fields = ['rgt_testclr_vol', 'lft_testclr_vol']
         for field in vol_fields:
@@ -82,8 +86,8 @@ class ChildTannerStagingFormValidator(ChildFormValidatorMixin, FormValidator):
         if assent:
             if gender != assent.gender:
                 msg = {'child_gender':
-                           f'Child gender does not match `{assent.gender}` from '
-                           'the Assent form. Please correct.'}
+                       f'Child gender does not match `{assent.gender}` from '
+                       'the Assent form. Please correct.'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
 
