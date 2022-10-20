@@ -1,9 +1,9 @@
 from django.db import models
 from django.db.models.deletion import PROTECT
+from django.utils import timezone
 from django_crypto_fields.fields import IdentityField
 from edc_base.model_mixins import BaseUuidModel
 from edc_base.utils import get_utcnow
-from django.utils import timezone
 
 
 class Appointment(BaseUuidModel):
@@ -15,7 +15,6 @@ class Appointment(BaseUuidModel):
     visit_code = models.CharField(max_length=25)
 
     visit_instance = models.CharField(max_length=25)
-   
 
 
 class CaregiverConsent(BaseUuidModel):
@@ -124,9 +123,9 @@ class ChildVisit(BaseUuidModel):
     appointment = models.OneToOneField(Appointment, on_delete=PROTECT)
 
     report_datetime = models.DateTimeField(default=get_utcnow)
-    
+
     schedule_name = models.CharField(max_length=25)
-    
+
     visit_code = models.CharField(
         max_length=25,
         null=True,

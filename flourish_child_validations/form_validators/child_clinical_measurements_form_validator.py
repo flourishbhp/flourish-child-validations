@@ -24,6 +24,37 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
 
         self.validate_consent_version_obj(self.subject_identifier)
 
+        self.validate_bp(cleaned_data)
+
+        self.applicable_if_true(
+            self.child_caregiver_consent_obj.gender == FEMALE and self.child_age >= 12,
+            field_applicable='is_child_preg',)
+
+        self.not_required_if(
+            YES,
+            field='is_child_preg',
+            field_required='child_waist_circ')
+
+        self.not_required_if(
+            YES,
+            field='is_child_preg',
+            field_required='child_hip_circ')
+
+        self.validate_skin_folds_followup()
+
+    def validate_skin_folds_followup(self):
+
+        child_visit = self.cleaned_data.get('child_visit')
+
+        req_fields = ['skin_folds_triceps', 'skin_folds_subscapular', 'skin_folds_suprailiac']
+
+        for req_field in req_fields:
+            self.required_if_true(
+                child_visit.visit_code == '3000',
+                field_required=req_field,
+                inverse=False)
+
+    def validate_bp(self, cleaned_data):
         child_systolic_bp = cleaned_data.get('child_systolic_bp')
         child_diastolic_bp = cleaned_data.get('child_diastolic_bp')
 
@@ -45,20 +76,6 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
                 msg = {'child_diastolic_bp': 'This field is not required.'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
-
-        self.applicable_if_true(
-            self.child_caregiver_consent_obj.gender == FEMALE and self.child_age >= 12,
-            field_applicable='is_child_preg',)
-
-        self.not_required_if(
-            YES,
-            field='is_child_preg',
-            field_required='child_waist_circ')
-
-        self.not_required_if(
-            YES,
-            field='is_child_preg',
-            field_required='child_hip_circ')
 
         if child_systolic_bp and child_diastolic_bp:
             if child_systolic_bp < child_diastolic_bp:
@@ -105,6 +122,7 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
 
     @property
     def child_age(self):
+
         if self.child_assent_obj:
             birth_date = self.child_assent_obj.dob
             years = age(birth_date, get_utcnow()).years
