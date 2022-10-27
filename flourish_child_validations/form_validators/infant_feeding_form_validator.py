@@ -71,6 +71,11 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
             field='ever_breastfed',
             field_applicable='freq_milk_rec')
 
+        self.required_if(
+            YES,
+            field='rec_liquids',
+            field_applicable='took_formula')
+
     def formula_validations(self):
 
         self.required_if(
