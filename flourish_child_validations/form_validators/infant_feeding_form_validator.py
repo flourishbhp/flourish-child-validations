@@ -74,7 +74,7 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
         self.required_if(
             YES,
             field='rec_liquids',
-            field_applicable='took_formula')
+            field_required='took_formula')
 
     def formula_validations(self):
 
