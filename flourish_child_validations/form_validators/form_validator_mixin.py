@@ -96,8 +96,8 @@ class ChildFormValidatorMixin:
                     'Participant has been taken offstudy. Cannot capture any '
                     'new data.')
         else:
-            self.maternal_visit = self.cleaned_data.get('maternal_visit') or None
-            if not self.maternal_visit or self.maternal_visit.require_crfs == NO:
+            self.child_visit = self.cleaned_data.get('child_visit') or None
+            if not self.child_visit or self.child_visit.require_crfs == NO:
                 raise forms.ValidationError(
                     'Participant is scheduled to be taken offstudy without '
                     'any new data collection. Cannot capture any new data.')
