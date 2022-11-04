@@ -51,6 +51,7 @@ class ChildContinuedConsentFormValidator(ChildFormValidatorMixin, FormValidator)
         self.validate_identity_number(cleaned_data)
         self.validate_preg_testing()
         self.validate_dob(cleaned_data)
+        super().clean()
 
     def clean_full_name_syntax(self):
         cleaned_data = self.cleaned_data

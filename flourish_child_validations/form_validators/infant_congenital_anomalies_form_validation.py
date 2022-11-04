@@ -20,6 +20,7 @@ class InfantCongenitalAnomaliesFormValidator(ChildFormValidatorMixin,
 class InfantFacialDefectFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
+        super().clean()
         self.validate_other_specify(
             field='facial_defect',
             other_specify_field='facial_defects_other')
@@ -28,6 +29,7 @@ class InfantFacialDefectFormValidator(ChildFormValidatorMixin, FormValidator):
 class InfantCleftDisorderFormFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
+        super().clean()
         self.validate_other_specify(
             field='cleft_disorder',
             other_specify_field='cleft_disorders_other')
@@ -36,6 +38,7 @@ class InfantCleftDisorderFormFormValidator(ChildFormValidatorMixin, FormValidato
 class InfantMouthUpGiFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
+        super().clean()
         self.validate_other_specify(
             field='mouth_up_gi')
 
@@ -43,6 +46,7 @@ class InfantMouthUpGiFormValidator(ChildFormValidatorMixin, FormValidator):
 class InfantCardioDisorderFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
+        super().clean()
         self.validate_other_specify(
             field='cardio_disorder',
             other_specify_field='cardiovascular_other')
@@ -51,6 +55,7 @@ class InfantCardioDisorderFormValidator(ChildFormValidatorMixin, FormValidator):
 class InfantRespiratoryDefectFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
+        super().clean()
         self.validate_other_specify(
             field='respiratory_defect',
             other_specify_field='respiratory_defects_other')
@@ -59,6 +64,7 @@ class InfantRespiratoryDefectFormValidator(ChildFormValidatorMixin, FormValidato
 class InfantLowerGiFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
+        super().clean()
         self.validate_other_specify(
             field='lower_gi')
 
@@ -66,6 +72,7 @@ class InfantLowerGiFormValidator(ChildFormValidatorMixin, FormValidator):
 class InfantFemaleGenitalFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
+        super().clean()
         self.validate_other_specify(
             field='female_genital')
 
@@ -73,6 +80,7 @@ class InfantFemaleGenitalFormValidator(ChildFormValidatorMixin, FormValidator):
 class InfantMaleGenitalFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
+        super().clean()
         self.validate_other_specify(
             field='male_genital')
 
@@ -80,6 +88,7 @@ class InfantMaleGenitalFormValidator(ChildFormValidatorMixin, FormValidator):
 class InfantRenalFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
+        super().clean()
         self.validate_other_specify(
             field='renal')
 
@@ -87,6 +96,7 @@ class InfantRenalFormValidator(ChildFormValidatorMixin, FormValidator):
 class InfantMusculoskeletalFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
+        super().clean()
         self.validate_other_specify(
             field='musculo_skeletal')
 
@@ -94,6 +104,7 @@ class InfantMusculoskeletalFormValidator(ChildFormValidatorMixin, FormValidator)
 class InfantSkinFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
+        super().clean()
         self.validate_other_specify(
             field='skin')
 
@@ -101,6 +112,7 @@ class InfantSkinFormValidator(ChildFormValidatorMixin, FormValidator):
 class InfantTrisomiesFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
+        super().clean()
         self.validate_other_specify(
             field='trisomies')
 
@@ -108,5 +120,6 @@ class InfantTrisomiesFormValidator(ChildFormValidatorMixin, FormValidator):
 class InfantCnsFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
+        super().clean()
         self.validate_other_specify(
             field='cns')

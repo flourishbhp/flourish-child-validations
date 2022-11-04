@@ -15,6 +15,7 @@ class ChildPreviousHospitalisationFormValidator(ChildFormValidatorMixin, FormVal
 
         self.required_if(YES, field='hos_last_visit',
                          field_required='hospitalized_count')
+        super().clean()
 
 
 class ChildPreHospitalisationInlineFormValidator(FormValidator):
@@ -30,3 +31,4 @@ class ChildPreHospitalisationInlineFormValidator(FormValidator):
         self.m2m_other_specify('chosp_surgical',
                                m2m_field='reason_hospitalized',
                                field_other='surgical_reason')
+        super().clean()

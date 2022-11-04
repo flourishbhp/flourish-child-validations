@@ -20,6 +20,7 @@ class BirthFeedingAndVaccineFormValidator(ChildFormValidatorMixin,
             self.cleaned_data.get('report_datetime'))
 
         self.validate_feeding()
+        super().clean()
 
     def validate_feeding(self):
 

@@ -12,9 +12,8 @@ class ChildFormValidatorMixin:
     infant_birth_model = None
 
     subject_consent_model = 'flourish_caregiver.subjectconsent'
-
+    child_offstudy_model = 'flourish_prn.childoffstudy'
     consent_version_model = 'flourish_caregiver.flourishconsentversion'
-
 
     @property
     def infant_birth_cls(self):
@@ -27,6 +26,22 @@ class ChildFormValidatorMixin:
     @property
     def consent_version_cls(self):
         return django_apps.get_model(self.consent_version_model)
+
+    @property
+    def child_offstudy_cls(self):
+        return django_apps.get_model(self.child_offstudy_model)
+
+    def clean(self):
+        if self.cleaned_data.get('child_visit'):
+            self.subject_identifier = self.cleaned_data.get(
+                'child_visit').subject_identifier
+            self.validate_against_visit_datetime(
+                self.cleaned_data.get('report_datetime'))
+        else:
+            self.subject_identifier = self.cleaned_data.get('subject_identifier')
+
+        self.validate_offstudy_model()
+        super().clean()
 
     def validate_against_birth_date(self, infant_identifier=None,
                                     report_datetime=None):
@@ -58,6 +73,34 @@ class ChildFormValidatorMixin:
                 'offstudy_date':
                 'offstudy date cannot be before visit date.'
             })
+
+    def validate_offstudy_model(self):
+
+        action_cls = site_action_items.get(
+            self.child_offstudy_cls.action_name)
+        action_item_model_cls = action_cls.action_item_model_cls()
+
+        try:
+            action_item_model_cls.objects.get(
+                subject_identifier=self.subject_identifier,
+                action_type__name=CHILDOFF_STUDY_ACTION,
+                status=NEW)
+        except action_item_model_cls.DoesNotExist:
+            try:
+                self.child_offstudy_cls.objects.get(
+                    subject_identifier=self.subject_identifier)
+            except self.child_offstudy_cls.DoesNotExist:
+                pass
+            else:
+                raise forms.ValidationError(
+                    'Participant has been taken offstudy. Cannot capture any '
+                    'new data.')
+        else:
+            self.child_visit = self.cleaned_data.get('child_visit') or None
+            if not self.child_visit or self.child_visit.require_crfs == NO:
+                raise forms.ValidationError(
+                    'Participant is scheduled to be taken offstudy without '
+                    'any new data collection. Cannot capture any new data.')
 
     def validate_consent_version_obj(self, subject_identifier):
 

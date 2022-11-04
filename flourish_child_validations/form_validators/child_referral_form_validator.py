@@ -10,6 +10,8 @@ class ChildReferralFormValidator(ChildFormValidatorMixin, FormValidator):
         self.subject_identifier = self.cleaned_data.get(
             'child_visit').appointment.subject_identifier
 
+        super().clean()
+
         self.validate_consent_version_obj(self.subject_identifier)
 
         other_fields = ['referred_to', 'support_ref_decline_reason',
