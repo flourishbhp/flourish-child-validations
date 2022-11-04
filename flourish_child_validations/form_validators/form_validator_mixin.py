@@ -96,11 +96,9 @@ class ChildFormValidatorMixin:
                     'Participant has been taken offstudy. Cannot capture any '
                     'new data.')
         else:
-            self.child_visit = self.cleaned_data.get('child_visit') or None
-            if not self.child_visit or self.child_visit.require_crfs == NO:
-                raise forms.ValidationError(
-                    'Participant is scheduled to be taken offstudy without '
-                    'any new data collection. Cannot capture any new data.')
+            raise forms.ValidationError(
+                'Participant is scheduled to be taken offstudy without '
+                'any new data collection. Cannot capture any new data.')
 
     def validate_consent_version_obj(self, subject_identifier):
 
