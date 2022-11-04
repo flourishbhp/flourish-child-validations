@@ -35,6 +35,7 @@ class VaccinesReceivedFormValidator(ChildFormValidatorMixin, FormValidator):
         dates = ['first_dose_dt', 'second_dose_dt', 'third_dose_dt', 'booster_dose_dt']
         self.check_missing_date(cleaned_data, dates=dates)
         self.validate_prev_immunization_received(cleaned_data)
+        super().clean()
 
     @property
     def caregiver_child_consent_model(self):
