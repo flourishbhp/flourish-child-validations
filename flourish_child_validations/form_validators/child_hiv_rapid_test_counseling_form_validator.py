@@ -1,7 +1,7 @@
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from edc_base.utils import get_utcnow
-from edc_constants.constants import YES
+from edc_constants.constants import YES, NO
 from edc_form_validators import FormValidator
 from .form_validator_mixin import ChildFormValidatorMixin
 
@@ -42,3 +42,10 @@ class ChildHIVRapidTestValidator(ChildFormValidatorMixin, FormValidator):
             not_required_msg=('If a rapid test was not processed, '
                               f'please do not provide the result.'))
 
+        self.required_if(
+            NO,
+            field='rapid_test_done',
+            field_required='comments',
+            required_msg=('If a rapid test was not processed, kindly provide a comment as '
+                          'to why it did not occur.'),
+            inverse=False)

@@ -26,6 +26,7 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
 
         self.not_applicable_not_allowed('chist_na', field=chronic_since,
                                         m2m_field=child_chronic)
+        super().clean()
 
     def not_applicable_not_allowed(self, *selections, field=None, m2m_field=None):
 

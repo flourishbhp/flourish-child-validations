@@ -30,6 +30,8 @@ class ChildBirthFormValidator(ChildFormValidatorMixin, FormValidator):
         self.validate_dob()
         self.validate_report_datetime()
 
+        super().clean()
+
     def validate_dob(self):
         cleaned_data = self.cleaned_data
         try:

@@ -96,6 +96,8 @@ class ChildPhysicalActivityFormValidator(ChildFormValidatorMixin, FormValidator)
                 field_required=field,
                 inverse=False)
 
+        super().clean()
+
     def time_validator(self, time=None, hrs=None, mins=None,
                        display_msg_at=''):
 

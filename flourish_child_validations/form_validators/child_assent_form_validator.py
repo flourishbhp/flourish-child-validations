@@ -52,6 +52,8 @@ class ChildAssentFormValidator(ChildFormValidatorMixin, FormValidator):
         self.validate_preg_testing()
         self.validate_dob(cleaned_data)
 
+        super().clean()
+
     def clean_full_name_syntax(self):
         cleaned_data = self.cleaned_data
         first_name = cleaned_data.get("first_name")
