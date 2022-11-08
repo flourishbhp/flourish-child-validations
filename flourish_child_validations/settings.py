@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'edc_device.apps.AppConfig',
     # 'flourish_caregiver.apps.AppConfig',
     # 'edc_timepoint.apps.AppConfig',
+    'flourish_prn.apps.AppConfig',
     'flourish_child_validations.apps.AppConfig',
 ]
 

@@ -2,7 +2,7 @@ from dateutil.relativedelta import relativedelta
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
 from edc_base.utils import get_utcnow
-from edc_constants.constants import NO , YES, NOT_APPLICABLE
+from edc_constants.constants import NO, YES
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
@@ -24,17 +24,23 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
                               field_required='test_done',
                               inverse=False)
 
-        all_fields = ['last_menstrual_period', 'is_lmp_date_estimated']
+        if visit_code == '3000':
+            self.required_if(YES,
+                             field='experienced_pregnancy',
+                             field_required='last_menstrual_period')
 
-        for field in all_fields:
-            self.required_if(YES, field='menarche', field_required=field)
-
-        test_done_fields = ['test_date', 'preg_test_result', ]
-        for field in test_done_fields:
-            self.required_if(YES, field='test_done', field_required=field)
+        self.required_if(YES,
+                         field='menarche',
+                         field_required='last_menstrual_period')
 
         self.required_if_not_none(field='last_menstrual_period',
                                   field_required='is_lmp_date_estimated')
+
+        test_done_fields = ['test_date', 'preg_test_result', ]
+        for field in test_done_fields:
+            self.required_if(YES,
+                             field='test_done',
+                             field_required=field)
 
         self.validate_consent_version_obj(self.subject_identifier)
         self.validate_lmp()
