@@ -1,1 +1,2 @@
 from .hiv_knowledge_form_validator import HivKnowledgeFormValidator
+from .tb_knowledge_form_validator import TbKnowledgeFormValidator
