@@ -29,6 +29,15 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
                              field='experienced_pregnancy',
                              field_required='last_menstrual_period')
 
+        self.applicable_if(NO,
+                           field='experienced_pregnancy',
+                           field_applicable='test_done')
+
+        self.required_if(NO,
+                         field='test_done',
+                         field_required='comments',
+                         inverse=False)
+
         self.required_if(YES,
                          field='menarche',
                          field_required='last_menstrual_period')
