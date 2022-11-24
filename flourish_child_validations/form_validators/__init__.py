@@ -32,3 +32,4 @@ from .infant_feeding_form_validator import InfantFeedingFormValidator
 from .tb_adol_validations import HivKnowledgeFormValidator
 from .tb_adol_validations import TbKnowledgeFormValidator
 from .tb_adol_validations import TbHistoryFormValidator
+from .tb_adol_validations import Covid19AdolFormValidator
