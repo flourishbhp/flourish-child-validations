@@ -20,6 +20,9 @@ class TbHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
                          field='tb_diagnosis_type', 
                          field_required='extra_pulmonary_loc')
         
+        self.validate_other_specify(field='extra_pulmonary_loc',
+                                    other_specify_field='other_loc')
+        
         self.required_if('outside_the_lungs', 'both', 
                          field='tb_diagnosis_type', 
                          field_required='extra_pulmonary_loc')
