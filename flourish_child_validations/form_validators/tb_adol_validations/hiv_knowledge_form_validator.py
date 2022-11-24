@@ -12,3 +12,7 @@ class HivKnowledgeFormValidator(ChildFormValidatorMixin, FormValidator):
           self.m2m_other_specify(OTHER, 
                                  m2m_field='hiv_knowledge_medium', 
                                  field_other='hiv_knowledge_medium_other')
+          
+          self.m2m_other_specify(OTHER,
+                                 m2m_field='hiv_community_treatment',
+                                 field_other='hiv_community_treatment_other')
