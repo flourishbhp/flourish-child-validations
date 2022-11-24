@@ -16,5 +16,5 @@ class AnthropometricFormValidator(ChildFormValidatorMixin, FormValidator):
         if (systolic_bp and diastolic_bp) \
             and (diastolic_bp > systolic_bp):
             raise ValidationError({
-                'diastolic_bp': 'Diastolic pressure can never be greater systolic pressure'
+                'diastolic_bp': 'Diastolic pressure cannot be greater than systolic pressure'
             })
