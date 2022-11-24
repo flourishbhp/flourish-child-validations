@@ -12,13 +12,19 @@ class TbHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
         self.validate_tb_preventative_therapy()
         
         
-        self.required_if(YES, 
-                         field='prior_tb_history', 
-                         field_required='tb_diagnosis_type')
+        self.required_if(
+            YES,
+            field='tbt_completed',
+            field_required='prior_treatmnt_history'
+        )
         
         self.required_if('outside_the_lungs', 'both', 
                          field='tb_diagnosis_type', 
                          field_required='extra_pulmonary_loc')
+        
+        self.required_if(OTHER,
+                         field='reason_for_therapy',
+                         field_required='reason_for_therapy_other')
         
         self.validate_other_specify(field='extra_pulmonary_loc',
                                     other_specify_field='other_loc')
