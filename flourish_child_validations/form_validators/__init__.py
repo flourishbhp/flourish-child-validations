@@ -35,3 +35,4 @@ from .tb_adol_validations import TbHistoryFormValidator
 from .tb_adol_validations import Covid19AdolFormValidator
 from .tb_adol_validations import TbScreeningDuringEncountersFormValidator
 from .tb_adol_validations import AnthropometricFormValidator
+from .tb_adol_validations import TbVisitScreeningFormValidator

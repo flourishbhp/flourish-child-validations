@@ -4,3 +4,4 @@ from .tb_history_form_validator import TbHistoryFormValidator
 from .covid_19_form_validator import Covid19AdolFormValidator
 from .tb_screening_during_encounters_form_validator import TbScreeningDuringEncountersFormValidator
 from .anthropometric_form_validator import AnthropometricFormValidator
+from .tb_visit_screening_validator import TbVisitScreeningFormValidator
