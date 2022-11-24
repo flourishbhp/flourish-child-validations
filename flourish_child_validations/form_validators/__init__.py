@@ -31,3 +31,4 @@ from .infant_feeding_form_validator import InfantFeedingFormValidator
 #TODO Import all items instead of using a wildcard
 from .tb_adol_validations import HivKnowledgeFormValidator
 from .tb_adol_validations import TbKnowledgeFormValidator
+from .tb_adol_validations import TbHistoryFormValidator
