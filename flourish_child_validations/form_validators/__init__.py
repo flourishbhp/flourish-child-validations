@@ -28,9 +28,10 @@ from .infant_arv_exposure_form_validation import InfantArvExposureFormValidator
 from .infant_congenital_anomalies_form_validation import *
 from .infant_feeding_form_validator import InfantFeedingFormValidator
 
-#TODO Import all items instead of using a wildcard
+#TODO Import all itemsA instead of using a wildcard
 from .tb_adol_validations import HivKnowledgeFormValidator
 from .tb_adol_validations import TbKnowledgeFormValidator
 from .tb_adol_validations import TbHistoryFormValidator
 from .tb_adol_validations import Covid19AdolFormValidator
 from .tb_adol_validations import TbScreeningDuringEncountersFormValidator
+from .tb_adol_validations import AnthropometricFormValidator
