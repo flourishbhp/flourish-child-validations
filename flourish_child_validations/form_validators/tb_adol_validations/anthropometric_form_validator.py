@@ -10,11 +10,10 @@ class AnthropometricFormValidator(ChildFormValidatorMixin, FormValidator):
       def clean(self):
         super().clean()
             
-        systolic_bp = self.cleaned_data.get('systolic_bp', None)
-        diastolic_bp = self.cleaned_data.get('diastolic_bp', None)
+        systolic_bp = self.cleaned_data.get('systolic_bp')
+        diastolic_bp = self.cleaned_data.get('diastolic_bp')
         
-        if (systolic_bp and diastolic_bp) \
-            and (diastolic_bp > systolic_bp):
+        if diastolic_bp > systolic_bp:
             raise ValidationError({
                 'diastolic_bp': 'Diastolic pressure cannot be greater than systolic pressure'
             })
