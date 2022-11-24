@@ -33,3 +33,4 @@ from .tb_adol_validations import HivKnowledgeFormValidator
 from .tb_adol_validations import TbKnowledgeFormValidator
 from .tb_adol_validations import TbHistoryFormValidator
 from .tb_adol_validations import Covid19AdolFormValidator
+from .tb_adol_validations import TbScreeningDuringEncountersFormValidator
