@@ -29,6 +29,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+SITE_ID = 40
+
 # Application definition
 
 INSTALLED_APPS = [
