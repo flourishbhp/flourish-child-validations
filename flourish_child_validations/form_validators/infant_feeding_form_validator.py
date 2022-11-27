@@ -1,4 +1,5 @@
 from django.apps import apps as django_apps
+from django.forms import ValidationError
 from edc_constants.constants import YES, NO
 from edc_form_validators import FormValidator
 
@@ -9,6 +10,12 @@ from .form_validator_mixin import ChildFormValidatorMixin
 class InfantFeedingFormValidator(ChildFormValidatorMixin,
                                  CrfOffStudyFormValidator,
                                  FormValidator):
+
+    breast_feeding_model = 'flourish_caregiver.breastfeedingquestionnaire'
+
+    @property
+    def breast_feeding_cls(self):
+        return django_apps.get_model(self.breast_feeding_model)
 
     def clean(self):
         self.subject_identifier = self.cleaned_data.get(
@@ -21,6 +28,8 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
             self.cleaned_data.get('report_datetime'))
 
         self.breastfeeding_validations()
+
+        self.validate_caregiver_breastfeeding()
 
         self.formula_validations()
 
@@ -161,3 +170,24 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
                 self.required_if_true(
                     value in selected,
                     field_required=field)
+
+    def validate_caregiver_breastfeeding(self):
+        child_visit = self.cleaned_data.get('child_visit')
+
+        try:
+            breast_feeding_obj = self.breast_feeding_cls.objects.get(
+                maternal_visit__subject_identifier=self.subject_identifier[:-3],
+                maternal_visit__visit_code='2002M',
+                maternal_visit__visit_code_sequence=child_visit.visit_code_sequence)
+        except self.breast_feeding_cls.DoesNotExist:
+            pass
+        else:
+            if (breast_feeding_obj.maternal_visit.visit_code[:4]
+                    <= self.cleaned_data.get('child_visit').visit_code):
+                if breast_feeding_obj.six_months_feeding != self.cleaned_data.get(
+                        'rec_liquids'):
+                    message = {
+                        'rec_liquids': ('Value does not match that of the mother\'s breast '
+                                        'feeding form. Kindly correct.')}
+                    self._errors.update(message)
+                    raise ValidationError(message)
