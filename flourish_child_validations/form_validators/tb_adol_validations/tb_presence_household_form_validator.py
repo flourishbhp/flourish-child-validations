@@ -10,10 +10,7 @@ class TbPresenceHouseholdMembersAdolFormValidator(ChildFormValidatorMixin, FormV
             'child_visit').subject_identifier
         super().clean()
 
-        self.required_if(
-            YES,
-            field='tb_diagnosed',
-            field_required='tb_ind_rel')
+        self.validate_tb_diagnosed()
 
         self.validate_other_specify(
             field='tb_ind_rel',
@@ -54,3 +51,15 @@ class TbPresenceHouseholdMembersAdolFormValidator(ChildFormValidatorMixin, FormV
         self.validate_other_specify(
             field='weight_ind_rel',
             other_specify_field='weight_ind_other')
+
+    def validate_tb_diagnosed(self):
+        required_fields = [
+            'tb_ind_rel', 'tb_referral'
+        ]
+        
+        for field in required_fields:
+            self.required_if(
+                YES,
+                field='tb_diagnosed',
+                field_required=field
+            )
