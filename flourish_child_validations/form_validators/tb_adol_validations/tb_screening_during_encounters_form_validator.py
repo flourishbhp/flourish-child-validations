@@ -11,7 +11,7 @@ class TbScreeningDuringEncountersFormValidator(ChildFormValidatorMixin, FormVali
         
         self.validate_required_fields()
         
-        self.m2m_other_specify(
+        self.m2m_other_specify(OTHER,
             m2m_field='care_location',
             field_other='care_location_other'
         )
