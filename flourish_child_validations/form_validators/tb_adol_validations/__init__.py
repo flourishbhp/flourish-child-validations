@@ -6,3 +6,4 @@ from .tb_screening_during_encounters_form_validator import TbScreeningDuringEnco
 from .anthropometric_form_validator import AnthropometricFormValidator
 from .tb_visit_screening_validator import TbVisitScreeningFormValidator
 from .tb_presence_household_form_validator import TbPresenceHouseholdMembersAdolFormValidator
+from .hiv_testing_form_validator import HIVTestingFormValidator
