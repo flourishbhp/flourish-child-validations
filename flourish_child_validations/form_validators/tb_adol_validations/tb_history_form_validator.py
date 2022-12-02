@@ -9,60 +9,47 @@ class TbHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
     def clean(self):
         super().clean()
         
-        self.validate_tb_preventative_therapy()
+        self.validate_history_of_tbt_required_fields()
         
-        
-        self.required_if(
-            YES,
-            field='tbt_completed',
-            field_required='prior_treatmnt_history'
+        self.validate_other_specify(
+            field='reason_for_therapy',
+            other_specify_field='reason_for_therapy_other'
         )
         
-        self.required_if('outside_the_lungs', 'both', 
-                         field='tb_diagnosis_type', 
+        self.required_if(YES,
+                         field='prior_tb_history',
+                         field_required='tb_diagnosis_type')
+        
+        self.required_if('outside_the_lungs', 'both',
+                         field='tb_diagnosis_type',
                          field_required='extra_pulmonary_loc')
+        self.validate_other_specify(
+            field='extra_pulmonary_loc',
+            other_specify_field='other_loc'
+        )
         
-        self.required_if(OTHER,
-                         field='reason_for_therapy',
-                         field_required='reason_for_therapy_other')
+        self.not_required_if('outside_the_lungs', 'both',
+                             field='tb_diagnosis_type',
+                             field_required='prior_treatmnt_history')
         
-        self.validate_other_specify(field='extra_pulmonary_loc',
-                                    other_specify_field='other_loc')
+        self.validate_prior_tb_history()
         
-        self.required_if('outside_the_lungs', 'both', 
-                         field='tb_diagnosis_type', 
-                         field_required='extra_pulmonary_loc')
-        
-        self.not_required_if('outside_the_lungs', 'both', 
-                         field='tb_diagnosis_type', 
-                         field_required='prior_treatmnt_history')
-        
-        self.validate_prior_treatment_history()
-          
-    def validate_tb_preventative_therapy(self):
-        
-        required_fields = [
-            'reason_for_therapy',
-            'therapy_prescribed_age',
-            'tbt_completed',
-        ]
-        
-        for field in required_fields:
-            self.required_if(YES,
-                             field='history_of_tbt', 
-                             field_required=field)
-            
-    def validate_prior_treatment_history(self):
         
 
+    def validate_history_of_tbt_required_fields(self):
+        fields = ['reason_for_therapy', 'therapy_prescribed_age', 'tbt_completed']
         
-        required_fields = [
-            'tb_drugs_freq',
-            'iv_meds_used',
-            'tb_treatmnt_completed'
-        ]
-        
-        for field in required_fields:
-            self.required_if(YES, 
-                             field='prior_treatmnt_history',
+        for field in fields:
+            self.required_if(YES,
+                             field='history_of_tbt',
                              field_required=field)
+            
+    def validate_prior_tb_history(self):
+        fields = ['tb_drugs_freq', 'iv_meds_used', 'tb_treatmnt_completed']
+        
+        for field in fields:
+            self.required_if(
+                YES,
+                field='prior_treatmnt_history',
+                field_required=field
+            )
