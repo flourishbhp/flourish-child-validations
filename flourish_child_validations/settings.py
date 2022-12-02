@@ -27,9 +27,10 @@ SECRET_KEY = '$d(@jsoci23er^e)kt_*-)uz((ae!f9&8&8jpnhrb_mbf1pth0'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
 SITE_ID = 40
+
+
+ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -43,8 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_crypto_fields.apps.AppConfig',
     'edc_device.apps.AppConfig',
-    # 'flourish_caregiver.apps.AppConfig',
-    # 'edc_timepoint.apps.AppConfig',
+    'edc_action_item.apps.AppConfig',
     'flourish_prn.apps.AppConfig',
     'flourish_child_validations.apps.AppConfig',
 ]
@@ -57,6 +57,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'edc_subject_dashboard.middleware.DashboardMiddleware',
+
 ]
 
 ROOT_URLCONF = 'flourish_child_validations.urls'
