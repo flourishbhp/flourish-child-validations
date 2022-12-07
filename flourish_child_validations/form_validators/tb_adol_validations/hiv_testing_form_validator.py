@@ -20,13 +20,16 @@ class HIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         'seen_by_healthcare',
         '''
         
-        self.required_if(YES,
-                         field='test_for_hiv', field_required='times_tested')
+        hiv_required_fields = ['times_tested', 'last_result']
+        
+        for field in hiv_required_fields:
+            
+            self.required_if(YES,
+                            field='test_for_hiv', field_required=field)
         
         fields = [
             'referred_for_treatment',
             'initiated_treatment',
-            'date_initiated_treatment',
             'seen_by_healthcare',
         ]
         
