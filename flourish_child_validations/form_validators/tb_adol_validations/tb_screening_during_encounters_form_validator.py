@@ -30,7 +30,22 @@ class TbScreeningDuringEncountersFormValidator(ChildFormValidatorMixin, FormVali
                          field_required='diagnostic_referral')
         
         
+        self.required_if(YES, 
+                         field='diagnostic_referral',
+                         field_required='diagnostic_studies')
         
+        
+        self.validate_other_specify(
+            field='diagnostic_studies',
+            other_specify_field='diagnostic_studies_other'
+        )
+        
+        self.required_if_not_none(field='diagnostic_studies',
+                                  field_required='tb_diagnostic')
+        
+        self.required_if(YES, 
+                         field='tb_diagnostic',
+                         field_required='specify_tests')
         
         
     
