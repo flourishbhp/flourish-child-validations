@@ -89,7 +89,6 @@ class TestClinicalMeasurementForm(TestCase):
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn('skin_folds_triceps', form_validator._errors)
 
-    @tag('mwc')
     def test_measurement_validator_waist_circ_not_required(self):
         cleaned_data = {
             'child_visit': self.child_visit,
@@ -106,7 +105,6 @@ class TestClinicalMeasurementForm(TestCase):
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn('child_waist_circ_third', form_validator._errors)
 
-    @tag('mwcr')
     def test_measurement_validator_waist_circ_required(self):
         cleaned_data = {
             'child_visit': self.child_visit,
@@ -122,3 +120,31 @@ class TestClinicalMeasurementForm(TestCase):
             cleaned_data=cleaned_data)
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn('child_waist_circ_third', form_validator._errors)
+
+    def test_measurement_validator_child_hip_circ_required(self):
+        cleaned_data = {
+            'child_visit': self.child_visit,
+            'child_systolic_bp': 120,
+            'child_hip_circ': 30.1,
+            'child_hip_circ_second': 34,
+            'child_hip_circ_third': None,
+            'child_diastolic_bp': 80,
+        }
+        form_validator = ChildClinicalMeasurementsFormValidator(
+            cleaned_data=cleaned_data)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('child_hip_circ_third', form_validator._errors)
+
+    def test_measurement_validator_child_hip_circ_not_required(self):
+        cleaned_data = {
+            'child_visit': self.child_visit,
+            'child_systolic_bp': 120,
+            'child_hip_circ': 30.1,
+            'child_hip_circ_second': 30.2,
+            'child_hip_circ_third': 30.4,
+            'child_diastolic_bp': 80,
+        }
+        form_validator = ChildClinicalMeasurementsFormValidator(
+            cleaned_data=cleaned_data)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('child_hip_circ_third', form_validator._errors)
