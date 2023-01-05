@@ -52,7 +52,7 @@ class TestClinicalMeasurementForm(TestCase):
             'skin_folds_triceps': None,
             'skin_folds_subscapular': None,
             'skin_folds_suprailiac': None
-            }
+        }
 
         form_validator = ChildClinicalMeasurementsFormValidator(
             cleaned_data=cleaned_data)
@@ -82,9 +82,43 @@ class TestClinicalMeasurementForm(TestCase):
             'skin_folds_triceps': None,
             'skin_folds_subscapular': None,
             'skin_folds_suprailiac': None
-            }
+        }
 
         form_validator = ChildClinicalMeasurementsFormValidator(
             cleaned_data=cleaned_data)
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn('skin_folds_triceps', form_validator._errors)
+
+    @tag('mwc')
+    def test_measurement_validator_waist_circ_not_required(self):
+        cleaned_data = {
+            'child_visit': self.child_visit,
+            'child_systolic_bp': 120,
+            'child_waist_circ': 30.1,
+            'child_waist_circ_second': 30,
+            'child_waist_circ_third': 30.5,
+            'child_diastolic_bp': 80,
+
+        }
+
+        form_validator = ChildClinicalMeasurementsFormValidator(
+            cleaned_data=cleaned_data)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('child_waist_circ_third', form_validator._errors)
+
+    @tag('mwcr')
+    def test_measurement_validator_waist_circ_required(self):
+        cleaned_data = {
+            'child_visit': self.child_visit,
+            'child_systolic_bp': 120,
+            'child_waist_circ': 30.1,
+            'child_waist_circ_second': 33,
+            'child_waist_circ_third': None,
+            'child_diastolic_bp': 80,
+
+        }
+
+        form_validator = ChildClinicalMeasurementsFormValidator(
+            cleaned_data=cleaned_data)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('child_waist_circ_third', form_validator._errors)
