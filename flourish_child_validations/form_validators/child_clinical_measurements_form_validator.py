@@ -41,35 +41,14 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
 
         self.validate_skin_folds_followup()
 
-        self.validate_measurement_margin(
-            first_measurement_field='child_waist_circ',
-            second_measurement_field='child_waist_circ_second',
-            third_measurement_field='child_waist_circ_third'
-        )
+        measurements = [('child_waist_circ', 'child_waist_circ_second', 'child_waist_circ_third'),
+                        ('child_hip_circ', 'child_hip_circ_second', 'child_hip_circ_third'),
+                        ('skin_folds_triceps', 'skin_folds_triceps_second', 'skin_folds_triceps_third'),
+                        ('skin_folds_subscapular', 'skin_folds_subscapular_second', 'skin_folds_subscapular_third'),
+                        ('skin_folds_suprailiac', 'skin_folds_suprailiac_second', 'skin_folds_suprailiac_third'), ]
 
-        self.validate_measurement_margin(
-            first_measurement_field='child_hip_circ',
-            second_measurement_field='child_hip_circ_second',
-            third_measurement_field='child_hip_circ_third'
-        )
-
-        self.validate_measurement_margin(
-            first_measurement_field='skin_folds_triceps',
-            second_measurement_field='skin_folds_triceps_second',
-            third_measurement_field='skin_folds_triceps_third'
-        )
-
-        self.validate_measurement_margin(
-            first_measurement_field='skin_folds_subscapular',
-            second_measurement_field='skin_folds_subscapular_second',
-            third_measurement_field='skin_folds_subscapular_third'
-        )
-
-        self.validate_measurement_margin(
-            first_measurement_field='skin_folds_suprailiac',
-            second_measurement_field='skin_folds_suprailiac_second',
-            third_measurement_field='skin_folds_suprailiac_third'
-        )
+        for fields in measurements:
+            self.validate_measurement_margin(*fields)
 
     def validate_skin_folds_followup(self):
 
@@ -169,17 +148,10 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
     def validate_measurement_margin(self, first_measurement_field, second_measurement_field, third_measurement_field):
         first_measurement = self.cleaned_data.get(first_measurement_field, None)
         second_measurement = self.cleaned_data.get(second_measurement_field, None)
-        third_measurement = self.cleaned_data.get(third_measurement_field, None)
 
         if first_measurement and second_measurement:
             margin = abs(first_measurement - second_measurement)
-            if margin < 1:
-                if third_measurement is not None:
-                    msg = {third_measurement_field: 'This field is not required.'}
-                    self._errors.update(msg)
-                    raise ValidationError(msg)
-            else:
-                if third_measurement is None:
-                    msg = {third_measurement_field: 'This field is required.'}
-                    self._errors.update(msg)
-                    raise ValidationError(msg)
+            self.required_if_true(
+                margin >= 1,
+                field_required=third_measurement_field
+            )
