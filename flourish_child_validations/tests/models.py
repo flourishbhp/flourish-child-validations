@@ -110,6 +110,25 @@ class ChildDataset(BaseUuidModel):
 
     infant_sex = models.CharField(max_length=7)
 
+class OnSchedule(BaseUuidModel):
+    subject_identifier = models.CharField(
+        max_length=50)
+    schedule_name = models.CharField(max_length=25, blank=True, null=True)
+
+    child_subject_identifier = models.CharField(
+        max_length=50)
+
+
+class Schedule(BaseUuidModel):
+    subject_identifier = models.CharField(
+        max_length=50)
+
+    child_subject_identifier = models.CharField(
+        max_length=50)
+
+    schedule_name = models.CharField(max_length=25, blank=True, null=True)
+
+    onschedule_model = models.CharField(max_length=25, blank=True, null=True)
 
 class ChildVisit(BaseUuidModel):
     subject_identifier = models.CharField(max_length=25)
@@ -120,12 +139,13 @@ class ChildVisit(BaseUuidModel):
 
     schedule_name = models.CharField(max_length=25)
 
+    schedule = models.OneToOneField(Schedule, on_delete=PROTECT)
+
     visit_code = models.CharField(
         max_length=25, )
 
     visit_code_sequence = models.CharField(
         max_length=25, )
-
 
 class RegisteredSubject(BaseUuidModel):
     subject_identifier = models.CharField(
@@ -165,26 +185,6 @@ class ChildOnScheduleCohortAQuarterly(BaseUuidModel):
     child_subject_identifier = models.CharField(
         verbose_name="Associated Child Identifier",
         max_length=50)
-
-
-class CaregiverOnScheduleCohortAQuarterly(BaseUuidModel):
-    subject_identifier = models.CharField(
-        max_length=50)
-
-    child_subject_identifier = models.CharField(
-        max_length=50)
-
-    schedule_name = models.CharField(max_length=25, blank=True, null=True)
-
-
-class OnScheduleCohortBEnrollment(BaseUuidModel):
-    subject_identifier = models.CharField(
-        max_length=50)
-
-    child_subject_identifier = models.CharField(
-        max_length=50)
-
-    schedule_name = models.CharField(max_length=25, blank=True, null=True)
 
 
 class CaregiverSocioDemographicData(BaseUuidModel):
