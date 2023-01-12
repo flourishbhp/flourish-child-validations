@@ -7,7 +7,6 @@ from edc_base.utils import get_utcnow
 
 
 class Appointment(BaseUuidModel):
-
     subject_identifier = models.CharField(max_length=25)
 
     appt_datetime = models.DateTimeField(default=get_utcnow)
@@ -18,7 +17,6 @@ class Appointment(BaseUuidModel):
 
 
 class CaregiverConsent(BaseUuidModel):
-
     subject_identifier = models.CharField(max_length=25)
 
     screening_identifier = models.CharField(max_length=50)
@@ -59,7 +57,6 @@ class SubjectConsent(BaseUuidModel):
 
 
 class CaregiverChildConsent(BaseUuidModel):
-
     subject_identifier = models.CharField(max_length=25)
 
     screening_identifier = models.CharField(max_length=50)
@@ -91,7 +88,6 @@ class CaregiverChildConsent(BaseUuidModel):
 
 
 class ChildAssent(BaseUuidModel):
-
     subject_identifier = models.CharField(max_length=25)
 
     screening_identifier = models.CharField(max_length=50)
@@ -110,14 +106,12 @@ class ChildAssent(BaseUuidModel):
 
 
 class ChildDataset(BaseUuidModel):
-
     study_child_identifier = models.CharField(max_length=36)
 
     infant_sex = models.CharField(max_length=7)
 
 
 class ChildVisit(BaseUuidModel):
-
     subject_identifier = models.CharField(max_length=25)
 
     appointment = models.OneToOneField(Appointment, on_delete=PROTECT)
@@ -127,13 +121,13 @@ class ChildVisit(BaseUuidModel):
     schedule_name = models.CharField(max_length=25)
 
     visit_code = models.CharField(
-        max_length=25,
-        null=True,
-        blank=True)
+        max_length=25, )
+
+    visit_code_sequence = models.CharField(
+        max_length=25, )
 
 
 class RegisteredSubject(BaseUuidModel):
-
     subject_identifier = models.CharField(
         max_length=50,
         unique=True)
@@ -145,7 +139,6 @@ class RegisteredSubject(BaseUuidModel):
 
 
 class ScreeningPriorBhpParticipants(BaseUuidModel):
-
     screening_identifier = models.CharField(max_length=50)
 
     report_datetime = models.DateTimeField()
@@ -154,12 +147,52 @@ class ScreeningPriorBhpParticipants(BaseUuidModel):
 
 
 class FlourishConsentVersion(BaseUuidModel):
-
     screening_identifier = models.CharField(
-        max_length=50,)
+        max_length=50, )
 
     version = models.CharField(
         max_length=3)
 
     report_datetime = models.DateTimeField(
-        default=timezone.now,)
+        default=timezone.now, )
+
+
+class ChildOnScheduleCohortAQuarterly(BaseUuidModel):
+    subject_identifier = models.CharField(
+        verbose_name="Subject Identifier",
+        max_length=50)
+
+    child_subject_identifier = models.CharField(
+        verbose_name="Associated Child Identifier",
+        max_length=50)
+
+
+class CaregiverOnScheduleCohortAQuarterly(BaseUuidModel):
+    subject_identifier = models.CharField(
+        max_length=50)
+
+    child_subject_identifier = models.CharField(
+        max_length=50)
+
+    schedule_name = models.CharField(max_length=25, blank=True, null=True)
+
+
+class OnScheduleCohortBEnrollment(BaseUuidModel):
+    subject_identifier = models.CharField(
+        max_length=50)
+
+    child_subject_identifier = models.CharField(
+        max_length=50)
+
+    schedule_name = models.CharField(max_length=25, blank=True, null=True)
+
+
+class CaregiverSocioDemographicData(BaseUuidModel):
+    maternal_visit = models.OneToOneField(ChildVisit, on_delete=PROTECT)
+    stay_with_child = models.CharField(max_length=50)
+
+
+class MaternalDelivery(BaseUuidModel):
+    report_datetime = models.DateTimeField()
+    subject_identifier = models.CharField(
+        max_length=50)

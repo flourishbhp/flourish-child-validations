@@ -9,7 +9,6 @@ from .form_validator_mixin import ChildFormValidatorMixin
 
 
 class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator):
-
     child_assent_model = 'flourish_child.childassent'
 
     child_caregiver_consent_model = 'flourish_caregiver.caregiverchildconsent'
@@ -52,39 +51,49 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
 
     def validate_child_stay_with_caregiver(self, cleaned_data=None):
         caregiver_subject_identifier = self.caregiver_subject_identifier
-        child_visit_code_sequence = self.cleaned_data.get('child_visit').visit_code_sequence
+        child_visit_code_sequence = self.cleaned_data.get(
+            'child_visit').visit_code_sequence
         child_visit = self.cleaned_data.get('child_visit').appointment.visit_code
         maternal_visit_code = str(child_visit) + 'M'
-        try:
-            caregiver_model_obj = \
-                self.caregiver_socio_demographic_cls.objects.get(
-                    maternal_visit__visit_code=maternal_visit_code,
-                    maternal_visit__visit_code_sequence=child_visit_code_sequence,
-                    maternal_visit__subject_identifier=caregiver_subject_identifier,
+        caregiver_model_objs = self.caregiver_socio_demographic_cls.objects.filter(
+            maternal_visit__visit_code=maternal_visit_code,
+            maternal_visit__visit_code_sequence=child_visit_code_sequence,
+            maternal_visit__subject_identifier=caregiver_subject_identifier,
+        )
+        for caregiver_model_obj in caregiver_model_objs:
+            corresponding_visit = caregiver_model_obj.maternal_visit
+            corresponding_onschedule_model = corresponding_visit.schedule.onschedule_model
+            corresponding_onschedule_cls = django_apps.get_model(
+                corresponding_onschedule_model)
+            try:
+                corresponding_onschedule_cls.objects.get(
+                    child_subject_identifier=self.subject_identifier,
+                    schedule_name=corresponding_visit.schedule_name
                 )
-        except self.caregiver_socio_demographic_cls.DoesNotExist:
-            pass
-        else:
-            if caregiver_model_obj.stay_with_child and \
-                    caregiver_model_obj.stay_with_child != cleaned_data.get(
-                    'stay_with_caregiver'):
-                msg = {'stay_with_caregiver':
-                       'Response should match the response provided on the '
-                       'caregiver socio demographic data form'}
-                self._errors.update(msg)
-                raise ValidationError(msg)
+
+            except corresponding_onschedule_cls.DoesNotExist:
+                pass
+            else:
+                if caregiver_model_obj.stay_with_child and \
+                        caregiver_model_obj.stay_with_child != cleaned_data.get(
+                        'stay_with_caregiver'):
+                    msg = {'stay_with_caregiver': 'Response should match the response '
+                                                  'provided on the caregiver socio '
+                                                  'demographic data form'}
+                    self._errors.update(msg)
+                    raise ValidationError(msg)
 
     def validate_number_of_people_living_in_the_household(self,
-                                                          cleaned_data=None):
+            cleaned_data=None):
         older_than18 = cleaned_data.get('older_than18')
         house_people_number = cleaned_data.get('house_people_number')
         if older_than18 and (older_than18 >
                              house_people_number):
             msg = {'older_than18':
-                   f'Number of people ({older_than18}) who are older than 18 '
-                   f'and live in the household cannot be more than the total '
-                   f'number ({house_people_number}) of people living in the '
-                   f'household'}
+                       f'Number of people ({older_than18}) who are older than 18 '
+                       f'and live in the household cannot be more than the total '
+                       f'number ({house_people_number}) of people living in the '
+                       f'household'}
             self._errors.update(msg)
             raise ValidationError(msg)
 
@@ -94,16 +103,16 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
         if (attend_school == YES and
                 self.cleaned_data.get('education_level') == 'no_schooling'):
             msg = {'education_level':
-                   'This child is said to be attending school, Please specify '
-                   'education level.'}
+                       'This child is said to be attending school, Please specify '
+                       'education level.'}
             self._errors.update(msg)
             raise ValidationError(msg)
 
         if (attend_school == NO and
                 self.cleaned_data.get('education_level') != 'no_schooling'):
             msg = {'education_level':
-                   'This child is not attending school, Please specify '
-                   'education level as `No schooling` to indicate this.'}
+                       'This child is not attending school, Please specify '
+                       'education level as `No schooling` to indicate this.'}
             self._errors.update(msg)
             raise ValidationError(msg)
 
