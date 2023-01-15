@@ -168,7 +168,8 @@ class ChildAssentFormValidator(ChildFormValidatorMixin, FormValidator):
 
         try:
             assent_obj = self.assent_cls.objects.get(
-                subject_identifier=self.cleaned_data.get('subject_identifier'),)
+                subject_identifier=self.cleaned_data.get('subject_identifier'),
+                version=self.cleaned_data.get('version'))
         except self.assent_cls.DoesNotExist:
             if assent_age and (assent_age < 7 or assent_age >= 18):
                 msg = {'dob':

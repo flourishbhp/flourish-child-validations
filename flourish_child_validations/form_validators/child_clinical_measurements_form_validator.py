@@ -8,7 +8,6 @@ from .form_validator_mixin import ChildFormValidatorMixin
 
 
 class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValidator):
-
     child_assent_model = 'flourish_child.childassent'
 
     child_caregiver_consent_model = 'flourish_caregiver.caregiverchildconsent'
@@ -28,7 +27,7 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
 
         self.applicable_if_true(
             self.child_caregiver_consent_obj.gender == FEMALE and self.child_age >= 12,
-            field_applicable='is_child_preg',)
+            field_applicable='is_child_preg', )
 
         self.not_required_if(
             YES,
@@ -41,6 +40,15 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
             field_required='child_hip_circ')
 
         self.validate_skin_folds_followup()
+
+        measurements = [('child_waist_circ', 'child_waist_circ_second', 'child_waist_circ_third'),
+                        ('child_hip_circ', 'child_hip_circ_second', 'child_hip_circ_third'),
+                        ('skin_folds_triceps', 'skin_folds_triceps_second', 'skin_folds_triceps_third'),
+                        ('skin_folds_subscapular', 'skin_folds_subscapular_second', 'skin_folds_subscapular_third'),
+                        ('skin_folds_suprailiac', 'skin_folds_suprailiac_second', 'skin_folds_suprailiac_third'), ]
+
+        for fields in measurements:
+            self.validate_measurement_margin(*fields)
 
     def validate_skin_folds_followup(self):
 
@@ -80,8 +88,8 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
         if child_systolic_bp and child_diastolic_bp:
             if child_systolic_bp < child_diastolic_bp:
                 msg = {'child_diastolic_bp':
-                       'Systolic blood pressure cannot be lower than the '
-                       'diastolic blood pressure. Please correct.'}
+                           'Systolic blood pressure cannot be lower than the '
+                           'diastolic blood pressure. Please correct.'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
 
@@ -136,3 +144,14 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
             years = age(birth_date, get_utcnow()).months
             return years
         return 0
+
+    def validate_measurement_margin(self, first_measurement_field, second_measurement_field, third_measurement_field):
+        first_measurement = self.cleaned_data.get(first_measurement_field, None)
+        second_measurement = self.cleaned_data.get(second_measurement_field, None)
+
+        if first_measurement and second_measurement:
+            margin = abs(first_measurement - second_measurement)
+            self.required_if_true(
+                margin >= 1,
+                field_required=third_measurement_field
+            )
