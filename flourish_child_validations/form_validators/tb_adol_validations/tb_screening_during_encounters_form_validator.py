@@ -7,7 +7,7 @@ class TbScreeningDuringEncountersFormValidator(ChildFormValidatorMixin, FormVali
       
       
     def clean(self):
-        cleaned_data = super().clean()
+        super().clean()
         
         self.m2m_other_specify(OTHER,
             m2m_field='care_location',
@@ -49,5 +49,3 @@ class TbScreeningDuringEncountersFormValidator(ChildFormValidatorMixin, FormVali
         self.required_if(YES, 
                          field='tb_diagnostic',
                          field_required='specify_tests')
-        
-        return cleaned_data
