@@ -27,8 +27,7 @@ from .form_validator_mixin import ChildFormValidatorMixin
 from .infant_arv_exposure_form_validation import InfantArvExposureFormValidator
 from .infant_congenital_anomalies_form_validation import *
 from .infant_feeding_form_validator import InfantFeedingFormValidator
-
-#TODO Import all itemsA instead of using a wildcard
+# TB Validators import
 from .tb_adol_validations import HivKnowledgeFormValidator
 from .tb_adol_validations import TbKnowledgeFormValidator
 from .tb_adol_validations import TbHistoryFormValidator
