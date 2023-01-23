@@ -109,8 +109,8 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
         child_caregiver_consent_model_cls = django_apps.get_model(
             self.child_caregiver_consent_model)
         try:
-            model_obj = child_caregiver_consent_model_cls.objects.get(
-                subject_identifier=self.subject_identifier)
+            model_obj = child_caregiver_consent_model_cls.objects.filter(
+                subject_identifier=self.subject_identifier).latest('consent_datetime')
         except child_caregiver_consent_model_cls.DoesNotExist:
             return None
         else:
