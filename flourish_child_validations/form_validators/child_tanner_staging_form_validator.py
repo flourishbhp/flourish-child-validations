@@ -96,7 +96,7 @@ class ChildTannerStagingFormValidator(ChildFormValidatorMixin, FormValidator):
         child_assents = self.child_assent_model_cls.objects.filter(
             subject_identifier=subject_identifier)
         try:
-            assent = child_assents.objects.latest('consent_datetime')
+            assent = child_assents.latest('consent_datetime')
         except self.child_assent_model_cls.DoesNotExist:
             return None
         else:
