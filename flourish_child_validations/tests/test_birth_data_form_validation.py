@@ -7,6 +7,7 @@ from ..form_validators import BirthDataFormValidator
 from .models import ChildVisit, Appointment, Schedule
 from .test_model_mixin import TestModeMixin
 
+
 class TestInfantBirthDataFormValidator(TestModeMixin, TestCase):
 
     def __init__(self, *args, **kwargs):
@@ -19,22 +20,17 @@ class TestInfantBirthDataFormValidator(TestModeMixin, TestCase):
             appt_datetime=timezone.now(),
             visit_code='2000',
             visit_instance='0')
-        
-                
+
         schedule = Schedule.objects.create(
             subject_identifier='2334432-1',
-
             child_subject_identifier='2334432',
-
             schedule_name='CohortAQuarterly'
         )
-        
 
         child_visit = ChildVisit.objects.create(
             subject_identifier='12345323',
             appointment=appointment,
-            schedule = schedule)
-
+            schedule=schedule)
 
         self.options = {
             'report_datetime': timezone.now(),
@@ -120,7 +116,7 @@ class TestInfantBirthDataFormValidator(TestModeMixin, TestCase):
 
     def test_gestational_age_required(self):
         self.options['gestational_age'] = None
-        
+
         form_validator = BirthDataFormValidator(
             cleaned_data=self.options
         )
@@ -153,7 +149,7 @@ class TestInfantBirthDataFormValidator(TestModeMixin, TestCase):
         )
 
         try:
-            form_validator.validate();
+            form_validator.validate()
         except ValidationError:
             self.fail(f"gestational_age: {self.options['gestational_age']} "
                       "not between 22 and 44")
