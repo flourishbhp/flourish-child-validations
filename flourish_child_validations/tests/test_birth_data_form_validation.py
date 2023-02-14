@@ -48,7 +48,6 @@ class TestInfantBirthDataFormValidator(TestModeMixin, TestCase):
             'apgar_score_min_5': 0,
             'apgar_score_min_10': 0,
             'congenital_anomalities': NO,
-            'schedule_id': 1,
         }
 
     def test_validate_apgar_0(self):
