@@ -20,3 +20,12 @@ class ChildPennCNBFormValidator(ChildFormValidatorMixin, FormValidator):
         self.validate_other_specify(
             field='reason_incomplete',
             other_specify_field='reason_other')
+
+        self.required_if(
+            NO,
+            field='results_validity',
+            field_required='reason_invalid')
+
+        self.validate_other_specify(
+            field='reason_invalid',
+            other_specify_field='invalid_other')
