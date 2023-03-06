@@ -96,13 +96,11 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
     @property
     def child_assent_obj(self):
         child_assent_model_cls = django_apps.get_model(self.child_assent_model)
-        try:
-            model_obj = child_assent_model_cls.objects.get(
-                subject_identifier=self.subject_identifier)
-        except child_assent_model_cls.DoesNotExist:
-            return None
-        else:
-            return model_obj
+        child_assent_objs = child_assent_model_cls.objects.filter(
+            subject_identifier=self.subject_identifier)
+
+        if child_assent_objs:
+            return child_assent_objs.latest('consent_datetime')
 
     @property
     def child_caregiver_consent_obj(self):
