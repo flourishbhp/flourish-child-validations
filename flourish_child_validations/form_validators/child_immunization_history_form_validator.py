@@ -32,7 +32,8 @@ class VaccinesReceivedFormValidator(ChildFormValidatorMixin, FormValidator):
         self.validate_received_vaccine_fields(cleaned_data)
         self.validate_hpv_vaccine(cleaned_data)
         self.validate_dates(cleaned_data)
-        dates = ['first_dose_dt', 'second_dose_dt', 'third_dose_dt', 'booster_dose_dt']
+        dates = ['first_dose_dt', 'second_dose_dt', 'third_dose_dt', 'booster_dose_dt',
+                 'booster_2nd_dose_dt', 'booster_3rd_dose_dt']
         self.check_missing_date(cleaned_data, dates=dates)
         self.validate_prev_immunization_received(cleaned_data)
         super().clean()
@@ -63,16 +64,19 @@ class VaccinesReceivedFormValidator(ChildFormValidatorMixin, FormValidator):
         second_dose_dt = cleaned_data.get('second_dose_dt')
         third_dose_dt = cleaned_data.get('third_dose_dt')
         booster_dose_dt = cleaned_data.get('booster_dose_dt')
+        booster_2nd_dose_dt = cleaned_data.get('booster_2nd_dose_dt')
+        booster_3rd_dose_dt = cleaned_data.get('booster_3rd_dose_dt')
         if received_vaccine_name:
             if not (first_dose_dt or second_dose_dt or third_dose_dt or
-                    booster_dose_dt):
+                    booster_dose_dt or booster_2nd_dose_dt or booster_3rd_dose_dt):
                 message = {'received_vaccine_name':
                            f'You provided a vaccine name {received_vaccine_name}.'
                            'Please provide details on the doses.'}
                 self._errors.update(message)
                 raise ValidationError(message)
         else:
-            if first_dose_dt or second_dose_dt or third_dose_dt or booster_dose_dt:
+            if (first_dose_dt or second_dose_dt or third_dose_dt or booster_dose_dt or
+                    booster_2nd_dose_dt or booster_3rd_dose_dt):
                 message = {'received_vaccine_name':
                            'Please provide the vaccine name before providing '
                            'details on the doses.'}
@@ -95,7 +99,10 @@ class VaccinesReceivedFormValidator(ChildFormValidatorMixin, FormValidator):
         second_dose_dt = cleaned_data.get('second_dose_dt')
         third_dose_dt = cleaned_data.get('third_dose_dt')
         booster_dose_dt = cleaned_data.get('booster_dose_dt')
-        dates = [first_dose_dt, second_dose_dt, third_dose_dt, booster_dose_dt]
+        booster_2nd_dose_dt = cleaned_data.get('booster_2nd_dose_dt')
+        booster_3rd_dose_dt = cleaned_data.get('booster_3rd_dose_dt')
+        dates = [first_dose_dt, second_dose_dt, third_dose_dt, booster_dose_dt, booster_2nd_dose_dt,
+                 booster_3rd_dose_dt]
 
         for date in dates:
             dates.remove(date)
@@ -104,9 +111,17 @@ class VaccinesReceivedFormValidator(ChildFormValidatorMixin, FormValidator):
                     message = f'Duplicate entry for date {date}, please correct.'
                     raise ValidationError(message)
 
-        self.compare_dates('first_dose_dt', ['second_dose_dt', 'third_dose_dt', 'booster_dose_dt'])
-        self.compare_dates('second_dose_dt', ['third_dose_dt', 'booster_dose_dt'])
-        self.compare_dates('third_dose_dt', ['booster_dose_dt'])
+        self.compare_dates('first_dose_dt',
+                           ['second_dose_dt', 'third_dose_dt', 'booster_dose_dt',
+                            'booster_2nd_dose_dt', 'booster_3rd_dose_dt'])
+        self.compare_dates('second_dose_dt',
+                           ['third_dose_dt', 'booster_dose_dt', 'booster_2nd_dose_dt',
+                            'booster_3rd_dose_dt'])
+        self.compare_dates('third_dose_dt',
+                           ['booster_dose_dt', 'booster_2nd_dose_dt', 'booster_3rd_dose_dt'])
+        self.compare_dates('booster_dose_dt',
+                           ['booster_2nd_dose_dt', 'booster_3rd_dose_dt'])
+        self.compare_dates('booster_2nd_dose_dt', ['booster_3rd_dose_dt'])
 
     def compare_dates(self, date_field, compared_to=[]):
         date = self.cleaned_data.get(date_field)
@@ -139,6 +154,7 @@ class VaccinesReceivedFormValidator(ChildFormValidatorMixin, FormValidator):
         second_dose_dt = cleaned_data.get('second_dose_dt')
         third_dose_dt = cleaned_data.get('third_dose_dt')
         booster_dose_dt = cleaned_data.get('booster_dose_dt')
+        booster_2nd_dose_dt = cleaned_data.get('booster_2nd_dose_dt')
         try:
             received_vaccine = self.vaccines_received_cls.objects.get(
                 ~Q(child_immunization_history=cleaned_data.get('child_immunization_history')),
@@ -148,7 +164,8 @@ class VaccinesReceivedFormValidator(ChildFormValidatorMixin, FormValidator):
                 first_dose_dt=first_dose_dt,
                 second_dose_dt=second_dose_dt,
                 third_dose_dt=third_dose_dt,
-                booster_dose_dt=booster_dose_dt)
+                booster_dose_dt=booster_dose_dt,
+                booster_2nd_dose_dt=booster_2nd_dose_dt)
         except self.vaccines_received_cls.DoesNotExist:
             pass
         else:
