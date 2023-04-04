@@ -2,8 +2,12 @@ from django.db import models
 from django.db.models.deletion import PROTECT
 from django.utils import timezone
 from django_crypto_fields.fields import IdentityField
-from edc_base.model_mixins import BaseUuidModel
+from edc_base.model_mixins import BaseUuidModel, ListModelMixin
 from edc_base.utils import get_utcnow
+
+
+class ListModel(ListModelMixin, BaseUuidModel):
+    pass
 
 
 class Appointment(BaseUuidModel):
@@ -110,6 +114,7 @@ class ChildDataset(BaseUuidModel):
 
     infant_sex = models.CharField(max_length=7)
 
+
 class OnSchedule(BaseUuidModel):
     subject_identifier = models.CharField(
         max_length=50)
@@ -130,6 +135,7 @@ class Schedule(BaseUuidModel):
 
     onschedule_model = models.CharField(max_length=25, blank=True, null=True)
 
+
 class ChildVisit(BaseUuidModel):
     subject_identifier = models.CharField(max_length=25)
 
@@ -146,6 +152,7 @@ class ChildVisit(BaseUuidModel):
 
     visit_code_sequence = models.CharField(
         max_length=25, )
+
 
 class RegisteredSubject(BaseUuidModel):
     subject_identifier = models.CharField(
