@@ -13,6 +13,17 @@ class TbReferralOutcomesFormValidator(ChildFormValidatorMixin, FormValidator):
             field_required='tb_eval_location'
         )
 
+        self.required_if(
+            NO,
+            field='tb_eval',
+            field_required='reason_not_going'
+        )
+
+        self.validate_other_specify(
+            field='reason_not_going',
+            field_required='reason_not_going_other'
+        )
+
         self.validate_other_specify(
             field='tb_eval_location',
             field_required='tb_eval_location_other'
