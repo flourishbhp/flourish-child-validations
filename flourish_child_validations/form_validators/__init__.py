@@ -38,3 +38,4 @@ from .tb_adol_validations import TbPresenceHouseholdMembersAdolFormValidator
 from .tb_adol_validations import TbReferralOutcomesFormValidator
 from .tb_adol_validations import TbScreeningDuringEncountersFormValidator
 from .tb_adol_validations import TbVisitScreeningFormValidator
+from .tb_adol_validations import TbReferralAdolFormValidator
