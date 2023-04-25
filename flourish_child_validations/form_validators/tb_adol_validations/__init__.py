@@ -10,3 +10,4 @@ from .tb_referral_outcomes_form_validator import TbReferralOutcomesFormValidator
 from .tb_screening_during_encounters_form_validator import \
     TbScreeningDuringEncountersFormValidator
 from .tb_visit_screening_validator import TbVisitScreeningFormValidator
+from .tb_referal_form_validator import TbReferralAdolFormValidator
