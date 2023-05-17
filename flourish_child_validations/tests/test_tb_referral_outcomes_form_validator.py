@@ -250,3 +250,70 @@ class TestTbReferralOutcomesFormValidator(TestModeMixin, TestCase):
             form_validator.validate()
         except ValidationError as e:
             self.fail(f'ValidationError unexpectedly raised. Got{e}')
+
+    def test_tb_eval_no_reason_not_going_required(self):
+        """
+        Raise error if tb_eval is NO and field reason_not_going is not provided
+        """
+        ListModel.objects.create(short_name="sputum")
+        cleaned_data = {
+            'tb_eval': NO,
+            'reason_not_going': None,
+            'tb_treat_start': YES,
+            'tb_prev_therapy_start': None,
+        }
+
+        form_validator = TbReferralOutcomesFormValidator(
+            cleaned_data=cleaned_data)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('reason_not_going', form_validator._errors)
+
+    def test_tb_eval_yes_reason_not_going_not_required(self):
+        """
+        Test that no ValidationError is raised if tb_eval is YES and field reason_not_going is not provided
+        """
+        ListModel.objects.create(short_name="sputum")
+        cleaned_data = {
+            'tb_eval': YES,
+            'reason_not_going': None,
+            'tb_eval_location': "place",
+            'tb_diagnostic_perf': YES,
+            'tb_diagnostics': ListModel.objects.all(),
+            'tb_diagnose_pos': YES,
+            'tb_test_results': "Test",
+            'tb_treat_start': YES,
+            'tb_prev_therapy_start': None,
+        }
+
+        form_validator = TbReferralOutcomesFormValidator(
+            cleaned_data=cleaned_data)
+        try:
+            form_validator.validate()
+        except ValidationError as e:
+            self.fail(f'ValidationError unexpectedly raised. Got{e}')
+
+    def test_reason_not_going_other_required(self):
+        """
+        Test that ValidationError is raised if reason_not_going is OTHER and field reason_not_going_other is not provided
+        """
+        ListModel.objects.create(short_name="sputum")
+        cleaned_data = {
+            'tb_eval': NO,
+            'reason_not_going': OTHER,
+            'reason_not_going_other': None,
+            'tb_eval_location': None,
+            'tb_diagnostic_perf': None,
+            'tb_diagnostics': None,
+            'tb_diagnose_pos': None,
+            'tb_test_results': None,
+            'tb_treat_start': None,
+            'tb_prev_therapy_start': None,
+        }
+
+        form_validator = TbReferralOutcomesFormValidator(
+            cleaned_data=cleaned_data)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('reason_not_going_other', form_validator._errors)
+
+
+
