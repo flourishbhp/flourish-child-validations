@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase, tag
-from edc_constants.constants import YES, NO, OTHER
+from edc_constants.constants import YES, NO, OTHER, PENDING
 
 from ..form_validators import TbReferralOutcomesFormValidator
 from .models import ListModel
@@ -209,6 +209,29 @@ class TestTbReferralOutcomesFormValidator(TestModeMixin, TestCase):
             form_validator.validate()
         except ValidationError as e:
             self.fail(f'ValidationError unexpectedly raised. Got{e}')
+
+    def test_tb_diagnose_pos_tb_treat_start_required_alternate(self):
+        """
+        Raise error if tb_diagnose_pos is No and tb_treat_start is not provided
+        """
+        ListModel.objects.create(short_name="sputum")
+        cleaned_data = {
+            'tb_eval': YES,
+            'tb_eval_location': "place",
+            'tb_eval_location_other': None,
+            'tb_diagnostic_perf': PENDING,
+            'tb_diagnostics': ListModel.objects.all(),
+            'tb_diagnose_pos': NO,
+            'tb_test_results': None,
+            'tb_treat_start': YES,
+            'tb_prev_therapy_start': None,
+        }
+
+        form_validator = TbReferralOutcomesFormValidator(
+            cleaned_data=cleaned_data)
+
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('tb_diagnostics', form_validator._errors)
 
     def test_tb_not_evalaluated(self):
         """
