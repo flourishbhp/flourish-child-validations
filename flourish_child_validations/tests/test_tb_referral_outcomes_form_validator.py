@@ -210,9 +210,9 @@ class TestTbReferralOutcomesFormValidator(TestModeMixin, TestCase):
         except ValidationError as e:
             self.fail(f'ValidationError unexpectedly raised. Got{e}')
 
-    def test_tb_diagnose_pos_tb_treat_start_required_alternate(self):
+    def test_tb_diagnose_pos_required(self):
         """
-        Raise error if tb_diagnose_pos is No and tb_treat_start is not provided
+        Test if tb_diagnostics is not required when tb_diagnostic_perf is pending
         """
         ListModel.objects.create(short_name="sputum")
         cleaned_data = {
@@ -314,6 +314,3 @@ class TestTbReferralOutcomesFormValidator(TestModeMixin, TestCase):
             cleaned_data=cleaned_data)
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn('reason_not_going_other', form_validator._errors)
-
-
-
