@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 from edc_constants.constants import YES, NO, OTHER, NEG
-from ..form_validators import InfantHIVTestingFormValidator
+from flourish_child_validations.form_validators import InfantHIVTestingFormValidator
 
 
 class TestHIVInfantTestingFormValidator(TestCase):
@@ -33,6 +33,8 @@ class TestHIVInfantTestingFormValidator(TestCase):
     def test_child_not_tested_reason_required(self):
         self.clean_data.update(
             child_tested_for_hiv=NO,
+            child_test_date=None,
+            child_test_date_estimated=None,
             reason_child_not_tested=None)
         form_validator = InfantHIVTestingFormValidator(
             cleaned_data=self.clean_data)
@@ -87,6 +89,9 @@ class TestHIVInfantTestingFormValidator(TestCase):
     def test_no_testing_no_additional_comments_invalid(self):
         self.clean_data.update(
             child_tested_for_hiv=NO,
+            child_test_date=None,
+            child_test_date_estimated=None,
+            reason_child_not_tested="blah",
             preferred_clinic_for_testing='no_testing',
             additional_comments=None,
         )
