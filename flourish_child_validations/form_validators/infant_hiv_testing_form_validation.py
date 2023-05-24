@@ -21,6 +21,12 @@ class InfantHIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
 
         self.required_if(
             YES,
+            field='child_tested_for_hiv',
+            field_required='results_received',
+        )
+
+        self.required_if(
+            YES,
             field='results_received',
             field_required='recall_result_date',
         )
