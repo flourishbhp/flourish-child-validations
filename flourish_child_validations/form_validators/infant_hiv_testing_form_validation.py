@@ -86,8 +86,8 @@ class InfantHIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         self.validate_test_date()
 
     def validate_test_date(self):
-        child_test_date = self.cleaned_data.get('child_test_date')
-        received_date = self.cleaned_data.get('received_date')
+        child_test_date = self.cleaned_data.get('child_test_date', None)
+        received_date = self.cleaned_data.get('received_date', None)
 
         if child_test_date and received_date and child_test_date > received_date:
             raise ValidationError(
