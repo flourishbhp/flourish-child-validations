@@ -100,3 +100,24 @@ class TestHIVInfantTestingFormValidator(TestCase):
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn('additional_comments', form_validator._errors)
 
+    def test_hiv_test_result_before_test_date_invalid(self):
+        self.clean_data.update(
+            child_test_date='2022-11-19',
+            received_date='2022-11-18'
+        )
+        form_validator = InfantHIVTestingFormValidator(
+            cleaned_data=self.clean_data)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('received_date', form_validator._errors)
+
+    def test_reason_child_not_tested_other_not_required(self):
+        self.clean_data.update(
+            reason_child_not_tested=None,
+            reason_child_not_tested_other='blah'
+        )
+        form_validator = InfantHIVTestingFormValidator(
+            cleaned_data=self.clean_data)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('reason_child_not_tested_other', form_validator._errors)
+
+
