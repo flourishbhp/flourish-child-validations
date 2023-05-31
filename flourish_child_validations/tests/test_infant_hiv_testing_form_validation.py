@@ -34,6 +34,11 @@ class TestHIVInfantTestingFormValidator(TestCase):
         self.clean_data.update(
             child_tested_for_hiv=NO,
             child_test_date=None,
+            received_date=None,
+            results_received=None,
+            recall_result_date=None,
+            result_date_estimated=None,
+            hiv_test_result=None,
             child_test_date_estimated=None,
             reason_child_not_tested=None)
         form_validator = InfantHIVTestingFormValidator(
@@ -65,6 +70,11 @@ class TestHIVInfantTestingFormValidator(TestCase):
             child_tested_for_hiv=NO,
             child_test_date=None,
             child_test_date_estimated=None,
+            received_date=None,
+            results_received=None,
+            recall_result_date=None,
+            result_date_estimated=None,
+            hiv_test_result=None,
             reason_child_not_tested="blah",
             preferred_clinic_for_testing=None,
         )
@@ -78,6 +88,11 @@ class TestHIVInfantTestingFormValidator(TestCase):
             child_tested_for_hiv=NO,
             reason_child_not_tested=OTHER,
             child_test_date=None,
+            received_date=None,
+            results_received=None,
+            recall_result_date=None,
+            result_date_estimated=None,
+            hiv_test_result=None,
             child_test_date_estimated=None,
             reason_child_not_tested_other=None,
         )
@@ -91,6 +106,11 @@ class TestHIVInfantTestingFormValidator(TestCase):
             child_tested_for_hiv=NO,
             child_test_date=None,
             child_test_date_estimated=None,
+            results_received=None,
+            recall_result_date=None,
+            received_date=None,
+            result_date_estimated=None,
+            hiv_test_result=None,
             reason_child_not_tested="blah",
             preferred_clinic_for_testing='no_testing',
             additional_comments=None,
@@ -99,4 +119,25 @@ class TestHIVInfantTestingFormValidator(TestCase):
             cleaned_data=self.clean_data)
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn('additional_comments', form_validator._errors)
+
+    def test_hiv_test_result_before_test_date_invalid(self):
+        self.clean_data.update(
+            child_test_date='2022-11-19',
+            received_date='2022-11-18'
+        )
+        form_validator = InfantHIVTestingFormValidator(
+            cleaned_data=self.clean_data)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('received_date', form_validator._errors)
+
+    def test_reason_child_not_tested_other_not_required(self):
+        self.clean_data.update(
+            reason_child_not_tested=None,
+            reason_child_not_tested_other='blah'
+        )
+        form_validator = InfantHIVTestingFormValidator(
+            cleaned_data=self.clean_data)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('reason_child_not_tested_other', form_validator._errors)
+
 
