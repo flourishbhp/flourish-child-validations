@@ -1,6 +1,7 @@
 from edc_form_validators import FormValidator
 from edc_constants.choices import YES, NO, OTHER
 from .form_validator_mixin import ChildFormValidatorMixin
+from django.forms import ValidationError
 
 
 class InfantHIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
@@ -70,9 +71,10 @@ class InfantHIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
             field_required='preferred_clinic_for_testing',
         )
 
-        self.validate_other_specify(
+        self.required_if(
+            OTHER,
             field='reason_child_not_tested',
-            other_specify_field='reason_child_not_tested_other',
+            field_required='reason_child_not_tested_other',
         )
 
         self.required_if(
@@ -81,3 +83,13 @@ class InfantHIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
             field_required='additional_comments',
         )
 
+        self.validate_test_date()
+
+    def validate_test_date(self):
+        child_test_date = self.cleaned_data.get('child_test_date', None)
+        received_date = self.cleaned_data.get('received_date', None)
+
+        if child_test_date and received_date and child_test_date > received_date:
+            raise ValidationError(
+                {'received_date':
+                     'Received date cannot be before test date.'})
