@@ -44,6 +44,20 @@ class TbReferralOutcomesFormValidator(ChildFormValidatorMixin, FormValidator):
             m2m_field='tb_diagnostics',
             field_other='tb_diagnostics_other')
 
+        field_answer_dict = {
+            'sputum_sample': 'sputum',
+            'chest_xray': 'chest_xray',
+            'gene_xpert': 'gene_xpert',
+            'tst_or_mentoux': 'tst_mantoux',
+            'covid_19': 'covid_19_test'
+        }
+
+        for key, value in field_answer_dict.items():
+
+            self.m2m_other_specify(key,
+                                   m2m_field='tb_diagnostics',
+                                   field_other=value)
+
         self.required_if(
             YES,
             field='tb_diagnostic_perf',
