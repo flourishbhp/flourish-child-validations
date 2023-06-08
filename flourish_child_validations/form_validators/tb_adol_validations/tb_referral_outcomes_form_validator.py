@@ -59,23 +59,6 @@ class TbReferralOutcomesFormValidator(ChildFormValidatorMixin, FormValidator):
                                    field_other=value)
 
         self.required_if(
-            YES,
-            field='tb_diagnostic_perf',
-            field_required='tb_diagnose_pos')
-
-        self.required_if(
-            YES,
-            field='tb_diagnose_pos',
-            field_required='tb_test_results')
-
-        self.required_if(
-            *[YES, NO],
-            field='tb_diagnose_pos',
-            field_required='tb_treat_start',
-            inverse=False
-        )
-
-        self.required_if(
             NO,
             field='tb_diagnostic_perf',
             field_required='tb_treat_start',
@@ -83,6 +66,6 @@ class TbReferralOutcomesFormValidator(ChildFormValidatorMixin, FormValidator):
         )
 
         self.required_if(
-            NO,
+            YES,
             field='tb_treat_start',
             field_required='tb_prev_therapy_start')
