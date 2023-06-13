@@ -27,6 +27,7 @@ from .form_validator_mixin import ChildFormValidatorMixin
 from .infant_arv_exposure_form_validation import InfantArvExposureFormValidator
 from .infant_congenital_anomalies_form_validation import *
 from .infant_feeding_form_validator import InfantFeedingFormValidator
+from .infant_hiv_testing_form_validation import InfantHIVTestingFormValidator
 from .tb_adol_validations import AnthropometricFormValidator
 from .tb_adol_validations import Covid19AdolFormValidator
 # TB Validators import

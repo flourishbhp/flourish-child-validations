@@ -50,6 +50,16 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
         for fields in measurements:
             self.validate_measurement_margin(*fields)
 
+        self.required_if_true(
+            self.child_age >= 4,
+            field_required='child_height',
+        )
+
+        self.required_if_true(
+            self.child_age >= 4,
+            field_required='child_weight_kg',
+        )
+
     def validate_skin_folds_followup(self):
 
         child_visit = self.cleaned_data.get('child_visit')
