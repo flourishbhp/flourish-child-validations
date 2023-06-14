@@ -54,9 +54,9 @@ class TbReferralOutcomesFormValidator(ChildFormValidatorMixin, FormValidator):
 
         for key, value in field_answer_dict.items():
 
-            self.m2m_other_specify(key,
+            self.m2m_other_specify(value,
                                    m2m_field='tb_diagnostics',
-                                   field_other=value)
+                                   field_other=key)
 
         self.required_if(
             NO,
