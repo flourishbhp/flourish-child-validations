@@ -1,5 +1,7 @@
-from edc_constants.constants import NO, OTHER, YES
+from django.core.exceptions import ValidationError
+from edc_constants.constants import NO, OTHER, YES, NORMAL, POS, NEG, ABNORMAL
 from edc_form_validators import FormValidator
+
 
 from flourish_child_validations.form_validators import ChildFormValidatorMixin
 
@@ -58,14 +60,25 @@ class TbReferralOutcomesFormValidator(ChildFormValidatorMixin, FormValidator):
                                    m2m_field='tb_diagnostics',
                                    field_other=key)
 
-        self.required_if(
-            NO,
-            field='tb_diagnostic_perf',
-            field_required='tb_treat_start',
-            inverse=False
-        )
+        self.validate_tb()
 
         self.required_if(
-            YES,
+            NO,
             field='tb_treat_start',
-            field_required='tb_prev_therapy_start')
+            field_required='tb_prev_therapy_start'
+        )
+
+    def validate_tb(self):
+        sputum_sample = self.cleaned_data.get('sputum_sample', None)
+        chest_xray = self.cleaned_data.get('chest_xray', None)
+        gene_xpert = self.cleaned_data.get('gene_xpert', None)
+        tst_or_mentoux = self.cleaned_data.get('tst_or_mentoux', None)
+        covid_19 = self.cleaned_data.get('covid_19', None)
+        tb_treat_start = self.cleaned_data.get('tb_treat_start', None)
+
+        answers = [sputum_sample, chest_xray,
+                   gene_xpert, tst_or_mentoux, covid_19]
+
+        answers = filter(lambda element: element in [POS, ABNORMAL], answers)
+
+        self.required_if_true(list(answers), field_required='tb_treat_start')
