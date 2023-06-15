@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_crypto_fields.apps.AppConfig',
     'edc_device.apps.AppConfig',
+    'edc_protocol.apps.AppConfig',
     'edc_action_item.apps.AppConfig',
     'flourish_prn.apps.AppConfig',
     'flourish_child_validations.apps.AppConfig',
@@ -145,4 +146,3 @@ if 'test' in sys.argv:
     MIGRATION_MODULES = DisableMigrations()
     PASSWORD_HASHERS = ('django.contrib.auth.hashers.MD5PasswordHasher',)
     DEFAULT_FILE_STORAGE = 'inmemorystorage.InMemoryStorage'
-
