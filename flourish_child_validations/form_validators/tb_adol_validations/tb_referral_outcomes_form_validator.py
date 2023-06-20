@@ -70,8 +70,8 @@ class TbReferralOutcomesFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def validate_tb(self):
         """
-        If a test is not specified, test results for that particular test 
-        should not be required- that only happens for sputum and covid-19 tests.
+        if all tests are neg, tb_treat_start should be no or vice versa
+        for pos results
         """
         sputum_sample = self.cleaned_data.get('sputum_sample', None)
         chest_xray = self.cleaned_data.get('chest_xray', None)
