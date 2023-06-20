@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase, tag
-from edc_constants.constants import (YES, NO, OTHER, 
+from edc_constants.constants import (YES, NO, OTHER,
                                      PENDING, NEG, POS)
 
 from ..form_validators import TbReferralOutcomesFormValidator
@@ -109,7 +109,7 @@ class TestTbReferralOutcomesFormValidator(TestModeMixin, TestCase):
         self.data['tb_diagnostic_perf'] = YES
         self.data['tb_diagnostics'] = ListModel.objects.filter(
             short_name='covid_19_test')
-        
+
         self.data['covid_19'] = POS
         self.data['tb_treat_start'] = NO
 
@@ -126,7 +126,7 @@ class TestTbReferralOutcomesFormValidator(TestModeMixin, TestCase):
         self.data['tb_diagnostic_perf'] = YES
         self.data['tb_diagnostics'] = ListModel.objects.filter(
             short_name='covid_19_test')
-        
+
         self.data['covid_19'] = NEG
         self.data['tb_treat_start'] = YES
 

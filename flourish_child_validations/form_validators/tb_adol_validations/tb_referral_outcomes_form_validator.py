@@ -92,4 +92,3 @@ class TbReferralOutcomesFormValidator(ChildFormValidatorMixin, FormValidator):
             raise ValidationError({'tb_treat_start': 'Not all tests are negative'})
         elif not answers and tb_treat_start == YES:
             raise ValidationError({'tb_treat_start': 'All tests are negative'})
-
