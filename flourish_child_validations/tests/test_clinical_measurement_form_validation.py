@@ -3,46 +3,39 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase, tag
 from django.utils import timezone
 from edc_base.utils import get_utcnow
-from edc_constants.constants import OTHER, YES, FEMALE
+from edc_constants.constants import FEMALE
 
 from ..form_validators import ChildClinicalMeasurementsFormValidator
-from .models import ChildVisit, Appointment, CaregiverChildConsent, ChildAssent
+from .models import ChildVisit, Appointment, CaregiverChildConsent, RegisteredSubject
+from .test_model_mixin import TestModelMixin
 
 
 @tag('cmf')
-class TestClinicalMeasurementForm(TestCase):
+class TestClinicalMeasurementForm(TestModelMixin, TestCase):
 
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(ChildClinicalMeasurementsFormValidator, *args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(ChildClinicalMeasurementsFormValidator, *args, **kwargs)
 
     def setUp(self):
-
-        flourish_consent_version_model = 'flourish_child_validations.flourishconsentversion'
-        subject_consent_model = 'flourish_child_validations.subjectconsent'
-        child_caregiver_consent_model = 'flourish_child_validations.caregiverchildconsent'
-        child_assent_model = 'flourish_child_validations.childassent'
-
-        ChildClinicalMeasurementsFormValidator.consent_version_model = flourish_consent_version_model
-        ChildClinicalMeasurementsFormValidator.subject_consent_model = subject_consent_model
-        ChildClinicalMeasurementsFormValidator.maternal_delivery_model = subject_consent_model
-        ChildClinicalMeasurementsFormValidator.child_assent_model = child_assent_model
-        ChildClinicalMeasurementsFormValidator.child_caregiver_consent_model = child_caregiver_consent_model
-
         CaregiverChildConsent.objects.create(
             gender=FEMALE,
             consent_datetime=get_utcnow(),
             child_dob=get_utcnow() - relativedelta(years=6),
-            subject_identifier='2334432')
+            subject_identifier='2334432-10')
 
         appointment = Appointment.objects.create(
-            subject_identifier='2334432',
+            subject_identifier='2334432-10',
             appt_datetime=timezone.now(),
             visit_code='2000',
             visit_instance='0')
 
         self.child_visit = ChildVisit.objects.create(
-            subject_identifier='2334432',
+            subject_identifier=appointment.subject_identifier,
             appointment=appointment)
+
+        RegisteredSubject.objects.create(
+            subject_identifier=appointment.subject_identifier,
+            relative_identifier='2334432', )
 
     def test_skin_folds_not_required_valid(self):
         cleaned_data = {
@@ -65,13 +58,13 @@ class TestClinicalMeasurementForm(TestCase):
     def test_skin_folds_not_required_invalid(self):
 
         appointment = Appointment.objects.create(
-            subject_identifier='2334432',
+            subject_identifier='2334432-10',
             appt_datetime=timezone.now(),
             visit_code='3000',
             visit_instance='0')
 
         child_visit = ChildVisit.objects.create(
-            subject_identifier='2334432',
+            subject_identifier='2334432-10',
             visit_code='3000',
             appointment=appointment)
 

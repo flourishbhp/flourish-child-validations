@@ -4,10 +4,29 @@ from django.utils import timezone
 from django_crypto_fields.fields import IdentityField
 from edc_base.model_mixins import BaseUuidModel, ListModelMixin
 from edc_base.utils import get_utcnow
+from edc_constants.constants import NEW
 
 
 class ListModel(ListModelMixin, BaseUuidModel):
     pass
+
+
+class ActionType(BaseUuidModel):
+    name = models.CharField(max_length=50, )
+
+
+class ActionItem(BaseUuidModel):
+    subject_identifier = models.CharField(max_length=25)
+
+    action_identifier = models.CharField(max_length=25)
+
+    report_datetime = models.DateTimeField(
+        default=get_utcnow)
+
+    action_type = models.ForeignKey(
+        ActionType, on_delete=PROTECT, )
+
+    status = models.CharField(max_length=25, default=NEW, )
 
 
 class Appointment(BaseUuidModel):
@@ -17,7 +36,15 @@ class Appointment(BaseUuidModel):
 
     visit_code = models.CharField(max_length=25)
 
+    visit_code_sequence = models.IntegerField(default=0)
+
     visit_instance = models.CharField(max_length=25)
+
+    visit_schedule_name = models.CharField(max_length=25)
+
+    @classmethod
+    def related_visit_model_attr(cls):
+        return 'childvisit'
 
 
 class CaregiverConsent(BaseUuidModel):
@@ -145,8 +172,6 @@ class ChildVisit(BaseUuidModel):
 
     schedule_name = models.CharField(max_length=25)
 
-    schedule = models.OneToOneField(Schedule, on_delete=PROTECT)
-
     visit_code = models.CharField(
         max_length=25, )
 
@@ -199,7 +224,16 @@ class CaregiverSocioDemographicData(BaseUuidModel):
     stay_with_child = models.CharField(max_length=50)
 
 
+class InfantFeeding(BaseUuidModel):
+    child_visit = models.OneToOneField(ChildVisit, on_delete=PROTECT)
+
+
 class MaternalDelivery(BaseUuidModel):
     report_datetime = models.DateTimeField()
     subject_identifier = models.CharField(
         max_length=50)
+
+
+class ChildOffStudy(BaseUuidModel):
+    action_name = 'submit-childoff-study'
+    subject_identifier = models.CharField(max_length=25)

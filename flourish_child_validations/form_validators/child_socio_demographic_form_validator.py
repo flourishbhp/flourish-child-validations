@@ -5,26 +5,31 @@ from edc_base.utils import age, get_utcnow
 from edc_constants.choices import NO, YES
 from edc_form_validators import FormValidator
 
+from ..utils import caregiver_subject_identifier
 from .form_validator_mixin import ChildFormValidatorMixin
 
 
 class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator):
     child_assent_model = 'flourish_child.childassent'
-
-    child_caregiver_consent_model = 'flourish_caregiver.caregiverchildconsent'
-
+    caregiver_child_consent_model = 'flourish_caregiver.caregiverchildconsent'
     maternal_delivery_model = 'flourish_caregiver.maternaldelivery'
-
     caregiver_socio_demographic_model = 'flourish_caregiver.sociodemographicdata'
+
+    def onschedule_model(self, instance=None):
+        schedule = getattr(instance, 'schedule', None)
+        return getattr(schedule, 'onschedule_model', None)
+
+    def onschedule_model_cls(self, onschedule_model):
+        return django_apps.get_model(onschedule_model)
 
     @property
     def caregiver_socio_demographic_cls(self):
         return django_apps.get_model(self.caregiver_socio_demographic_model)
 
     def clean(self):
+        super().clean()
         self.subject_identifier = self.cleaned_data.get(
             'child_visit').appointment.subject_identifier
-        super().clean()
 
         self.validate_consent_version_obj(self.subject_identifier)
 
@@ -42,15 +47,9 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
 
         self.validate_other_specify(field='education_level')
 
-    @property
-    def caregiver_subject_identifier(self):
-        subject_identifier = self.subject_identifier.split('-')
-        subject_identifier.pop()
-        caregiver_subject_identifier = '-'.join(subject_identifier)
-        return caregiver_subject_identifier
-
     def validate_child_stay_with_caregiver(self, cleaned_data=None):
-        caregiver_subject_identifier = self.caregiver_subject_identifier
+        maternal_identifier = caregiver_subject_identifier(
+            self.registered_subject_cls, self.subject_identifier)
         child_visit_code_sequence = self.cleaned_data.get(
             'child_visit').visit_code_sequence
         child_visit = self.cleaned_data.get('child_visit').appointment.visit_code
@@ -58,28 +57,28 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
         caregiver_model_objs = self.caregiver_socio_demographic_cls.objects.filter(
             maternal_visit__visit_code=maternal_visit_code,
             maternal_visit__visit_code_sequence=child_visit_code_sequence,
-            maternal_visit__subject_identifier=caregiver_subject_identifier,
-        )
+            maternal_visit__subject_identifier=maternal_identifier, )
+
         for caregiver_model_obj in caregiver_model_objs:
             corresponding_visit = caregiver_model_obj.maternal_visit
-            corresponding_onschedule_model = corresponding_visit.schedule.onschedule_model
-            corresponding_onschedule_cls = django_apps.get_model(
+            corresponding_onschedule_model = self.onschedule_model(
+                instance=corresponding_visit)
+            corresponding_onschedule_cls = self.onschedule_model_cls(
                 corresponding_onschedule_model)
+
             try:
                 corresponding_onschedule_cls.objects.get(
                     child_subject_identifier=self.subject_identifier,
-                    schedule_name=corresponding_visit.schedule_name
-                )
-
+                    schedule_name=corresponding_visit.schedule_name, )
             except corresponding_onschedule_cls.DoesNotExist:
                 pass
             else:
-                if caregiver_model_obj.stay_with_child and \
+                if (caregiver_model_obj.stay_with_child and
                         caregiver_model_obj.stay_with_child != cleaned_data.get(
-                        'stay_with_caregiver'):
-                    msg = {'stay_with_caregiver': 'Response should match the response '
-                                                  'provided on the caregiver socio '
-                                                  'demographic data form'}
+                            'stay_with_caregiver')):
+                    msg = {'stay_with_caregiver':
+                           'Response should match the response provided '
+                           'on the caregiver socio demographic data form'}
                     self._errors.update(msg)
                     raise ValidationError(msg)
 
@@ -139,7 +138,7 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
     @property
     def child_caregiver_consent_obj(self):
         child_caregiver_consent_model_cls = django_apps.get_model(
-            self.child_caregiver_consent_model)
+            self.caregiver_child_consent_model)
 
         child_caregiver_consen_objs = child_caregiver_consent_model_cls.objects.filter(
             subject_identifier=self.subject_identifier)
@@ -151,9 +150,11 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
     def maternal_delivery_obj(self):
         maternal_delivery_model_cls = django_apps.get_model(
             self.maternal_delivery_model)
+        maternal_identifier = caregiver_subject_identifier(
+            self.registered_subject_cls, self.subject_identifier)
         try:
             model_obj = maternal_delivery_model_cls.objects.get(
-                subject_identifier__istartswith=self.subject_identifier)
+                subject_identifier=maternal_identifier)
         except maternal_delivery_model_cls.DoesNotExist:
             return None
         else:

@@ -1,10 +1,15 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 from edc_constants.constants import YES, NO, OTHER, NEG
-from flourish_child_validations.form_validators import InfantHIVTestingFormValidator
+
+from ..form_validators import InfantHIVTestingFormValidator
+from .test_model_mixin import TestModelMixin
 
 
-class TestHIVInfantTestingFormValidator(TestCase):
+class TestHIVInfantTestingFormValidator(TestModelMixin, TestCase):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(InfantHIVTestingFormValidator, *args, **kwargs)
 
     def setUp(self):
         self.clean_data = {
