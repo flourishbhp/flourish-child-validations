@@ -46,6 +46,12 @@ class TbReferralOutcomesFormValidator(ChildFormValidatorMixin, FormValidator):
             m2m_field='tb_diagnostics',
             field_other='tb_diagnostics_other')
 
+        tb_diagnostics_other = self.cleaned_data.get('tb_diagnostics_other',
+                                                     None)
+
+        self.required_if_true(tb_diagnostics_other,
+                              field_required='tb_diagnostics_other_results')
+
         field_answer_dict = {
             'sputum_sample': 'sputum',
             'chest_xray': 'chest_xray',
@@ -77,18 +83,17 @@ class TbReferralOutcomesFormValidator(ChildFormValidatorMixin, FormValidator):
         chest_xray = self.cleaned_data.get('chest_xray', None)
         gene_xpert = self.cleaned_data.get('gene_xpert', None)
         tst_or_mentoux = self.cleaned_data.get('tst_or_mentoux', None)
-        covid_19 = self.cleaned_data.get('covid_19', None) 
-        tb_treat_start = self.cleaned_data.get('tb_treat_start') # compulsory
+        covid_19 = self.cleaned_data.get('covid_19', None)
+        tb_treat_start = self.cleaned_data.get('tb_treat_start')  # compulsory
 
         answers = [sputum_sample, chest_xray,
                    gene_xpert, tst_or_mentoux, covid_19]
 
-        answers = list(filter(lambda element: element in [POS, ABNORMAL] \
+        answers = list(filter(lambda element: element in [POS, ABNORMAL]
                               and element != None, answers))
 
-
-
         if answers and tb_treat_start == NO:
-            raise ValidationError({'tb_treat_start': 'Not all tests are negative'})
+            raise ValidationError(
+                {'tb_treat_start': 'Not all tests are negative'})
         elif not answers and tb_treat_start == YES:
             raise ValidationError({'tb_treat_start': 'All tests are negative'})
