@@ -1,5 +1,7 @@
-from edc_constants.constants import NO, OTHER, YES
+from django.core.exceptions import ValidationError
+from edc_constants.constants import NO, OTHER, YES, NORMAL, POS, NEG, ABNORMAL
 from edc_form_validators import FormValidator
+
 
 from flourish_child_validations.form_validators import ChildFormValidatorMixin
 
@@ -44,31 +46,54 @@ class TbReferralOutcomesFormValidator(ChildFormValidatorMixin, FormValidator):
             m2m_field='tb_diagnostics',
             field_other='tb_diagnostics_other')
 
-        self.required_if(
-            YES,
-            field='tb_diagnostic_perf',
-            field_required='tb_diagnose_pos')
+        tb_diagnostics_other = self.cleaned_data.get('tb_diagnostics_other',
+                                                     None)
 
-        self.required_if(
-            YES,
-            field='tb_diagnose_pos',
-            field_required='tb_test_results')
+        self.required_if_true(tb_diagnostics_other,
+                              field_required='tb_diagnostics_other_results')
 
-        self.required_if(
-            *[YES, NO],
-            field='tb_diagnose_pos',
-            field_required='tb_treat_start',
-            inverse=False
-        )
+        field_answer_dict = {
+            'sputum_sample': 'sputum',
+            'chest_xray': 'chest_xray',
+            'gene_xpert': 'gene_xpert',
+            'tst_or_mentoux': 'tst_mantoux',
+            'covid_19': 'covid_19_test'
+        }
 
-        self.required_if(
-            NO,
-            field='tb_diagnostic_perf',
-            field_required='tb_treat_start',
-            inverse=False
-        )
+        for key, value in field_answer_dict.items():
+
+            self.m2m_other_specify(value,
+                                   m2m_field='tb_diagnostics',
+                                   field_other=key)
+
+        self.validate_tb()
 
         self.required_if(
             NO,
             field='tb_treat_start',
-            field_required='tb_prev_therapy_start')
+            field_required='tb_prev_therapy_start'
+        )
+
+    def validate_tb(self):
+        """
+        if all tests are neg, tb_treat_start should be no or vice versa
+        for pos results
+        """
+        sputum_sample = self.cleaned_data.get('sputum_sample', None)
+        chest_xray = self.cleaned_data.get('chest_xray', None)
+        gene_xpert = self.cleaned_data.get('gene_xpert', None)
+        tst_or_mentoux = self.cleaned_data.get('tst_or_mentoux', None)
+        covid_19 = self.cleaned_data.get('covid_19', None)
+        tb_treat_start = self.cleaned_data.get('tb_treat_start')  # compulsory
+
+        answers = [sputum_sample, chest_xray,
+                   gene_xpert, tst_or_mentoux, covid_19]
+
+        answers = list(filter(lambda element: element in [POS, ABNORMAL]
+                              and element != None, answers))
+
+        if answers and tb_treat_start == NO:
+            raise ValidationError(
+                {'tb_treat_start': 'Not all tests are negative'})
+        elif not answers and tb_treat_start == YES:
+            raise ValidationError({'tb_treat_start': 'All tests are negative'})

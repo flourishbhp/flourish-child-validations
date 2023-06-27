@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase, tag
-from edc_constants.constants import YES, NO, OTHER, PENDING
+from edc_constants.constants import (YES, NO, OTHER,
+                                     PENDING, NEG, POS)
 
 from ..form_validators import TbReferralOutcomesFormValidator
 from .models import ListModel
@@ -12,305 +13,125 @@ class TestTbReferralOutcomesFormValidator(TestModeMixin, TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(TbReferralOutcomesFormValidator, *args, **kwargs)
 
-    def test_tb_eval_location_required_valid(self):
-        """
-        Raise error if tb eval is Yes and field tb eval location is not provided
-        """
-        ListModel.objects.create(short_name="sputum")
-        cleaned_data = {
-            'tb_eval': YES,
-            'tb_eval_location': None,
-            'tb_diagnostic_perf': YES,
-            'tb_treat_start': NO,
-            'tb_prev_therapy_start': YES,
-            'tb_diagnose_pos': YES,
-            'tb_test_results': "thiiis ",
-            'tb_diagnostics': ListModel.objects.all()
-        }
+    def setUp(self):
+
+        ListModel.objects.bulk_create(
+            objs=[ListModel(short_name='sputum', name='sputum'),
+                  ListModel(short_name='chest_xray', name='chest_xray'),
+                  ListModel(short_name='gene_xpert', name='gene_xpert'),
+                  ListModel(short_name='tst_mantoux', name='tst_mantoux'),
+                  ListModel(short_name='covid_19_test', name='covid_19_test')])
+
+        self.data = {'tb_eval': 'Yes',
+                     'reason_not_going': None,
+                     'reason_not_going_other': 'mmm',
+                     'tb_eval_comments': '',
+                     'tb_eval_location': 'OTHER',
+                     'tb_eval_location_other': 'mmmm',
+                     'tb_diagnostic_perf': 'No',
+                     'tb_diagnostics': ListModel.objects.none(),
+                     'tb_diagnostics_other': None,
+                     'sputum_sample': None,
+                     'chest_xray': None,
+                     'gene_xpert': None,
+                     'tst_or_mentoux': None,
+                     'covid_19': None,
+                     'tb_treat_start': None,
+                     'tb_prev_therapy_start': None,
+                     'tb_comments': ''}
+
+    def test_form_valid(self):
 
         form_validator = TbReferralOutcomesFormValidator(
-            cleaned_data=cleaned_data)
+            cleaned_data=self.data)
+
+        try:
+            form_validator.validate()
+        except ValidationError:
+            self.fail('Data supplied not valid')
+
+    def test_chest_xray_required(self):
+        self.data['tb_diagnostic_perf'] = YES
+        self.data['tb_diagnostics'] = ListModel.objects.filter(
+            short_name='chest_xray')
+
+        self.data['chest_xray'] = None
+
+        form_validator = TbReferralOutcomesFormValidator(
+            cleaned_data=self.data)
+
         self.assertRaises(ValidationError, form_validator.validate)
-        self.assertIn('tb_eval_location', form_validator._errors)
+        self.assertIn('chest_xray', form_validator._errors)
 
-    def test_tb_eval_location_other_required_valid(self):
-        """
-        Raise error if tb eval location is other and field tb eval location other is not provided
-        """
-        ListModel.objects.create(short_name="sputum")
-        cleaned_data = {
-            'tb_eval': YES,
-            'tb_eval_location': OTHER,
-            'tb_eval_location_other': None,
-            'tb_diagnostic_perf': YES,
-            'tb_treat_start': NO,
-            'tb_prev_therapy_start': YES,
-            'tb_diagnose_pos': YES,
-            'tb_test_results': "thiiis ",
-            'tb_diagnostics': ListModel.objects.all()
-        }
+    def test_gene_xpert_required(self):
+        self.data['tb_diagnostic_perf'] = YES
+        self.data['tb_diagnostics'] = ListModel.objects.filter(
+            short_name='gene_xpert')
+
+        self.data['gene_xpert'] = None
 
         form_validator = TbReferralOutcomesFormValidator(
-            cleaned_data=cleaned_data)
+            cleaned_data=self.data)
+
         self.assertRaises(ValidationError, form_validator.validate)
-        self.assertIn('tb_eval_location_other', form_validator._errors)
+        self.assertIn('gene_xpert', form_validator._errors)
 
-    def test_tb_diag_perf_treat_start_required(self):
-        """
-        Raise error if tb_diag is No and field tb_treat_start is null
-        """
-        ListModel.objects.create(short_name="sputum")
-        cleaned_data = {
-            'tb_eval': YES,
-            'tb_eval_location': "Place",
-            'tb_eval_location_other': None,
-            'tb_diagnostic_perf': NO,
-            'tb_treat_start': None,
-            'tb_prev_therapy_start': YES,
-            'tb_test_results': "thiiis ",
-        }
+    def test_tst_or_mentoux_required(self):
+        self.data['tb_diagnostic_perf'] = YES
+        self.data['tb_diagnostics'] = ListModel.objects.filter(
+            short_name='tst_mantoux')
+
+        self.data['tst_or_mentoux'] = None
 
         form_validator = TbReferralOutcomesFormValidator(
-            cleaned_data=cleaned_data)
+            cleaned_data=self.data)
+
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('tst_or_mentoux', form_validator._errors)
+
+    def test_covid_19_required(self):
+        self.data['tb_diagnostic_perf'] = YES
+        self.data['tb_diagnostics'] = ListModel.objects.filter(
+            short_name='covid_19_test')
+
+        self.data['covid_19'] = None
+
+        form_validator = TbReferralOutcomesFormValidator(
+            cleaned_data=self.data)
+
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('covid_19', form_validator._errors)
+
+    def test_tb_treat_start_should_be_yes(self):
+        """
+        tb_test_start should be No if all test results are negative
+        """
+        self.data['tb_diagnostic_perf'] = YES
+        self.data['tb_diagnostics'] = ListModel.objects.filter(
+            short_name='covid_19_test')
+
+        self.data['covid_19'] = POS
+        self.data['tb_treat_start'] = NO
+
+        form_validator = TbReferralOutcomesFormValidator(
+            cleaned_data=self.data)
 
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn('tb_treat_start', form_validator._errors)
 
-    def test_tb_diagnostics_other_specify(self):
-        """
-         Raise error if tb_diagnostics is Other and tb_diagnostics_other is null
-         """
-        ListModel.objects.create(short_name=OTHER)
-        cleaned_data = {
-            'tb_eval': YES,
-            'tb_eval_location': "place",
-            'tb_eval_location_other': None,
-            'tb_diagnostic_perf': YES,
-            'tb_treat_start': NO,
-            'tb_prev_therapy_start': YES,
-            'tb_diagnose_pos': YES,
-            'tb_test_results': "thiiis ",
-            'tb_diagnostics': ListModel.objects.all()
-        }
-        form_validator = TbReferralOutcomesFormValidator(
-            cleaned_data=cleaned_data)
-        self.assertRaises(ValidationError, form_validator.validate)
-        self.assertIn('tb_diagnostics_other', form_validator._errors)
+    def test_tb_treat_start_should_be_no(self):
+        '''
+        tb_test_start should be Yes if some tests results are positive
+        '''
+        self.data['tb_diagnostic_perf'] = YES
+        self.data['tb_diagnostics'] = ListModel.objects.filter(
+            short_name='covid_19_test')
 
-    def test_referral_tb_diagnostic_perf_not_required(self):
-        """
-        Raise error if tb_diagnostic_perf is NO and tb_diagnose_pos is provided
-        """
-        ListModel.objects.create(short_name="sputum")
-        cleaned_data = {
-            'tb_eval': YES,
-            'tb_eval_location': "place",
-            'tb_eval_location_other': None,
-            'tb_diagnostic_perf': NO,
-            'tb_treat_start': NO,
-            'tb_prev_therapy_start': YES,
-            'tb_diagnose_pos': YES,
-            'tb_test_results': "thiiis ",
-        }
+        self.data['covid_19'] = NEG
+        self.data['tb_treat_start'] = YES
 
         form_validator = TbReferralOutcomesFormValidator(
-            cleaned_data=cleaned_data)
-        self.assertRaises(ValidationError, form_validator.validate)
-        self.assertIn('tb_diagnose_pos', form_validator._errors)
+            cleaned_data=self.data)
 
-    def test_referral_tb_diagnostic_perf_required(self):
-        """
-        Raise error if tb_diagnostic_perf is Yes and tb_diagnose_pos is not provided
-        """
-        ListModel.objects.create(short_name="sputum")
-        cleaned_data = {
-            'tb_eval': YES,
-            'tb_eval_location': "place",
-            'tb_eval_location_other': None,
-            'tb_diagnostic_perf': YES,
-            'tb_treat_start': NO,
-            'tb_prev_therapy_start': YES,
-            'tb_diagnostics': ListModel.objects.all(),
-            'tb_diagnose_pos': None,
-            'tb_test_results': "thiiis ",
-        }
-
-        form_validator = TbReferralOutcomesFormValidator(
-            cleaned_data=cleaned_data)
-        self.assertRaises(ValidationError, form_validator.validate)
-        self.assertIn('tb_diagnose_pos', form_validator._errors)
-
-    def test_tb_treat_start_required(self):
-        """
-        Raise error if tb_diagnostic_perf is No and tb_treat_start is not provided
-        """
-        ListModel.objects.create(short_name="sputum")
-        cleaned_data = {
-            'tb_eval': YES,
-            'tb_eval_location': "place",
-            'tb_eval_location_other': None,
-            'tb_diagnostic_perf': NO,
-            'tb_diagnostics': None,
-            'tb_diagnose_pos': None,
-            'tb_test_results': None,
-            'tb_treat_start': None,
-            'tb_prev_therapy_start': None,
-        }
-
-        form_validator = TbReferralOutcomesFormValidator(
-            cleaned_data=cleaned_data)
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn('tb_treat_start', form_validator._errors)
-
-    def test_tb_diagnose_pos_tb_treat_start_required(self):
-        """
-        Raise error if tb_diagnose_pos is No and tb_treat_start is not provided
-        """
-        ListModel.objects.create(short_name="sputum")
-        cleaned_data = {
-            'tb_eval': YES,
-            'tb_eval_location': "place",
-            'tb_eval_location_other': None,
-            'tb_diagnostic_perf': YES,
-            'tb_diagnostics': ListModel.objects.all(),
-            'tb_diagnose_pos': NO,
-            'tb_test_results': None,
-            'tb_treat_start': YES,
-            'tb_prev_therapy_start': None,
-        }
-
-        form_validator = TbReferralOutcomesFormValidator(
-            cleaned_data=cleaned_data)
-        try:
-            form_validator.validate()
-        except ValidationError as e:
-            self.fail(f'ValidationError unexpectedly raised. Got{e}')
-
-    def test_tb_diagnose_pos_tb_treat_start_required_alternate(self):
-        """
-        Raise error if tb_diagnose_pos is No and tb_treat_start is not provided
-        """
-        ListModel.objects.create(short_name="sputum")
-        cleaned_data = {
-            'tb_eval': YES,
-            'tb_eval_location': "place",
-            'tb_eval_location_other': None,
-            'tb_diagnostic_perf': YES,
-            'tb_diagnostics': ListModel.objects.all(),
-            'tb_diagnose_pos': YES,
-            'tb_test_results': "Test",
-            'tb_treat_start': YES,
-            'tb_prev_therapy_start': None,
-        }
-
-        form_validator = TbReferralOutcomesFormValidator(
-            cleaned_data=cleaned_data)
-        try:
-            form_validator.validate()
-        except ValidationError as e:
-            self.fail(f'ValidationError unexpectedly raised. Got{e}')
-
-    def test_tb_diagnose_pos_required(self):
-        """
-        Test if tb_diagnostics is not required when tb_diagnostic_perf is pending
-        """
-        ListModel.objects.create(short_name="sputum")
-        cleaned_data = {
-            'tb_eval': YES,
-            'tb_eval_location': "place",
-            'tb_eval_location_other': None,
-            'tb_diagnostic_perf': PENDING,
-            'tb_diagnostics': ListModel.objects.all(),
-            'tb_diagnose_pos': NO,
-            'tb_test_results': None,
-            'tb_treat_start': YES,
-            'tb_prev_therapy_start': None,
-        }
-
-        form_validator = TbReferralOutcomesFormValidator(
-            cleaned_data=cleaned_data)
-
-        self.assertRaises(ValidationError, form_validator.validate)
-        self.assertIn('tb_diagnostics', form_validator._errors)
-
-    def test_tb_not_evalaluated(self):
-        """
-        Raise error if tb_diagnose_pos is No and tb_treat_start is not provided
-        """
-        ListModel.objects.create(short_name="sputum")
-        cleaned_data = {
-            'tb_eval': NO,
-            'tb_treat_start': YES,
-            'tb_prev_therapy_start': None,
-        }
-
-        form_validator = TbReferralOutcomesFormValidator(
-            cleaned_data=cleaned_data)
-        try:
-            form_validator.validate()
-        except ValidationError as e:
-            self.fail(f'ValidationError unexpectedly raised. Got{e}')
-
-    def test_tb_eval_no_reason_not_going_required(self):
-        """
-        Raise error if tb_eval is NO and field reason_not_going is not provided
-        """
-        ListModel.objects.create(short_name="sputum")
-        cleaned_data = {
-            'tb_eval': NO,
-            'reason_not_going': None,
-            'tb_treat_start': YES,
-            'tb_prev_therapy_start': None,
-        }
-
-        form_validator = TbReferralOutcomesFormValidator(
-            cleaned_data=cleaned_data)
-        self.assertRaises(ValidationError, form_validator.validate)
-        self.assertIn('reason_not_going', form_validator._errors)
-
-    def test_tb_eval_yes_reason_not_going_not_required(self):
-        """
-        Test that no ValidationError is raised if tb_eval is YES and field reason_not_going is not provided
-        """
-        ListModel.objects.create(short_name="sputum")
-        cleaned_data = {
-            'tb_eval': YES,
-            'reason_not_going': None,
-            'tb_eval_location': "place",
-            'tb_diagnostic_perf': YES,
-            'tb_diagnostics': ListModel.objects.all(),
-            'tb_diagnose_pos': YES,
-            'tb_test_results': "Test",
-            'tb_treat_start': YES,
-            'tb_prev_therapy_start': None,
-        }
-
-        form_validator = TbReferralOutcomesFormValidator(
-            cleaned_data=cleaned_data)
-        try:
-            form_validator.validate()
-        except ValidationError as e:
-            self.fail(f'ValidationError unexpectedly raised. Got{e}')
-
-    def test_reason_not_going_other_required(self):
-        """
-        Test that ValidationError is raised if reason_not_going is OTHER and field reason_not_going_other is not provided
-        """
-        ListModel.objects.create(short_name="sputum")
-        cleaned_data = {
-            'tb_eval': NO,
-            'reason_not_going': OTHER,
-            'reason_not_going_other': None,
-            'tb_eval_location': None,
-            'tb_diagnostic_perf': None,
-            'tb_diagnostics': None,
-            'tb_diagnose_pos': None,
-            'tb_test_results': None,
-            'tb_treat_start': None,
-            'tb_prev_therapy_start': None,
-        }
-
-        form_validator = TbReferralOutcomesFormValidator(
-            cleaned_data=cleaned_data)
-        self.assertRaises(ValidationError, form_validator.validate)
-        self.assertIn('reason_not_going_other', form_validator._errors)
