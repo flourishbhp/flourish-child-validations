@@ -1,7 +1,7 @@
 from edc_constants.constants import NO
 from edc_form_validators import FormValidator
 
-from flourish_child_validations.form_validators import ChildFormValidatorMixin
+from flourish_child_validations.form_validators.form_validator_mixin import ChildFormValidatorMixin
 
 
 class ChildCBCLSection4FormValidator(ChildFormValidatorMixin, FormValidator):
