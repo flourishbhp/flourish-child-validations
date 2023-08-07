@@ -145,8 +145,6 @@ class ChildVisit(BaseUuidModel):
 
     schedule_name = models.CharField(max_length=25)
 
-    schedule = models.OneToOneField(Schedule, on_delete=PROTECT)
-
     visit_code = models.CharField(
         max_length=25, )
 

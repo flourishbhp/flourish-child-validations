@@ -1,6 +1,6 @@
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
-from edc_base.utils import get_utcnow, age
+from edc_base.utils import age, get_utcnow
 from edc_constants.constants import FEMALE, YES
 from edc_form_validators import FormValidator
 
@@ -41,22 +41,26 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
 
         self.validate_skin_folds_followup()
 
-        measurements = [('child_waist_circ', 'child_waist_circ_second', 'child_waist_circ_third'),
-                        ('child_hip_circ', 'child_hip_circ_second', 'child_hip_circ_third'),
-                        ('skin_folds_triceps', 'skin_folds_triceps_second', 'skin_folds_triceps_third'),
-                        ('skin_folds_subscapular', 'skin_folds_subscapular_second', 'skin_folds_subscapular_third'),
-                        ('skin_folds_suprailiac', 'skin_folds_suprailiac_second', 'skin_folds_suprailiac_third'), ]
+        measurements = [
+            ('child_waist_circ', 'child_waist_circ_second', 'child_waist_circ_third'),
+            ('child_hip_circ', 'child_hip_circ_second', 'child_hip_circ_third'),
+            ('skin_folds_triceps', 'skin_folds_triceps_second',
+             'skin_folds_triceps_third'),
+            ('skin_folds_subscapular', 'skin_folds_subscapular_second',
+             'skin_folds_subscapular_third'),
+            ('skin_folds_suprailiac', 'skin_folds_suprailiac_second',
+             'skin_folds_suprailiac_third'), ]
 
         for fields in measurements:
             self.validate_measurement_margin(*fields)
 
         self.required_if_true(
-            self.child_age >= 4,
+            self.child_age >= 1.5,
             field_required='child_height',
         )
 
         self.required_if_true(
-            self.child_age >= 4,
+            self.child_age >= 1.5,
             field_required='child_weight_kg',
         )
 
@@ -64,7 +68,8 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
 
         child_visit = self.cleaned_data.get('child_visit')
 
-        req_fields = ['skin_folds_triceps', 'skin_folds_subscapular', 'skin_folds_suprailiac']
+        req_fields = ['skin_folds_triceps', 'skin_folds_subscapular',
+                      'skin_folds_suprailiac']
 
         for req_field in req_fields:
             self.required_if_true(
@@ -141,19 +146,22 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
 
         if self.child_assent_obj:
             birth_date = self.child_assent_obj.dob
-            years = age(birth_date, get_utcnow()).years
+            years = age(birth_date, get_utcnow()).years + age(
+                birth_date, get_utcnow()).months / 12
             return years
         elif self.child_caregiver_consent_obj:
             birth_date = self.child_caregiver_consent_obj.child_dob
-            years = age(birth_date, get_utcnow()).years
+            years = age(birth_date, get_utcnow()).years + age(
+                birth_date, get_utcnow()).months / 12
             return years
         elif self.maternal_delivery_obj:
             birth_date = self.maternal_delivery_obj.delivery_datetime.date()
-            years = age(birth_date, get_utcnow()).months
+            years = age(birth_date, get_utcnow()).months / 12
             return years
         return 0
 
-    def validate_measurement_margin(self, first_measurement_field, second_measurement_field, third_measurement_field):
+    def validate_measurement_margin(self, first_measurement_field,
+                                    second_measurement_field, third_measurement_field):
         first_measurement = self.cleaned_data.get(first_measurement_field, None)
         second_measurement = self.cleaned_data.get(second_measurement_field, None)
 
