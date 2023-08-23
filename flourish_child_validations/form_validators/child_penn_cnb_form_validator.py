@@ -34,7 +34,7 @@ class ChildPennCNBFormValidator(ChildFormValidatorMixin, FormValidator):
             other_specify_field='impact_other')
 
         fields = ['date_deployed', 'start_time', 'stop_time', 'testing_impacted',
-                  'claim_experience', ]
+                  'claim_experience', 'staff_assisting']
 
         for field in fields:
             self.required_if(
