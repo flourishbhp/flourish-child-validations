@@ -12,4 +12,14 @@ class ChildCBCLSection4FormValidator(ChildFormValidatorMixin, FormValidator):
             self.required_if(
                 NO, field='valid', field_required=field)
 
+        self.validate_other_specify(
+            field='withdrawn',
+            other_specify_field='other_withdrawn',
+        )
+
+        self.validate_other_specify(
+            field='worries',
+            other_specify_field='other_worries',
+        )
+
 
