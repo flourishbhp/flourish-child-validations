@@ -17,6 +17,7 @@ class ChildPennCNBFormValidator(ChildFormValidatorMixin, FormValidator):
             NO,
             field='completed',
             field_required='reason_incomplete')
+
         reason_incomplete = cleaned_data.get('reason_incomplete')
         completed = cleaned_data.get('completed')
 
@@ -32,8 +33,8 @@ class ChildPennCNBFormValidator(ChildFormValidatorMixin, FormValidator):
             field='testing_impacted',
             other_specify_field='impact_other')
 
-        fields = ['date_deployed', 'start_time', 'stop_time', 'staff_assisting',
-                  'testing_impacted', 'impact_other', 'claim_experience', ]
+        fields = ['date_deployed', 'start_time', 'stop_time', 'testing_impacted',
+                  'claim_experience', 'staff_assisting']
 
         for field in fields:
             self.required_if(
