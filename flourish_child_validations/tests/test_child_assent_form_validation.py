@@ -4,33 +4,18 @@ from edc_base.utils import get_utcnow, relativedelta
 from edc_constants.constants import YES, FEMALE, MALE, NOT_APPLICABLE
 
 from ..form_validators import ChildAssentFormValidator
-from .models import CaregiverChildConsent
+from .models import CaregiverChildConsent, RegisteredSubject
 from .models import CaregiverConsent, ChildDataset, ScreeningPriorBhpParticipants
-from .test_model_mixin import TestModeMixin
+from .test_model_mixin import TestModelMixin
 
 
 @tag('mm')
-class TestChildAssentForm(TestModeMixin, TestCase):
+class TestChildAssentForm(TestModelMixin, TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(ChildAssentFormValidator, *args, **kwargs)
 
     def setUp(self):
-        # subject_consent_model = 'flourish_child_validations.caregiverconsent'
-        # ChildAssentFormValidator.subject_consent_model = subject_consent_model
-
-        # prior_screening_model = 'flourish_child_validations.screeningpriorbhpparticipants'
-        # ChildAssentFormValidator.prior_screening_model = prior_screening_model
-
-        # child_dataset_model = 'flourish_child_validations.childdataset'
-        # ChildAssentFormValidator.child_dataset_model = child_dataset_model
-        #
-        # child_assent_model = 'flourish_child_validations.childassent'
-        # ChildAssentFormValidator.child_assent_model = child_assent_model
-        #
-        # caregiver_child_consent_model = 'flourish_child_validations.caregiverchildconsent'
-        # ChildAssentFormValidator.caregiver_child_consent_model = caregiver_child_consent_model
-
         self.screening_identifier = 'ABC12345'
         self.study_child_identifier = '1234DCD'
 
@@ -55,6 +40,10 @@ class TestChildAssentForm(TestModeMixin, TestCase):
             identity_type='birth_cert',
             confirm_identity='123425678',
             version='1',)
+
+        RegisteredSubject.objects.create(
+            subject_identifier=self.caregiver_child_consent.subject_identifier,
+            relative_identifier=self.subject_consent.subject_identifier, )
 
         self.child_assent_options = {
             'screening_identifier': self.screening_identifier,
