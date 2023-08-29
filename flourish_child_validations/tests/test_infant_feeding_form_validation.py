@@ -5,27 +5,30 @@ from edc_base.utils import get_utcnow
 from edc_constants.constants import YES, NO, NOT_APPLICABLE
 
 from ..form_validators import InfantFeedingFormValidator
-from .models import ChildVisit, Appointment
-from .test_model_mixin import TestModeMixin
+from .models import ChildVisit, Appointment, RegisteredSubject
+from .test_model_mixin import TestModelMixin
 
 
 @tag('inff')
-class TestInfantFeedingFormValidator(TestModeMixin, TestCase):
+class TestInfantFeedingFormValidator(TestModelMixin, TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(InfantFeedingFormValidator, *args, **kwargs)
 
     def setUp(self):
-
         appointment = Appointment.objects.create(
-            subject_identifier='2334432',
-            appt_datetime=timezone.now(),
+            subject_identifier='2334432-1',
+            appt_datetime=get_utcnow(),
             visit_code='2000',
             visit_instance='0')
 
         self.child_visit = ChildVisit.objects.create(
-            subject_identifier='12345323',
-            appointment=appointment)
+            appointment=appointment,
+            report_datetime=get_utcnow())
+
+        RegisteredSubject.objects.create(
+            subject_identifier=appointment.subject_identifier,
+            relative_identifier='2334432', )
 
         self.options = {
             'report_datetime': timezone.now(),
@@ -53,11 +56,12 @@ class TestInfantFeedingFormValidator(TestModeMixin, TestCase):
             'child_visit': self.child_visit,
             'ever_breastfed': NO,
             'freq_milk_rec': NOT_APPLICABLE,
-            'rec_liquids': NO,
+            'rec_liquids': YES,
             'formula_water': 'blah blah',
             'taken_solid_foods': NO,
             'solid_foods': [],
-            'took_formula': YES
+            'took_formula': YES,
+            'dt_formula_introduced': None
         }
         form_validator = InfantFeedingFormValidator(
             cleaned_data=self.options)
@@ -71,7 +75,7 @@ class TestInfantFeedingFormValidator(TestModeMixin, TestCase):
             'child_visit': self.child_visit,
             'ever_breastfed': NO,
             'freq_milk_rec': NOT_APPLICABLE,
-            'rec_liquids': NO,
+            'rec_liquids': YES,
             'formula_water': 'blah blah',
             'taken_solid_foods': NO,
             'solid_foods': [],
@@ -82,11 +86,3 @@ class TestInfantFeedingFormValidator(TestModeMixin, TestCase):
             cleaned_data=self.options)
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn('dt_formula_est', form_validator._errors)
-
-    #
-    # def test_validate_apgar_1(self):
-    #     self.options['apgar_score'] = YES
-    #     form_validator = BirthDataFormValidator(
-    #         cleaned_data=self.options)
-    #     self.assertRaises(ValidationError, form_validator.validate)
-    #     self.assertIn('apgar_score_min_1', form_validator._errors)

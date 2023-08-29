@@ -1,6 +1,5 @@
-from django.apps import apps as django_apps
 from edc_form_validators import FormValidator
-from edc_constants.constants import OTHER, YES, UNKNOWN
+from edc_constants.constants import YES
 from ..form_validator_mixin import ChildFormValidatorMixin
 
 class TbHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
@@ -11,21 +10,7 @@ class TbHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
         
         self.validate_history_of_tbt_required_fields()
         
-        # self.validate_other_specify(
-        #     field='reason_for_therapy',
-        #     other_specify_field='reason_for_therapy_other' 
-        # )
-    
-        # for field in ['tb_diagnosis_type', 'prior_treatmnt_history']:
-        #     self.required_if(YES,
-        #                     field='prior_tb_history',
-        #                     field_required=field)
-        
-
-        
-        self.validate_prior_tb_history()
-        
-        
+        self.validate_prior_tb_history() 
 
     def validate_history_of_tbt_required_fields(self):
         fields = ['reason_for_therapy', 'therapy_prescribed_age', 'tbt_completed']

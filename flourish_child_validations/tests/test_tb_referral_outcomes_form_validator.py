@@ -1,15 +1,14 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase, tag
-from edc_constants.constants import (YES, NO, OTHER,
-                                     PENDING, NEG, POS)
+from edc_constants.constants import (YES, NO, NEG, POS)
 
 from ..form_validators import TbReferralOutcomesFormValidator
 from .models import ListModel
-from .test_model_mixin import TestModeMixin
+from .test_model_mixin import TestModelMixin
 
 
 @tag('tbrof')
-class TestTbReferralOutcomesFormValidator(TestModeMixin, TestCase):
+class TestTbReferralOutcomesFormValidator(TestModelMixin, TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(TbReferralOutcomesFormValidator, *args, **kwargs)
 
