@@ -2,27 +2,32 @@ from django.test import TestCase, tag
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from edc_constants.constants import NO, YES
+
 from ..form_validators import TbHistoryFormValidator
-from .models import ChildVisit, Appointment
-from .test_model_mixin import TestModeMixin
+from .models import ChildVisit, Appointment, RegisteredSubject
+from .test_model_mixin import TestModelMixin
 
 
 @tag('adol_history')
-class TestTbHistoryFormValidator(TestModeMixin, TestCase):
+class TestTbHistoryFormValidator(TestModelMixin, TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(TbHistoryFormValidator, *args, **kwargs)
 
     def setUp(self):
         appointment = Appointment.objects.create(
-            subject_identifier='2334432',
+            subject_identifier='2334432-1',
             appt_datetime=timezone.now(),
             visit_code='2000',
             visit_instance='0')
 
         child_visit = ChildVisit.objects.create(
-            subject_identifier='12345323',
+            subject_identifier='2334432-1',
             appointment=appointment)
+
+        RegisteredSubject.objects.create(
+            subject_identifier=appointment.subject_identifier,
+            relative_identifier='2334432')
         
         self.data = {
             'child_visit': child_visit,
@@ -66,7 +71,7 @@ class TestTbHistoryFormValidator(TestModeMixin, TestCase):
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn('tbt_completed', form_validator._errors)
     
-    def test_tbt_completed_required(self):
+    def test_tb_drugs_freq_required(self):
         self.data['tb_drugs_freq'] = None
         
         form_validator = TbHistoryFormValidator(cleaned_data=self.data)
@@ -90,13 +95,11 @@ class TestTbHistoryFormValidator(TestModeMixin, TestCase):
         
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn('tb_treatmnt_completed', form_validator._errors)
-        
-        
+
     def test_prior_treatmnt_history_required(self):
-        self.data['tbt_completed'] = NO
+        self.data['prior_treatmnt_history'] = None
         
         form_validator = TbHistoryFormValidator(cleaned_data=self.data)
-        
+
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn('prior_treatmnt_history', form_validator._errors)
-        

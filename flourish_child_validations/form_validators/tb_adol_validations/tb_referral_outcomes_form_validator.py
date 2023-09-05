@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from edc_constants.constants import NO, OTHER, YES, NORMAL, POS, NEG, ABNORMAL
+from edc_constants.constants import NO, OTHER, YES, POS, ABNORMAL
 from edc_form_validators import FormValidator
 
 

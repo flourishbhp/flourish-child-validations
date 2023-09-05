@@ -1,16 +1,34 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase, tag
+from edc_base.utils import get_utcnow
 from edc_constants.constants import OTHER
 
-from flourish_child_validations.form_validators import ChildReferralFUFormValidator, \
-    InfantFeedingFormValidator
-from flourish_child_validations.tests.test_model_mixin import TestModeMixin
+from ..form_validators import ChildReferralFUFormValidator
+from .models import Appointment, ChildVisit, ListModel, RegisteredSubject
+from .test_model_mixin import TestModelMixin
 
-
-class TestInfantBirthDataFormValidator(TestModeMixin, TestCase):
+class TestChildRefferalFormValidator(TestModelMixin, TestCase):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(InfantFeedingFormValidator, *args, **kwargs)
+        super().__init__(ChildReferralFUFormValidator, *args, **kwargs)
+
+    def setUp(self):
+        appointment = Appointment.objects.create(
+            subject_identifier='2334432-1',
+            appt_datetime=get_utcnow(),
+            visit_code='2000',
+            visit_instance='0')
+
+        self.child_visit = ChildVisit.objects.create(
+            subject_identifier='12345323',
+            appointment=appointment)
+
+        RegisteredSubject.objects.create(
+            subject_identifier=appointment.subject_identifier,
+            relative_identifier='2334432', )
+
+        ListModel.objects.create(name=OTHER, short_name=OTHER)
+
     @tag('emo')
     def test_emo_support_type_other(self):
         """
@@ -18,7 +36,8 @@ class TestInfantBirthDataFormValidator(TestModeMixin, TestCase):
                """
 
         cleaned_data = {
-            'emo_support_type': OTHER,
+            'child_visit': self.child_visit,
+            'emo_support_type': ListModel.objects.all(),
             'emo_support_type_other': None
         }
 

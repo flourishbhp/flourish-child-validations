@@ -1,27 +1,30 @@
 from django.test import TestCase, tag
-from django.utils import timezone
-from django.core.exceptions import ValidationError
+from edc_base.utils import get_utcnow
+
 from ..form_validators import Covid19AdolFormValidator
-from .models import ChildVisit, Appointment
-from .test_model_mixin import TestModeMixin
+from .models import ChildVisit, Appointment, RegisteredSubject
+from .test_model_mixin import TestModelMixin
 
 
 @tag('covid')
-class TestCovid19FormValidator(TestModeMixin, TestCase):
+class TestCovid19FormValidator(TestModelMixin, TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(Covid19AdolFormValidator, *args, **kwargs)
 
     def setUp(self):
         appointment = Appointment.objects.create(
-            subject_identifier='2334432',
-            appt_datetime=timezone.now(),
+            subject_identifier='2334432-1',
+            appt_datetime=get_utcnow(),
             visit_code='2000',
             visit_instance='0')
 
         child_visit = ChildVisit.objects.create(
-            subject_identifier='12345323',
             appointment=appointment)
+
+        RegisteredSubject.objects.create(
+            subject_identifier=appointment.subject_identifier,
+            relative_identifier='2334432')
         
         self.data = {
             'child_visit': child_visit,

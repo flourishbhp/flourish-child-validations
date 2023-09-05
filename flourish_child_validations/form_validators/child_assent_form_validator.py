@@ -140,17 +140,17 @@ class ChildAssentFormValidator(ChildFormValidatorMixin, FormValidator):
                            'Please correct.'}
                     self._errors.update(msg)
                     raise ValidationError(msg)
-            gender = cleaned_data.get('gender')
-            if gender == FEMALE and identity[4] != '2':
-                msg = {'identity':
-                       'Participant is Female. Please correct the identity number.'}
-                self._errors.update(msg)
-                raise ValidationError(msg)
-            if gender == MALE and identity[4] != '1':
-                msg = {'identity':
-                       'Participant is Male. Please correct the identity number.'}
-                self._errors.update(msg)
-                raise ValidationError(msg)
+                gender = cleaned_data.get('gender')
+                if gender == FEMALE and identity[4] != '2':
+                    msg = {'identity':
+                           'Participant is Female. Please correct the identity number.'}
+                    self._errors.update(msg)
+                    raise ValidationError(msg)
+                if gender == MALE and identity[4] != '1':
+                    msg = {'identity':
+                           'Participant is Male. Please correct the identity number.'}
+                    self._errors.update(msg)
+                    raise ValidationError(msg)
 
     def validate_dob(self, cleaned_data=None):
 
@@ -234,7 +234,8 @@ class ChildAssentFormValidator(ChildFormValidatorMixin, FormValidator):
             subject_identifier=self.cleaned_data.get('subject_identifier'))
 
         if not child_consent:
-            raise ValidationError('Caregiver child consent matching query does not exist.')
+            raise ValidationError(
+                'Caregiver child consent matching query does not exist.')
 
         return child_consent.latest('consent_datetime')
 
