@@ -3,36 +3,36 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase, tag
 from django.utils import timezone
 from edc_base.utils import get_utcnow
-from edc_constants.constants import NO, YES, NOT_APPLICABLE, FEMALE, MALE
+from edc_constants.constants import NO, YES
 
-from flourish_child_validations.form_validators import ChildPregTestingFormValidator
+from ..form_validators import ChildPregTestingFormValidator
 
-from .models import ChildVisit, Appointment
+from .test_model_mixin import TestModelMixin
+from .models import ChildVisit, Appointment, RegisteredSubject
 
 
 @tag('tpf')
-class TestChildPregnacyFormValidator(TestCase):
+class TestChildPregnacyFormValidator(TestModelMixin, TestCase):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(ChildPregTestingFormValidator, *args, **kwargs)
 
     def setUp(self):
-        flourish_consent_version_model = 'flourish_child_validations.flourishconsentversion'
-        subject_consent_model = 'flourish_child_validations.subjectconsent'
-        child_caregiver_consent_model = 'flourish_child_validations.caregiverchildconsent'
-
-        ChildPregTestingFormValidator.consent_version_model = flourish_consent_version_model
-        ChildPregTestingFormValidator.subject_consent_model = subject_consent_model
-        ChildPregTestingFormValidator.child_caregiver_consent_model = child_caregiver_consent_model
-
         appointment = Appointment.objects.create(
-            subject_identifier='2334432',
+            subject_identifier='2334432-1',
             appt_datetime=timezone.now(),
             visit_code='2001',
             visit_instance='0',
            )
 
         child_visit = ChildVisit.objects.create(
-            subject_identifier='12345323',
+            subject_identifier='2334432-1',
             appointment=appointment,
             schedule_name='child_a_quart_schedule1',)
+
+        RegisteredSubject.objects.create(
+            subject_identifier=appointment.subject_identifier,
+            relative_identifier='2334432', )
 
         self.options = {
             'test_done': YES,

@@ -1,10 +1,12 @@
 from django import forms
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
-from edc_constants.constants import NO, NEW
+from edc_constants.constants import NEW
 
 from edc_action_item.site_action_items import site_action_items
 from flourish_prn.action_items import CHILDOFF_STUDY_ACTION
+
+from ..utils import caregiver_subject_identifier
 
 
 class ChildFormValidatorMixin:
@@ -14,6 +16,7 @@ class ChildFormValidatorMixin:
     subject_consent_model = 'flourish_caregiver.subjectconsent'
     child_offstudy_model = 'flourish_prn.childoffstudy'
     consent_version_model = 'flourish_caregiver.flourishconsentversion'
+    registered_subject_model = 'edc_registration.registeredsubject'
 
     @property
     def infant_birth_cls(self):
@@ -30,6 +33,16 @@ class ChildFormValidatorMixin:
     @property
     def child_offstudy_cls(self):
         return django_apps.get_model(self.child_offstudy_model)
+
+    @property
+    def registered_subject_cls(self):
+        return django_apps.get_model(self.registered_subject_model)
+
+    @property
+    def action_item_model_cls(self):
+        action_cls = site_action_items.get(
+            self.child_offstudy_cls.action_name)
+        return action_cls.action_item_model_cls()
 
     def clean(self):
         if self.cleaned_data.get('child_visit'):
@@ -76,16 +89,12 @@ class ChildFormValidatorMixin:
 
     def validate_offstudy_model(self):
 
-        action_cls = site_action_items.get(
-            self.child_offstudy_cls.action_name)
-        action_item_model_cls = action_cls.action_item_model_cls()
-
         try:
-            action_item_model_cls.objects.get(
+            self.action_item_model_cls.objects.get(
                 subject_identifier=self.subject_identifier,
                 action_type__name=CHILDOFF_STUDY_ACTION,
                 status=NEW)
-        except action_item_model_cls.DoesNotExist:
+        except self.action_item_model_cls.DoesNotExist:
             try:
                 self.child_offstudy_cls.objects.get(
                     subject_identifier=self.subject_identifier)
@@ -114,9 +123,10 @@ class ChildFormValidatorMixin:
                     ' continuing.')
 
     def latest_consent_obj(self, subject_identifier):
-
+        maternal_identifier=caregiver_subject_identifier(
+            self.registered_subject_cls, subject_identifier)
         subject_consents = self.subject_consent_cls.objects.filter(
-            subject_identifier=subject_identifier[:-3])
+            subject_identifier=maternal_identifier)
 
         if subject_consents:
             return subject_consents.latest('consent_datetime')

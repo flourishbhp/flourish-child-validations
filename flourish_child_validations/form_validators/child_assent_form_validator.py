@@ -234,7 +234,8 @@ class ChildAssentFormValidator(ChildFormValidatorMixin, FormValidator):
             subject_identifier=self.cleaned_data.get('subject_identifier'))
 
         if not child_consent:
-            raise ValidationError('Caregiver child consent matching query does not exist.')
+            raise ValidationError(
+                'Caregiver child consent matching query does not exist.')
 
         return child_consent.latest('consent_datetime')
 

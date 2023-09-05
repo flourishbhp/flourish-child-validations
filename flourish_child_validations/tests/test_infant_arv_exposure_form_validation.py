@@ -5,26 +5,30 @@ from edc_base.utils import get_utcnow
 from edc_constants.constants import YES, NO, NOT_APPLICABLE
 
 from ..form_validators import InfantArvExposureFormValidator
-from .models import ChildVisit, Appointment
-from .test_model_mixin import TestModeMixin
+from .models import ChildVisit, Appointment, RegisteredSubject
+from .test_model_mixin import TestModelMixin
 
 
 @tag('mm')
-class TestInfantArvExposureFormValidator(TestModeMixin, TestCase):
+class TestInfantArvExposureFormValidator(TestModelMixin, TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(InfantArvExposureFormValidator, *args, **kwargs)
 
     def setUp(self):
         appointment = Appointment.objects.create(
-            subject_identifier='2334432',
+            subject_identifier='2334432-1',
             appt_datetime=timezone.now(),
             visit_code='2000',
             visit_instance='0')
 
         self.child_visit = ChildVisit.objects.create(
-            subject_identifier='12345323',
+            subject_identifier=appointment.subject_identifier,
             appointment=appointment)
+
+        RegisteredSubject.objects.create(
+            subject_identifier=appointment.subject_identifier,
+            relative_identifier='2334432', )
 
     def test_azt_after_birth_yes_azt_dose_date_required(self):
         cleaned_data = {

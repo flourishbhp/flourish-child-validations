@@ -4,14 +4,13 @@ from edc_base.utils import age, get_utcnow
 from edc_constants.constants import FEMALE, YES
 from edc_form_validators import FormValidator
 
+from ..utils import caregiver_subject_identifier
 from .form_validator_mixin import ChildFormValidatorMixin
 
 
 class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValidator):
     child_assent_model = 'flourish_child.childassent'
-
-    child_caregiver_consent_model = 'flourish_caregiver.caregiverchildconsent'
-
+    caregiver_child_consent_model = 'flourish_caregiver.caregiverchildconsent'
     maternal_delivery_model = 'flourish_caregiver.maternaldelivery'
 
     def clean(self):
@@ -120,7 +119,7 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
     @property
     def child_caregiver_consent_obj(self):
         child_caregiver_consent_model_cls = django_apps.get_model(
-            self.child_caregiver_consent_model)
+            self.caregiver_child_consent_model)
         try:
             model_obj = child_caregiver_consent_model_cls.objects.filter(
                 subject_identifier=self.subject_identifier).latest('consent_datetime')
@@ -133,9 +132,11 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
     def maternal_delivery_obj(self):
         maternal_delivery_model_cls = django_apps.get_model(
             self.maternal_delivery_model)
+        maternal_identifier = caregiver_subject_identifier(
+            self.registered_subject_cls, self.subject_identifier)
         try:
             model_obj = maternal_delivery_model_cls.objects.get(
-                subject_identifier__istartswith=self.subject_identifier)
+                subject_identifier=maternal_identifier)
         except maternal_delivery_model_cls.DoesNotExist:
             return None
         else:
