@@ -133,7 +133,8 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
         maternal_delivery_model_cls = django_apps.get_model(
             self.maternal_delivery_model)
         maternal_identifier = caregiver_subject_identifier(
-            self.registered_subject_cls, self.subject_identifier)
+            subject_identifier=self.subject_identifier,
+            registered_subject_cls=self.registered_subject_cls)
         try:
             model_obj = maternal_delivery_model_cls.objects.get(
                 subject_identifier=maternal_identifier)

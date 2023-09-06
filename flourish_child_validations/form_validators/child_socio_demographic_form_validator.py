@@ -49,7 +49,8 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
 
     def validate_child_stay_with_caregiver(self, cleaned_data=None):
         maternal_identifier = caregiver_subject_identifier(
-            self.registered_subject_cls, self.subject_identifier)
+            subject_identifier=self.subject_identifier,
+            registered_subject_cls=self.registered_subject_cls)
         child_visit_code_sequence = self.cleaned_data.get(
             'child_visit').visit_code_sequence
         child_visit = self.cleaned_data.get('child_visit').appointment.visit_code
@@ -151,7 +152,8 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
         maternal_delivery_model_cls = django_apps.get_model(
             self.maternal_delivery_model)
         maternal_identifier = caregiver_subject_identifier(
-            self.registered_subject_cls, self.subject_identifier)
+            subject_identifier=self.subject_identifier,
+            registered_subject_cls=self.registered_subject_cls,)
         try:
             model_obj = maternal_delivery_model_cls.objects.get(
                 subject_identifier=maternal_identifier)

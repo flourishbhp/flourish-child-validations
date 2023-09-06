@@ -36,7 +36,7 @@ class ChildBirthFormValidator(ChildFormValidatorMixin, FormValidator):
         cleaned_data = self.cleaned_data
 
         maternal_identifier = caregiver_subject_identifier(
-            cleaned_data.get('subject_identifier'))
+            subject_identifier=cleaned_data.get('subject_identifier'))
 
         try:
             maternal_lab_del = self.maternal_del_cls.objects.get(
@@ -70,7 +70,7 @@ class ChildBirthFormValidator(ChildFormValidatorMixin, FormValidator):
             self._errors.update(msg)
 
         maternal_identifier = caregiver_subject_identifier(
-            cleaned_data.get('subject_identifier'))
+            subject_identifier=cleaned_data.get('subject_identifier'))
 
         try:
             maternal_labour_obj = self.maternal_del_cls.objects.get(
