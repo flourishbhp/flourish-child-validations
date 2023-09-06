@@ -1,7 +1,7 @@
 from django.apps import apps as django_apps
 
 
-def caregiver_subject_identifier(registered_subject_cls, subject_identifier):
+def caregiver_subject_identifier(subject_identifier, registered_subject_cls=None):
     registered_subject_cls = registered_subject_cls or django_apps.get_model(
         'edc_registration.registeredsubject')
     try:
