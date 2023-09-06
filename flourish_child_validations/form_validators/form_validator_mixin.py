@@ -124,7 +124,8 @@ class ChildFormValidatorMixin:
 
     def latest_consent_obj(self, subject_identifier):
         maternal_identifier=caregiver_subject_identifier(
-            self.registered_subject_cls, subject_identifier)
+            subject_identifier=subject_identifier,
+            registered_subject_cls=self.registered_subject_cls)
         subject_consents = self.subject_consent_cls.objects.filter(
             subject_identifier=maternal_identifier)
 
