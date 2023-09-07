@@ -2,12 +2,10 @@ from django.core.exceptions import ValidationError
 from edc_constants.constants import NO, OTHER, YES, POS, ABNORMAL
 from edc_form_validators import FormValidator
 
-
 from flourish_child_validations.form_validators import ChildFormValidatorMixin
 
 
 class TbReferralOutcomesFormValidator(ChildFormValidatorMixin, FormValidator):
-
     def clean(self):
         self.required_if(
             YES,
@@ -61,7 +59,6 @@ class TbReferralOutcomesFormValidator(ChildFormValidatorMixin, FormValidator):
         }
 
         for key, value in field_answer_dict.items():
-
             self.m2m_other_specify(value,
                                    m2m_field='tb_diagnostics',
                                    field_other=key)
@@ -90,10 +87,8 @@ class TbReferralOutcomesFormValidator(ChildFormValidatorMixin, FormValidator):
                    gene_xpert, tst_or_mentoux, covid_19]
 
         answers = list(filter(lambda element: element in [POS, ABNORMAL]
-                              and element != None, answers))
+                                              and element != None, answers))
 
         if answers and tb_treat_start == NO:
             raise ValidationError(
                 {'tb_treat_start': 'Not all tests are negative'})
-        elif not answers and tb_treat_start == YES:
-            raise ValidationError({'tb_treat_start': 'All tests are negative'})
