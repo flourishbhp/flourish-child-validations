@@ -7,7 +7,7 @@ from .models import ChildVisit, Appointment, Schedule
 from .test_model_mixin import TestModeMixin
 
 
-@tag('tb_ref')
+@tag('tbref')
 class TestTbReferralFormValidator(TestModeMixin, TestCase):
 
     def __init__(self, *args, **kwargs):
@@ -19,34 +19,30 @@ class TestTbReferralFormValidator(TestModeMixin, TestCase):
             appt_datetime=get_utcnow(),
             visit_code='2100A',
             visit_instance='0')
-        
+
         schedule = Schedule.objects.create(
             subject_identifier='2334432-1',
             child_subject_identifier='2334432',
             schedule_name='CohortAQuarterly'
         )
 
-
         child_visit = ChildVisit.objects.create(
             subject_identifier='12345323',
-            schedule = schedule,
+            schedule_name=schedule.schedule_name,
             appointment=appointment)
-        
+
         self.data = {
             'child_visit': child_visit,
             'report_datetime': get_utcnow(),
-            'referral_date': get_utcnow().date(),  
+            'referral_date': get_utcnow().date(),
             'location': 'g_west',
             'location_other': None
         }
-        
-        
+
     def test_location_other_required(self):
         self.data['location'] = OTHER
-        
+
         form_validator = TbReferralAdolFormValidator(cleaned_data=self.data)
-        
+
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn('location_other', form_validator._errors)
-    
-        
