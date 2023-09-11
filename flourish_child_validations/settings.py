@@ -45,8 +45,6 @@ INSTALLED_APPS = [
     'django_crypto_fields.apps.AppConfig',
     'edc_device.apps.AppConfig',
     'edc_protocol.apps.AppConfig',
-    'edc_action_item.apps.AppConfig',
-    'flourish_prn.apps.AppConfig',
     'flourish_child_validations.apps.AppConfig',
 ]
 

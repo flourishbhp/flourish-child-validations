@@ -1,28 +1,40 @@
 from django.test import TestCase, tag
-from django.utils import timezone
 from django.core.exceptions import ValidationError
+from edc_base.utils import get_utcnow
 from edc_constants.constants import YES, OTHER
+
 from ..form_validators import HivKnowledgeFormValidator
-from .models import ChildVisit, Appointment
-from .test_model_mixin import TestModeMixin
+from .models import (ChildVisit, Appointment, ActionItem, ActionType,
+                     RegisteredSubject)
+from .test_model_mixin import TestModelMixin
 
 
 @tag('adol_hiv')
-class TestHivKnowledgeFormValidator(TestModeMixin, TestCase):
+class TestHivKnowledgeFormValidator(TestModelMixin, TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(HivKnowledgeFormValidator, *args, **kwargs)
 
     def setUp(self):
         appointment = Appointment.objects.create(
-            subject_identifier='2334432',
-            appt_datetime=timezone.now(),
+            subject_identifier='2334432-1',
+            appt_datetime=get_utcnow(),
             visit_code='2000',
             visit_instance='0')
 
         child_visit = ChildVisit.objects.create(
-            subject_identifier='12345323',
             appointment=appointment)
+
+        RegisteredSubject.objects.create(
+            subject_identifier=appointment.subject_identifier,
+            relative_identifier='2334432')
+
+        action_type = ActionType.objects.create(
+            name='submit-childoff-study')
+
+        ActionItem.objects.create(
+            subject_identifier=appointment.subject_identifier,
+            action_type=action_type)
         
         self.data = {
             'child_visit': child_visit,
