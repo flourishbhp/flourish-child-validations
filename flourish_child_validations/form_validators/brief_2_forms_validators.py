@@ -23,6 +23,7 @@ class Brief2ParentFormsValidators(BaseFormValidator):
     validation_field = 'valid'
 
     def clean(self):
+        super().clean()
         self.validate_other_specify(
             field='invalid_reason',
             other_specify_field='other_invalid_reason',
@@ -39,6 +40,7 @@ class Brief2SelfReportedFormsValidators(BaseFormValidator):
     validation_field = 'brief2_self_valid'
 
     def clean(self):
+        super().clean()
         self.validate_other_specify(
             field='brief2_self_invalid_reason',
             other_specify_field='other_brief2_self_invalid_reason',
