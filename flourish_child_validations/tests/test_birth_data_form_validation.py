@@ -1,14 +1,14 @@
 from django.core.exceptions import ValidationError
-from django.test import TestCase, tag
+from django.test import TestCase
 from django.utils import timezone
 from edc_constants.constants import YES, NO
 
 from ..form_validators import BirthDataFormValidator
-from .models import ChildVisit, Appointment, Schedule
-from .test_model_mixin import TestModeMixin
+from .models import ChildVisit, Appointment, RegisteredSubject
+from .test_model_mixin import TestModelMixin
 
 
-class TestInfantBirthDataFormValidator(TestModeMixin, TestCase):
+class TestInfantBirthDataFormValidator(TestModelMixin, TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(BirthDataFormValidator, *args, **kwargs)
@@ -16,21 +16,18 @@ class TestInfantBirthDataFormValidator(TestModeMixin, TestCase):
     def setUp(self):
 
         appointment = Appointment.objects.create(
-            subject_identifier='2334432',
+            subject_identifier='2334432-1',
             appt_datetime=timezone.now(),
             visit_code='2000',
             visit_instance='0')
 
-        schedule = Schedule.objects.create(
-            subject_identifier='2334432-1',
-            child_subject_identifier='2334432',
-            schedule_name='CohortAQuarterly'
-        )
-
         child_visit = ChildVisit.objects.create(
-            subject_identifier='12345323',
-            appointment=appointment,
-            schedule=schedule)
+            subject_identifier='2334432-1',
+            appointment=appointment, )
+
+        RegisteredSubject.objects.create(
+            subject_identifier=appointment.subject_identifier,
+            relative_identifier='2334432')
 
         self.options = {
             'report_datetime': timezone.now(),

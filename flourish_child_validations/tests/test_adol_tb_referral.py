@@ -2,20 +2,22 @@ from django.test import TestCase, tag
 from edc_base.utils import get_utcnow
 from edc_constants.constants import OTHER
 from django.core.exceptions import ValidationError
+
 from ..form_validators import TbReferralAdolFormValidator
-from .models import ChildVisit, Appointment, Schedule
-from .test_model_mixin import TestModeMixin
+from .models import ChildVisit, Appointment, RegisteredSubject
+from .test_model_mixin import TestModelMixin
 
 
-@tag('tbref')
-class TestTbReferralFormValidator(TestModeMixin, TestCase):
+
+@tag('tb_ref')
+class TestTbReferralFormValidator(TestModelMixin, TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(TbReferralAdolFormValidator, *args, **kwargs)
 
     def setUp(self):
         appointment = Appointment.objects.create(
-            subject_identifier='2334432',
+            subject_identifier='2334432-1',
             appt_datetime=get_utcnow(),
             visit_code='2100A',
             visit_instance='0')

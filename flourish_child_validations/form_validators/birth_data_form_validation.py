@@ -33,10 +33,12 @@ class BirthDataFormValidator(ChildFormValidatorMixin, CrfOffStudyFormValidator,
 
             if  22 > gestational_age or gestational_age > 43:
                 raise forms.ValidationError(
-                    {'gestational_age': 'Gestational age should be between 22 and 43.'})
+                    {'gestational_age':
+                     'Gestational age should be between 22 and 43.'})
                 
         else:
-            raise forms.ValidationError({'gestational_age': 'Gestational age is required'})
+            raise forms.ValidationError({'gestational_age':
+                                         'Gestational age is required'})
 
     def validate_apgar_score(self):
         agpar_list = ['apgar_score_min_1', 'apgar_score_min_5',

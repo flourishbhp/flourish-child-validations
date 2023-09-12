@@ -7,7 +7,6 @@ from edc_constants.constants import NO, YES
 class ChildPennCNBFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
-        cleaned_data = self.cleaned_data
         self.subject_identifier = self.cleaned_data.get(
             'child_visit').appointment.subject_identifier
 
@@ -18,13 +17,6 @@ class ChildPennCNBFormValidator(ChildFormValidatorMixin, FormValidator):
             field='completed',
             field_required='reason_incomplete')
 
-        reason_incomplete = cleaned_data.get('reason_incomplete')
-        completed = cleaned_data.get('completed')
-
-        self.required_if_true(
-            reason_incomplete == 'handicapped' or completed == NO,
-            field_required='comments')
-
         self.validate_other_specify(
             field='reason_incomplete',
             other_specify_field='reason_other')
@@ -34,7 +26,7 @@ class ChildPennCNBFormValidator(ChildFormValidatorMixin, FormValidator):
             other_specify_field='impact_other')
 
         fields = ['date_deployed', 'start_time', 'stop_time', 'testing_impacted',
-                  'claim_experience', ]
+                  'claim_experience', 'staff_assisting']
 
         for field in fields:
             self.required_if(

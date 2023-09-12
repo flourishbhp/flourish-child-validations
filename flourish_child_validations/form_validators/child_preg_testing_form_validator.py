@@ -10,7 +10,7 @@ from .form_validator_mixin import ChildFormValidatorMixin
 
 class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
 
-    child_caregiver_consent_model = 'flourish_caregiver.caregiverchildconsent'
+    caregiver_child_consent_model = 'flourish_caregiver.caregiverchildconsent'
 
     def clean(self):
 
@@ -56,7 +56,7 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
 
     @property
     def child_caregiver_consent_model_cls(self):
-        return django_apps.get_model(self.child_caregiver_consent_model)
+        return django_apps.get_model(self.caregiver_child_consent_model)
 
     @property
     def caregiver_child_obj(self):

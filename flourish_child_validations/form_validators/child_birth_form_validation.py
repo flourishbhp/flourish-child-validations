@@ -1,16 +1,16 @@
+import pytz
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
 from django.utils.timezone import localtime
 from edc_form_validators import FormValidator
-import pytz
 
+from ..utils import caregiver_subject_identifier
 from .form_validator_mixin import ChildFormValidatorMixin
 
 
 class ChildBirthFormValidator(ChildFormValidatorMixin, FormValidator):
 
     registered_subject_model = 'edc_registration.registeredsubject'
-
     maternal_del_model = 'flourish_caregiver.maternaldelivery'
 
     @property
@@ -34,14 +34,18 @@ class ChildBirthFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def validate_dob(self):
         cleaned_data = self.cleaned_data
-        try:
-            maternal_identifier = self.registered_subject_cls.objects.get(
-                subject_identifier=cleaned_data.get(
-                    'subject_identifier')).relative_identifier
 
+        maternal_identifier = caregiver_subject_identifier(
+            subject_identifier=cleaned_data.get('subject_identifier'))
+
+        try:
             maternal_lab_del = self.maternal_del_cls.objects.get(
                 subject_identifier=maternal_identifier)
-
+        except self.maternal_del_cls.DoesNotExist:
+            raise ValidationError(
+                'Cannot find maternal labour and delivery '
+                'form for this infant! This is not expected.')
+        else:
             dob = cleaned_data.get('dob')  # already a date
             delivery_datetime = maternal_lab_del.delivery_datetime  # date + utc time
             local_tz = pytz.timezone('Africa/Gaborone')  # get our zone
@@ -57,12 +61,6 @@ class ChildBirthFormValidator(ChildFormValidatorMixin, FormValidator):
                 self._errors.update(msg)
                 raise ValidationError(msg)
 
-        except self.registered_subject_cls.DoesNotExist:
-            raise ValidationError('Registered Subject does not exist.')
-        except self.maternal_del_cls.DoesNotExist:
-            raise ValidationError('Cannot find maternal labour and delivery '
-                                  'form for this infant! This is not expected.')
-
     def validate_report_datetime(self):
         cleaned_data = self.cleaned_data
         if (cleaned_data.get('report_datetime') and
@@ -70,28 +68,25 @@ class ChildBirthFormValidator(ChildFormValidatorMixin, FormValidator):
             msg = {'report_datetime': 'Child enrollment date cannot be '
                    'before child birth date.'}
             self._errors.update(msg)
-        try:
-            maternal_identifier = self.registered_subject_cls.objects.get(
-                subject_identifier=cleaned_data.get(
-                    'subject_identifier')).relative_identifier
-        except self.registered_subject_cls.DoesNotExist:
-            raise ValidationError('Registered Subject does not exist.')
-        else:
-            try:
-                maternal_labour_obj = self.maternal_del_cls.objects.get(
-                    subject_identifier=maternal_identifier)
-            except self.maternal_lab_del_cls.DoesNotExist:
-                raise ValidationError(
-                    'Cannot find maternal labour form for this child! This is not expected.')
-                raise ValidationError(msg)
-            else:
-                report_datetime = cleaned_data.get('report_datetime')
-                mld_datetime = localtime(maternal_labour_obj.delivery_datetime)
 
-                if (report_datetime and report_datetime < mld_datetime):
-                    msg = {'report_datetime':
-                           'Infant report datetime must be on or after maternal '
-                           f'delivery datetime of {mld_datetime}. '
-                           f'Got {report_datetime}'}
-                    self._errors.update(msg)
-                    raise ValidationError(msg)
+        maternal_identifier = caregiver_subject_identifier(
+            subject_identifier=cleaned_data.get('subject_identifier'))
+
+        try:
+            maternal_labour_obj = self.maternal_del_cls.objects.get(
+                subject_identifier=maternal_identifier)
+        except self.maternal_lab_del_cls.DoesNotExist:
+            raise ValidationError(
+                'Cannot find maternal labour form for this child! This is not expected.')
+            raise ValidationError(msg)
+        else:
+            report_datetime = cleaned_data.get('report_datetime')
+            mld_datetime = localtime(maternal_labour_obj.delivery_datetime)
+
+            if (report_datetime and report_datetime < mld_datetime):
+                msg = {'report_datetime':
+                       'Infant report datetime must be on or after maternal '
+                       f'delivery datetime of {mld_datetime}. '
+                       f'Got {report_datetime}'}
+                self._errors.update(msg)
+                raise ValidationError(msg)
