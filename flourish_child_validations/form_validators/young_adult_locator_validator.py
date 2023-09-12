@@ -3,11 +3,11 @@ from edc_constants.constants import YES, NO
 from edc_form_validators.form_validator import FormValidator
 
 
-class ChildLocatorFormValidator(FormValidator):
+class YoungAdultLocatorFormValidator(FormValidator):
 
     def clean(self):
 
-        fields = ['may_call', 'may_visit_home', 
+        fields = [ 'may_visit_home', 'may_call',
                   'may_call_work','may_contact_indirectly']
 
         for field in fields:
