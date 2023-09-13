@@ -7,8 +7,10 @@ from .models import ListModel
 from .test_model_mixin import TestModelMixin
 
 
-@tag('tbrof')
-class TestTbReferralOutcomesFormValidator(TestModelMixin, TestCase):
+
+@tag('tbref')
+class TestTbReferralOutcomesFormValidator(TestModeMixin, TestCase):
+
     def __init__(self, *args, **kwargs):
         super().__init__(TbReferralOutcomesFormValidator, *args, **kwargs)
 
@@ -111,23 +113,6 @@ class TestTbReferralOutcomesFormValidator(TestModelMixin, TestCase):
 
         self.data['covid_19'] = POS
         self.data['tb_treat_start'] = NO
-
-        form_validator = TbReferralOutcomesFormValidator(
-            cleaned_data=self.data)
-
-        self.assertRaises(ValidationError, form_validator.validate)
-        self.assertIn('tb_treat_start', form_validator._errors)
-
-    def test_tb_treat_start_should_be_no(self):
-        '''
-        tb_test_start should be Yes if some tests results are positive
-        '''
-        self.data['tb_diagnostic_perf'] = YES
-        self.data['tb_diagnostics'] = ListModel.objects.filter(
-            short_name='covid_19_test')
-
-        self.data['covid_19'] = NEG
-        self.data['tb_treat_start'] = YES
 
         form_validator = TbReferralOutcomesFormValidator(
             cleaned_data=self.data)

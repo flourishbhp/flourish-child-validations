@@ -44,3 +44,4 @@ from .tb_adol_validations import TbReferralAdolFormValidator
 from .tb_adol_validations import TbReferralOutcomesFormValidator
 from .tb_adol_validations import TbScreeningDuringEncountersFormValidator
 from .tb_adol_validations import TbVisitScreeningFormValidator
+from .young_adult_locator_validator import YoungAdultLocatorFormValidator
