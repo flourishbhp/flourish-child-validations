@@ -43,7 +43,7 @@ class Brief2SelfReportedFormsValidators(BaseFormValidator):
         super().clean()
         self.validate_other_specify(
             field='brief2_self_invalid_reason',
-            other_specify_field='other_brief2_self_invalid_reason',
+            other_specify_field='other_breif2_self_invalid_reason',
         )
 
         self.validate_other_specify(
