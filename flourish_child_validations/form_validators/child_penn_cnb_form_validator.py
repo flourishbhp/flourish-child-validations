@@ -1,7 +1,7 @@
+from edc_constants.constants import NO, YES
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
-from edc_constants.constants import NO, YES
 
 
 class ChildPennCNBFormValidator(ChildFormValidatorMixin, FormValidator):
@@ -25,8 +25,8 @@ class ChildPennCNBFormValidator(ChildFormValidatorMixin, FormValidator):
             field='testing_impacted',
             other_specify_field='impact_other')
 
-        fields = ['date_deployed', 'start_time', 'stop_time', 'testing_impacted',
-                  'claim_experience', 'staff_assisting']
+        fields = ['date_deployed', 'start_time', 'stop_time', 'claim_experience',
+                  'staff_assisting']
 
         for field in fields:
             self.required_if(
