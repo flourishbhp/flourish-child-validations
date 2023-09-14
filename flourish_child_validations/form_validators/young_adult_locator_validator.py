@@ -19,8 +19,7 @@ class YoungAdultLocatorFormValidator(FormValidator):
         self.required_if(
             YES,
             field='may_visit_home',
-            field_required='physical_address'
-        )
+            field_required='physical_address')
 
         self.validate_may_call_fields()
         self.validate_work_contact()
