@@ -15,11 +15,19 @@ class YoungAdultLocatorFormValidator(FormValidator):
             self.required_if(NO,
                              field='along_side_caregiver',
                              field_required=field)
+            
+
+        self.required_if(
+            YES, 
+            field='may_visit_home',
+            field_required='physical_address'
+        )
 
         self.validate_may_call_fields()
         self.validate_work_contact()
         self.validate_contact_details()
         self.validate_indirect_contact()
+
 
     def validate_work_contact(self):
         self.required_if(
