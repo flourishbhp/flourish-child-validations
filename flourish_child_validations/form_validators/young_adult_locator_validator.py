@@ -7,14 +7,19 @@ class YoungAdultLocatorFormValidator(FormValidator):
 
     def clean(self):
 
-        fields = [ 'may_visit_home', 'may_call',
-                  'may_call_work','may_contact_indirectly']
+        fields = ['may_visit_home', 'may_call',
+                  'may_call_work', 'may_contact_indirectly']
 
         for field in fields:
 
             self.required_if(NO,
                              field='along_side_caregiver',
                              field_required=field)
+
+        self.required_if(
+            YES,
+            field='may_visit_home',
+            field_required='physical_address')
 
         self.validate_may_call_fields()
         self.validate_work_contact()
