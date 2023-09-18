@@ -57,6 +57,10 @@ class InfantArvProphylaxisFormValidator(ChildFormValidatorMixin,
                          field='reason_modified',
                          field_required='reason_modified_othr')
 
+        self.required_if(YES,
+                         field='took_art_proph',
+                         field_required='missed_dose')
+
         fields_required = ['missed_dose_count', 'reason_missed']
         for field_required in fields_required:
             self.required_if(YES,
