@@ -10,7 +10,6 @@ from .test_model_mixin import TestModelMixin
 
 @tag('tb_ref')
 class TestTbReferralFormValidator(TestModelMixin, TestCase):
-
     def __init__(self, *args, **kwargs):
         super().__init__(TbReferralAdolFormValidator, *args, **kwargs)
 
@@ -28,22 +27,19 @@ class TestTbReferralFormValidator(TestModelMixin, TestCase):
         RegisteredSubject.objects.create(
             subject_identifier=appointment.subject_identifier,
             relative_identifier='2334432')
-        
+
         self.data = {
             'child_visit': child_visit,
             'report_datetime': get_utcnow(),
-            'referral_date': get_utcnow().date(),  
+            'referral_date': get_utcnow().date(),
             'location': 'g_west',
             'location_other': None
         }
-        
-        
+
     def test_location_other_required(self):
         self.data['location'] = OTHER
-        
+
         form_validator = TbReferralAdolFormValidator(cleaned_data=self.data)
-        
+
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn('location_other', form_validator._errors)
-    
-        
