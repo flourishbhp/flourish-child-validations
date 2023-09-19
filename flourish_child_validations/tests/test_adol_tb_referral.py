@@ -11,7 +11,6 @@ from .test_model_mixin import TestModelMixin
 
 @tag('tb_ref')
 class TestTbReferralFormValidator(TestModelMixin, TestCase):
-
     def __init__(self, *args, **kwargs):
         super().__init__(TbReferralAdolFormValidator, *args, **kwargs)
 
