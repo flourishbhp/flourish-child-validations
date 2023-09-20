@@ -2,7 +2,7 @@ import re
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
 from edc_base.utils import relativedelta
-from edc_constants.constants import NO, FEMALE, MALE
+from edc_constants.constants import YES, NO, FEMALE, MALE
 from edc_form_validators import FormValidator
 from .form_validator_mixin import ChildFormValidatorMixin
 
@@ -51,6 +51,10 @@ class ChildContinuedConsentFormValidator(ChildFormValidatorMixin, FormValidator)
         self.validate_identity_number(cleaned_data)
         self.validate_preg_testing()
         self.validate_dob(cleaned_data)
+
+        self.required_if(YES, 
+                         field='along_side_caregiver',
+                         field_required='include_contact_details')
         super().clean()
 
     def clean_full_name_syntax(self):
