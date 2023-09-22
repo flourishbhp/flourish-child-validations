@@ -9,6 +9,8 @@ class BirthFeedingAndVaccineFormValidator(ChildFormValidatorMixin,
                                           CrfOffStudyFormValidator,
                                           FormValidator):
 
+    infant_birth_model = 'flourish_child.childbirth'
+
     def clean(self):
         self.subject_identifier = self.cleaned_data.get(
             'child_visit').appointment.subject_identifier
@@ -20,6 +22,8 @@ class BirthFeedingAndVaccineFormValidator(ChildFormValidatorMixin,
             self.cleaned_data.get('report_datetime'))
 
         self.validate_feeding()
+
+        self.validate_breastfeed_dt()
         super().clean()
 
     def validate_feeding(self):
@@ -45,3 +49,12 @@ class BirthFeedingAndVaccineFormValidator(ChildFormValidatorMixin,
 
         self.required_if_not_none(field='formulafeed_start_dt',
                                   field_required='formulafeed_start_est')
+
+    def validate_breastfeed_dt(self):
+        breastfeed_start_dt = self.cleaned_data.get('breastfeed_start_dt', None)
+        self.validate_against_birth_date(
+            infant_identifier=self.subject_identifier,
+            report_datetime=breastfeed_start_dt,
+            date_attr='dob',
+            message='Date when infant breastfeeding began can not be before child DOB.')
+        

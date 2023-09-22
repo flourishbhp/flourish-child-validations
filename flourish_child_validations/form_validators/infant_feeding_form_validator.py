@@ -1,4 +1,5 @@
 from django.apps import apps as django_apps
+from django.core.exceptions import ValidationError
 from edc_constants.constants import YES, NO
 from edc_form_validators import FormValidator
 
@@ -23,6 +24,8 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
         self.validate_against_visit_datetime(
             self.cleaned_data.get('report_datetime'))
 
+        self.validate_date_weaned()
+
         self.breastfeeding_validations()
 
         self.formula_validations()
@@ -33,7 +36,7 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
 
     def previous_child_visit_exists(self, child_visit):
         try:
-            child_visit.get_previous_by_report_datetime()
+            child_visit.previous_visit
         except child_visit.__class__.DoesNotExist:
             return False
         else:
@@ -46,15 +49,15 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
 
         while self.previous_child_visit_exists(child_visit):
 
-            child_visit = child_visit.get_previous_by_report_datetime()
+            child_visit = child_visit.previous_visit
 
             try:
-                infant_feeding_cls.objects.get(
+                infant_feeding = infant_feeding_cls.objects.get(
                     child_visit=child_visit)
             except infant_feeding_cls.DoesNotExist:
                 continue
             else:
-                return True
+                return infant_feeding
 
     def breastfeeding_validations(self):
 
@@ -172,3 +175,46 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
                 self.required_if_true(
                     value in selected,
                     field_required=field)
+
+    def validate_date_weaned(self):
+        dt_weaned = self.cleaned_data.get('dt_weaned', None)
+        dt_formula_introduced = self.cleaned_data.get('dt_formula_introduced', None)
+        bf_start_dt = self.cleaned_data.get('bf_start_dt', None)
+        
+        previous_instance = self.previous_feeding_instance()
+        previous_wean_dt = getattr(previous_instance, 'dt_weaned', None)
+        if previous_wean_dt and dt_weaned:
+            consistent = (dt_weaned == previous_wean_dt)
+            if not consistent:
+                message = {'dt_weaned':
+                           f'The date participant weaned is {previous_wean_dt} '
+                           f'from visit {previous_instance.child_visit.visit_code}'
+                           ' Date provided is not consistent with this date.'}
+                self._errors.update(message)
+                raise ValidationError(message)
+        
+        self.applicable_if_true(
+            (not previous_wean_dt or not dt_weaned),
+            field_applicable= 'freq_milk_rec', )
+
+        prev_formula_dt = getattr(previous_instance, 'dt_formula_introduced', None)
+        if prev_formula_dt and dt_formula_introduced:
+            consistent = (dt_formula_introduced == prev_formula_dt)
+            if not consistent:
+                message = {'dt_formula_introduced':
+                           f'Date infant formula introduced is {prev_formula_dt} '
+                           f'from visit {previous_instance.child_visit.visit_code}'
+                           ' Date provided is not consistent with this date.'}
+                self._errors.update(message)
+                raise ValidationError(message)
+
+        prev_bf_start_dt = getattr(previous_instance, 'bf_start_dt', None)
+        if prev_bf_start_dt and bf_start_dt:
+            consistent = (bf_start_dt == prev_bf_start_dt)
+            if not consistent:
+                message = {'bf_start_dt':
+                           f'Date infant started breastfeeding is {prev_bf_start_dt} '
+                           f'from visit {previous_instance.child_visit.visit_code}'
+                           ' Date provided is not consistent with this date.'}
+                self._errors.update(message)
+                raise ValidationError(message)
