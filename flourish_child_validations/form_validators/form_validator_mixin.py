@@ -11,7 +11,7 @@ from ..utils import caregiver_subject_identifier
 
 class ChildFormValidatorMixin:
 
-    infant_birth_model = None
+    infant_birth_model = 'flourish_child.childbirth'
 
     subject_consent_model = 'flourish_caregiver.subjectconsent'
     child_offstudy_model = 'flourish_prn.childoffstudy'
@@ -51,7 +51,8 @@ class ChildFormValidatorMixin:
             self.validate_against_visit_datetime(
                 self.cleaned_data.get('report_datetime'))
         else:
-            self.subject_identifier = self.cleaned_data.get('subject_identifier')
+            self.subject_identifier = self.cleaned_data.get(
+                'subject_identifier')
 
         self.validate_offstudy_model()
         super().clean()

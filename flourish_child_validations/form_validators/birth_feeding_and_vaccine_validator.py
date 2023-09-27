@@ -1,4 +1,5 @@
 from edc_form_validators import FormValidator
+from django.core.exceptions import ValidationError
 from ..constants import BREASTFEED_ONLY, BOTH_BREAST_FEEDING_AND_FORMULA, FORMULA_ONLY
 
 from .crf_offstudy_form_validator import CrfOffStudyFormValidator
@@ -20,11 +21,15 @@ class BirthFeedingAndVaccineFormValidator(ChildFormValidatorMixin,
             self.cleaned_data.get('report_datetime'))
 
         self.validate_feeding()
+
+        self.validate_breast_feeding_dates()
+
         super().clean()
 
     def validate_feeding(self):
 
-        feeding_after_delivery = self.cleaned_data.get('feeding_after_delivery')
+        feeding_after_delivery = self.cleaned_data.get(
+            'feeding_after_delivery')
 
         breast_feeding_condition = feeding_after_delivery in [BREASTFEED_ONLY,
                                                               BOTH_BREAST_FEEDING_AND_FORMULA]
@@ -37,7 +42,7 @@ class BirthFeedingAndVaccineFormValidator(ChildFormValidatorMixin,
                               field_required='breastfeed_start_dt')
 
         self.required_if_true(condition=formula_feeding_condition,
-                              field_required='formulafeed_start_dt')
+                              field_required='breastfeed_start_dt')
 
         # required dates
         self.required_if_not_none(field='breastfeed_start_dt',
@@ -45,3 +50,27 @@ class BirthFeedingAndVaccineFormValidator(ChildFormValidatorMixin,
 
         self.required_if_not_none(field='formulafeed_start_dt',
                                   field_required='formulafeed_start_est')
+
+    def validate_breast_feeding_dates(self):
+        try:
+            infant_birth = self.infant_birth_cls.objects.get(
+                subject_identifier=self.subject_identifier)
+        except self.infant_birth_cls.DoesNotExist:
+            raise ValidationError(
+                'Please complete Infant Birth form '
+                f'before  proceeding.')
+        else:
+
+            breastfeed_start_dt = self.cleaned_data.get(
+                'breastfeed_start_dt', None)
+
+            formulafeed_start_dt = self.cleaned_data.get(
+                'formulafeed_start_dt', None)
+
+            error_msg = f'Date cannot be before DOB : {infant_birth.dob}'
+
+            if breastfeed_start_dt and breastfeed_start_dt < infant_birth.dob:
+                raise ValidationError({'breastfeed_start_dt': error_msg})
+
+            if formulafeed_start_dt and formulafeed_start_dt < infant_birth.dob:
+                raise ValidationError({'formulafeed_start_dt': error_msg})
