@@ -24,6 +24,7 @@ class BirthFeedingAndVaccineFormValidator(ChildFormValidatorMixin,
         self.validate_feeding()
 
         self.validate_breastfeed_dt()
+        
         super().clean()
 
     def validate_feeding(self):
@@ -57,4 +58,3 @@ class BirthFeedingAndVaccineFormValidator(ChildFormValidatorMixin,
             report_datetime=breastfeed_start_dt,
             date_attr='dob',
             message='Date when infant breastfeeding began can not be before child DOB.')
-        

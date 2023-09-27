@@ -70,6 +70,7 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
 
             try:
                 corresponding_onschedule_cls.objects.get(
+                    subject_identifier=maternal_identifier,
                     child_subject_identifier=self.subject_identifier,
                     schedule_name=corresponding_visit.schedule_name, )
             except corresponding_onschedule_cls.DoesNotExist:

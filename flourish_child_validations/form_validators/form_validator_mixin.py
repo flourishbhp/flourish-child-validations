@@ -11,7 +11,7 @@ from ..utils import caregiver_subject_identifier
 
 class ChildFormValidatorMixin:
 
-    infant_birth_model = 'flourish_child.childbirth'
+    infant_birth_model = None
 
     subject_consent_model = 'flourish_caregiver.subjectconsent'
     child_offstudy_model = 'flourish_prn.childoffstudy'
@@ -58,7 +58,8 @@ class ChildFormValidatorMixin:
         super().clean()
 
     def validate_against_birth_date(self, infant_identifier=None,
-                                    report_datetime=None):
+                                    report_datetime=None, date_attr=None,
+                                    message=None):
 
         try:
             infant_birth = self.infant_birth_cls.objects.get(
@@ -66,11 +67,12 @@ class ChildFormValidatorMixin:
         except self.infant_birth_cls.DoesNotExist:
             raise ValidationError(
                 'Please complete Infant Birth form '
-                f'before  proceeding.')
+                f'before proceeding.')
         else:
-            if report_datetime and report_datetime < infant_birth.report_datetime:
-                raise forms.ValidationError(
-                    "Report datetime cannot be before enrollemt datetime.")
+            if (report_datetime and
+                    report_datetime < getattr(infant_birth, f'{date_attr}')):
+                message = message or 'Report datetime cannot be before enrollment datetime.'
+                raise forms.ValidationError(message)
             else:
                 return infant_birth
 
