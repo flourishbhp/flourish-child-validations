@@ -11,7 +11,7 @@ from ..utils import caregiver_subject_identifier
 
 class ChildFormValidatorMixin:
 
-    infant_birth_model = 'flourish_child.childbirth'
+    infant_birth_model = None
 
     subject_consent_model = 'flourish_caregiver.subjectconsent'
     child_offstudy_model = 'flourish_prn.childoffstudy'
