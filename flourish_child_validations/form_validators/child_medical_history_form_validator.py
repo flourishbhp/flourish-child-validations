@@ -26,6 +26,19 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
 
         self.not_applicable_not_allowed('chist_na', field=chronic_since,
                                         m2m_field=child_chronic)
+
+        self.validate_other_specify(field='current_symptoms_child')
+
+        illness_fields = ['current_symptoms_child', 'symptoms_start_date_child',
+                          'clinic_visit_child']
+
+        for field in illness_fields:
+            self.required_if(
+                YES,
+                field_required=field,
+                field='current_illness_child',
+            )
+
         super().clean()
 
     def not_applicable_not_allowed(self, *selections, field=None, m2m_field=None):
