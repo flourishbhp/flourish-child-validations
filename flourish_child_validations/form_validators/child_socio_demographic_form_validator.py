@@ -53,7 +53,8 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
             registered_subject_cls=self.registered_subject_cls)
         child_visit_code_sequence = self.cleaned_data.get(
             'child_visit').visit_code_sequence
-        child_visit = self.cleaned_data.get('child_visit').appointment.visit_code
+        child_visit = self.cleaned_data.get(
+            'child_visit').appointment.visit_code
         maternal_visit_code = str(child_visit) + 'M'
         caregiver_model_objs = self.caregiver_socio_demographic_cls.objects.filter(
             maternal_visit__visit_code=maternal_visit_code,
@@ -85,16 +86,16 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
                     raise ValidationError(msg)
 
     def validate_number_of_people_living_in_the_household(self,
-            cleaned_data=None):
+                                                          cleaned_data=None):
         older_than18 = cleaned_data.get('older_than18')
         house_people_number = cleaned_data.get('house_people_number')
         if older_than18 and (older_than18 >
                              house_people_number):
             msg = {'older_than18':
-                       f'Number of people ({older_than18}) who are older than 18 '
-                       f'and live in the household cannot be more than the total '
-                       f'number ({house_people_number}) of people living in the '
-                       f'household'}
+                   f'Number of people ({older_than18}) who are older than 18 '
+                   f'and live in the household cannot be more than the total '
+                   f'number ({house_people_number}) of people living in the '
+                   f'household'}
             self._errors.update(msg)
             raise ValidationError(msg)
 
@@ -104,16 +105,16 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
         if (attend_school == YES and
                 self.cleaned_data.get('education_level') == 'no_schooling'):
             msg = {'education_level':
-                       'This child is said to be attending school, Please specify '
-                       'education level.'}
+                   'This child is said to be attending school, Please specify '
+                   'education level.'}
             self._errors.update(msg)
             raise ValidationError(msg)
 
         if (attend_school == NO and
                 self.cleaned_data.get('education_level') != 'no_schooling'):
             msg = {'education_level':
-                       'This child is not attending school, Please specify '
-                       'education level as `No schooling` to indicate this.'}
+                   'This child is not attending school, Please specify '
+                   'education level as `No schooling` to indicate this.'}
             self._errors.update(msg)
             raise ValidationError(msg)
 
@@ -121,6 +122,15 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
             YES,
             field='attend_school',
             field_applicable='school_type')
+
+        boarding_responses = [
+            'public_boarding_school',
+            'private_boarding_school']
+
+        self.required_if(
+            *boarding_responses,
+            field='school_type',
+            field_required='months_in_boarding')
 
         self.applicable_if_true(
             self.child_age > 16 and attend_school == NO,
