@@ -2,7 +2,7 @@ import re
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
 from edc_base.utils import relativedelta
-from edc_constants.constants import YES, NO, FEMALE, MALE
+from edc_constants.constants import NO, FEMALE, MALE
 from edc_form_validators import FormValidator
 from .form_validator_mixin import ChildFormValidatorMixin
 
