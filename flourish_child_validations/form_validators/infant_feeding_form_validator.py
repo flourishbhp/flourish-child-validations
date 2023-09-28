@@ -34,22 +34,13 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
 
         self.solid_foods_validations()
 
-    def previous_child_visit_exists(self, child_visit):
-        try:
-            child_visit.previous_visit
-        except child_visit.__class__.DoesNotExist:
-            return False
-        else:
-            return True
-
     def previous_feeding_instance(self):
         infant_feeding_cls = django_apps.get_model(self.infant_feeding_model)
 
-        child_visit = self.cleaned_data.get('child_visit')
+        child_visit = self.cleaned_data.get('child_visit', None)
 
-        while self.previous_child_visit_exists(child_visit):
-
-            child_visit = child_visit.previous_visit
+        while child_visit:
+            child_visit = getattr(child_visit, 'previous_visit', False)
 
             try:
                 infant_feeding = infant_feeding_cls.objects.get(
