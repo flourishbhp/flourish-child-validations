@@ -18,7 +18,6 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
         self.subject_identifier = self.cleaned_data.get(
             'child_visit').appointment.subject_identifier
         super().clean()
-
         self.validate_consent_version_obj(self.subject_identifier)
 
         self.validate_against_visit_datetime(
@@ -70,11 +69,6 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
                 NO,
                 field='continuing_to_bf',
                 field_required='dt_weaned')
-
-        self.applicable_if(
-            YES,
-            field='ever_breastfed',
-            field_applicable='freq_milk_rec')
 
         self.required_if(
             YES,
@@ -183,10 +177,16 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
                            ' Date provided is not consistent with this date.'}
                 self._errors.update(message)
                 raise ValidationError(message)
-        
-        self.applicable_if_true(
-            (not previous_wean_dt or not dt_weaned),
-            field_applicable= 'freq_milk_rec', )
+
+        if previous_wean_dt:
+            self.applicable_if_true(
+                not previous_wean_dt,
+                field_applicable= 'freq_milk_rec', )
+        else:
+            self.applicable_if(
+                YES,
+                field='ever_breastfed',
+                field_applicable='freq_milk_rec')
 
         prev_formula_dt = getattr(previous_instance, 'dt_formula_introduced', None)
         if prev_formula_dt and dt_formula_introduced:
