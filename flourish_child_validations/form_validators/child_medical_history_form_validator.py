@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from edc_constants.constants import NO, NONE, NOT_APPLICABLE, YES
+from edc_constants.constants import NO, NONE, NOT_APPLICABLE, OTHER, YES
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
@@ -28,10 +28,6 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
         self.not_applicable_not_allowed('chist_na', field=chronic_since,
                                         m2m_field=child_chronic)
 
-        self.validate_other_specify(field='current_symptoms')
-
-        self.validate_other_specify(field='current_medications')
-
         currently_taking_medications_fields = ['current_medications',
                                                'duration_of_medications', ]
 
@@ -41,6 +37,18 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
                 field_required=field,
                 field='currently_taking_medications',
             )
+
+        self.required_if(
+            OTHER,
+            field_required='current_medications_other',
+            field='current_medications',
+        )
+
+        self.required_if(
+            OTHER,
+            field_required='current_symptoms_other',
+            field='current_symptoms',
+        )
 
         current_illness_fields = ['current_symptoms', 'symptoms_start_date',
                                   'seen_at_local_clinic']
