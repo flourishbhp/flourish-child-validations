@@ -28,7 +28,9 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
         self.not_applicable_not_allowed('chist_na', field=chronic_since,
                                         m2m_field=child_chronic)
 
-        self.validate_other_specify(field='current_symptoms_child')
+        self.validate_other_specify(field='current_symptoms')
+
+        self.validate_other_specify(field='current_medications')
 
         currently_taking_medications_fields = ['current_medications',
                                                'duration_of_medications', ]
@@ -60,14 +62,12 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
             if field == YES and m2m_field:
                 for selection in selections:
                     if selection in selected:
-                        message = {'child_chronic':
-                                       'This field is applicable'}
+                        message = {'child_chronic': 'This field is applicable'}
                         self._errors.update(message)
                         raise ValidationError(message)
             elif field in [NO, NOT_APPLICABLE]:
                 if 'chist_na' not in selected:
-                    message = {'child_chronic':
-                                   'You can only select \'Not Applicable\''}
+                    message = {'child_chronic': 'You can only select \'Not Applicable\''}
                     self._errors.update(message)
                     raise ValidationError(message)
 
