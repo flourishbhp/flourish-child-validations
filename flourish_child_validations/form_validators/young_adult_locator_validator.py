@@ -6,7 +6,7 @@ from edc_form_validators.form_validator import FormValidator
 class YoungAdultLocatorFormValidator(FormValidator):
 
     def clean(self):
-
+        super().clean()
         fields = ['may_visit_home', 'may_call',
                   'may_call_work', 'may_contact_indirectly']
 
