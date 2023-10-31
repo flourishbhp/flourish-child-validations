@@ -179,15 +179,10 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
                 self._errors.update(message)
                 raise ValidationError(message)
 
-        if previous_wean_dt:
-            self.applicable_if_true(
-                not previous_wean_dt,
-                field_applicable= 'freq_milk_rec', )
-        else:
-            self.applicable_if(
-                YES,
-                field='ever_breastfed',
-                field_applicable='freq_milk_rec')
+        self.applicable_if(
+            NO,
+            field='child_weaned',
+            field_applicable='freq_milk_rec')
 
         prev_formula_dt = getattr(previous_instance, 'dt_formula_introduced', None)
         if prev_formula_dt and dt_formula_introduced:
