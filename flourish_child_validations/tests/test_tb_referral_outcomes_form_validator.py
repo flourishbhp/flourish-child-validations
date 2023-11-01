@@ -7,8 +7,10 @@ from .models import ListModel
 from .test_model_mixin import TestModelMixin
 
 
-@tag('tbrof')
-class TestTbReferralOutcomesFormValidator(TestModelMixin, TestCase):
+
+@tag('tbref')
+class TestTbReferralOutcomesFormValidator(TestModeMixin, TestCase):
+
     def __init__(self, *args, **kwargs):
         super().__init__(TbReferralOutcomesFormValidator, *args, **kwargs)
 

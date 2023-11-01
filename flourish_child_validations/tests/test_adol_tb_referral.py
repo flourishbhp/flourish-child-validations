@@ -8,6 +8,7 @@ from .models import ChildVisit, Appointment, RegisteredSubject
 from .test_model_mixin import TestModelMixin
 
 
+
 @tag('tb_ref')
 class TestTbReferralFormValidator(TestModelMixin, TestCase):
     def __init__(self, *args, **kwargs):
@@ -20,13 +21,16 @@ class TestTbReferralFormValidator(TestModelMixin, TestCase):
             visit_code='2100A',
             visit_instance='0')
 
-        child_visit = ChildVisit.objects.create(
+        schedule = Schedule.objects.create(
             subject_identifier='2334432-1',
-            appointment=appointment)
+            child_subject_identifier='2334432',
+            schedule_name='CohortAQuarterly'
+        )
 
-        RegisteredSubject.objects.create(
-            subject_identifier=appointment.subject_identifier,
-            relative_identifier='2334432')
+        child_visit = ChildVisit.objects.create(
+            subject_identifier='12345323',
+            schedule_name=schedule.schedule_name,
+            appointment=appointment)
 
         self.data = {
             'child_visit': child_visit,

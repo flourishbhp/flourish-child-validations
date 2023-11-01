@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
-from edc_constants.constants import YES, NO, NOT_APPLICABLE, NONE
+from edc_constants.constants import NO, NONE, NOT_APPLICABLE, OTHER, YES
 from edc_form_validators import FormValidator
+
 from .form_validator_mixin import ChildFormValidatorMixin
 
 
@@ -26,23 +27,55 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
 
         self.not_applicable_not_allowed('chist_na', field=chronic_since,
                                         m2m_field=child_chronic)
+
+        currently_taking_medications_fields = ['current_medications',
+                                               'duration_of_medications', ]
+
+        for field in currently_taking_medications_fields:
+            self.required_if(
+                YES,
+                field_required=field,
+                field='currently_taking_medications',
+            )
+
+        self.required_if(
+            OTHER,
+            field_required='current_medications_other',
+            field='current_medications',
+        )
+
+        self.required_if(
+            OTHER,
+            field_required='current_symptoms_other',
+            field='current_symptoms',
+        )
+
+        current_illness_fields = ['current_symptoms', 'symptoms_start_date',
+                                  'seen_at_local_clinic']
+
+        for field in current_illness_fields:
+            self.required_if(
+                YES,
+                field_required=field,
+                field='currently_taking_medications',
+            )
+
         super().clean()
 
     def not_applicable_not_allowed(self, *selections, field=None, m2m_field=None):
 
         if m2m_field and field:
-            selected = {obj.short_name: obj.name for obj in m2m_field if m2m_field is not None}
+            selected = {obj.short_name: obj.name for obj in m2m_field if
+                        m2m_field is not None}
             if field == YES and m2m_field:
                 for selection in selections:
                     if selection in selected:
-                        message = {'child_chronic':
-                                   'This field is applicable'}
+                        message = {'child_chronic': 'This field is applicable'}
                         self._errors.update(message)
                         raise ValidationError(message)
             elif field in [NO, NOT_APPLICABLE]:
                 if 'chist_na' not in selected:
-                    message = {'child_chronic':
-                               'You can only select \'Not Applicable\''}
+                    message = {'child_chronic': 'You can only select \'Not Applicable\''}
                     self._errors.update(message)
                     raise ValidationError(message)
 

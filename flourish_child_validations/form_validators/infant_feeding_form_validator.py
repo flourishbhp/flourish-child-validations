@@ -13,12 +13,12 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
 
     breast_feeding_model = 'flourish_caregiver.breastfeedingquestionnaire'
     infant_feeding_model = 'flourish_child.infantfeeding'
+    infant_birth_model = 'flourish_child.childbirth'
 
     def clean(self):
         self.subject_identifier = self.cleaned_data.get(
             'child_visit').appointment.subject_identifier
         super().clean()
-
         self.validate_consent_version_obj(self.subject_identifier)
 
         self.validate_against_visit_datetime(
@@ -53,7 +53,7 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
     def breastfeeding_validations(self):
 
         fields_required = ['bf_start_dt', 'bf_start_dt_est', 'recent_bf_dt',
-                           'continuing_to_bf']
+                           'continuing_to_bf', 'child_weaned']
         for field in fields_required:
             self.required_if(
                 YES,
@@ -70,11 +70,6 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
                 NO,
                 field='continuing_to_bf',
                 field_required='dt_weaned')
-
-        self.applicable_if(
-            YES,
-            field='ever_breastfed',
-            field_applicable='freq_milk_rec')
 
         self.required_if(
             YES,
@@ -183,10 +178,11 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
                            ' Date provided is not consistent with this date.'}
                 self._errors.update(message)
                 raise ValidationError(message)
-        
-        self.applicable_if_true(
-            (not previous_wean_dt or not dt_weaned),
-            field_applicable= 'freq_milk_rec', )
+
+        self.applicable_if(
+            NO,
+            field='child_weaned',
+            field_applicable='freq_milk_rec')
 
         prev_formula_dt = getattr(previous_instance, 'dt_formula_introduced', None)
         if prev_formula_dt and dt_formula_introduced:
@@ -198,6 +194,12 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
                            ' Date provided is not consistent with this date.'}
                 self._errors.update(message)
                 raise ValidationError(message)
+
+        self.validate_against_birth_date(
+            infant_identifier=self.subject_identifier,
+            report_datetime=dt_formula_introduced,
+            date_attr='dob',
+            message='Date infant formula introduced can not be before child DOB.')
 
         prev_bf_start_dt = getattr(previous_instance, 'bf_start_dt', None)
         if prev_bf_start_dt and bf_start_dt:

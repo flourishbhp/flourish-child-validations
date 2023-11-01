@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from edc_constants.constants import YES, UNKNOWN
+from edc_constants.constants import YES, UNKNOWN, NO, OTHER
 from edc_form_validators import FormValidator
 
 from .crf_offstudy_form_validator import CrfOffStudyFormValidator
@@ -20,14 +20,22 @@ class InfantArvExposureFormValidator(ChildFormValidatorMixin,
         self.validate_against_visit_datetime(
             self.cleaned_data.get('report_datetime'))
 
-        self.required_if(
-            YES,
-            field='azt_after_birth',
-            field_required='azt_dose_date',
-            required_msg='Provide date of the first dose for AZT.',
-            not_required_msg=(
+        fields_required = {
+            'azt_dose_date': (
+                'Provide date of the first dose for AZT.',
                 'Participant indicated that AZT was NOT provided. '
-                'You cannot provide date of first dose'))
+                'You cannot provide date of first dose'),
+            'azt_within_72h': (
+                'Please specify if AZT dosing occurred within 72 hours of birth',
+                'AZT was NOT provided. Question is not required.')}
+
+        for field, messages in fields_required.items():
+            self.required_if(
+                YES,
+                field='azt_after_birth',
+                field_required=field,
+                required_msg=messages[0],
+                not_required_msg=messages[1])
 
         if (self.cleaned_data.get('azt_after_birth')
                 and self.cleaned_data.get('azt_after_birth') == UNKNOWN):
@@ -42,11 +50,33 @@ class InfantArvExposureFormValidator(ChildFormValidatorMixin,
                 field='azt_after_birth',
                 field_applicable='azt_additional_dose')
 
-        self.required_if(
-            YES,
-            field='sdnvp_after_birth',
-            field_required='nvp_dose_date',
-            required_msg=('If infant has received single dose NVP then provide'
-                          'NVP date.'),
-            not_required_msg=('Participant indicated that NVP was NOT provided'
-                              'You cannot provide date of first dose.'))
+        fields_required = {
+            'nvp_dose_date': (
+                'If infant has received single dose NVP then provide NVP date.',
+                'Participant indicated that NVP was NOT provided. '
+                'You cannot provide date of first dose'),
+            'snvp_dose_within_72h': (
+                'Please specify if NVP single dosing occurred within 72 hours of birth',
+                'NVP was NOT provided. Question is not required.')}
+
+        for field, messages in fields_required.items():
+            self.required_if(
+                YES,
+                field='sdnvp_after_birth',
+                field_required=field,
+                required_msg=messages[0],
+                not_required_msg=messages[1])
+
+        self.required_if(NO,
+                         field='sdnvp_after_birth',
+                         field_required='nvp_cont_dosing')
+
+        fields_required = ['arvs_specify', 'date_1st_arv_dose']
+        for field in fields_required:
+            self.required_if(YES,
+                             field='additional_arvs',
+                             field_required=field)
+
+        self.required_if(OTHER,
+                         field='arvs_specify',
+                         field_required='arvs_specify_other')
