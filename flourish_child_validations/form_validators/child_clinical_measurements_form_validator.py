@@ -4,8 +4,8 @@ from edc_base.utils import age, get_utcnow
 from edc_constants.constants import FEMALE, YES
 from edc_form_validators import FormValidator
 
-from .form_validator_mixin import ChildFormValidatorMixin
 from ..utils import caregiver_subject_identifier
+from .form_validator_mixin import ChildFormValidatorMixin
 
 
 class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValidator):
@@ -40,19 +40,6 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
 
         self.validate_skin_folds_followup()
 
-        self.required_if_true(
-            self.child_age >= 1.5,
-            field_required='child_height',
-        )
-
-        self.required_if_true(
-            self.child_age >= 1.5,
-            field_required='child_weight_kg',
-        )
-
-        self.validate_skin_folds_measurements()
-
-    def validate_skin_folds_measurements(self):
         measurements = [
             ('child_waist_circ', 'child_waist_circ_second', 'child_waist_circ_third'),
             ('child_hip_circ', 'child_hip_circ_second', 'child_hip_circ_third'),
@@ -65,15 +52,16 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
 
         for fields in measurements:
             self.validate_measurement_margin(*fields)
-            for field in fields:
-                if 'skin_folds' in field:
-                    visit_skin_fold_messure = self.cleaned_data.get(
-                        'visit_skin_fold_messure')
-                    field_required = self.cleaned_data.get(field)
-                    if (visit_skin_fold_messure == YES and (not field_required or
-                                                            field_required == '')):
-                        msg = {field: 'This field is required.'}
-                        raise ValidationError(msg)
+
+        self.required_if_true(
+            self.child_age >= 1.5,
+            field_required='child_height',
+        )
+
+        self.required_if_true(
+            self.child_age >= 1.5,
+            field_required='child_weight_kg',
+        )
 
     def validate_skin_folds_followup(self):
 
