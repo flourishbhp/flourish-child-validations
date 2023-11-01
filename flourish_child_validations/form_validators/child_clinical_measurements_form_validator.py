@@ -4,8 +4,8 @@ from edc_base.utils import age, get_utcnow
 from edc_constants.constants import FEMALE, YES
 from edc_form_validators import FormValidator
 
-from .form_validator_mixin import ChildFormValidatorMixin
 from ..utils import caregiver_subject_identifier
+from .form_validator_mixin import ChildFormValidatorMixin
 
 
 class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValidator):
@@ -52,13 +52,6 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
 
         for fields in measurements:
             self.validate_measurement_margin(*fields)
-            for field in fields:
-                if 'skin_folds' in field:
-                    self.required_if(
-                        YES,
-                        field_required=field,
-                        field='visit_skin_fold_messure'
-                    )
 
         self.required_if_true(
             self.child_age >= 1.5,
