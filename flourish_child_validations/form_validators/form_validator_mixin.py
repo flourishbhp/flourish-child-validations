@@ -51,7 +51,7 @@ class ChildFormValidatorMixin:
             self.validate_against_visit_datetime(
                 self.cleaned_data.get('report_datetime'))
         else:
-            self.subject_identifier = self.cleaned_data.get(
+            self.subject_identifier = self.subject_identifier or self.cleaned_data.get(
                 'subject_identifier')
 
         self.validate_offstudy_model()
