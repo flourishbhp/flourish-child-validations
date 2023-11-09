@@ -40,7 +40,6 @@ class ChildBirthFormValidator(ChildFormValidatorMixin, FormValidator):
 
         try:
             maternal_lab_del = self.maternal_del_cls.objects.get(
-                child_subject_identifier=self.subject_identifier,
                 subject_identifier=maternal_identifier)
         except self.maternal_del_cls.DoesNotExist:
             raise ValidationError(
@@ -75,7 +74,6 @@ class ChildBirthFormValidator(ChildFormValidatorMixin, FormValidator):
 
         try:
             maternal_labour_obj = self.maternal_del_cls.objects.get(
-                child_subject_identifier=self.subject_identifier,
                 subject_identifier=maternal_identifier)
         except self.maternal_lab_del_cls.DoesNotExist:
             raise ValidationError(
