@@ -66,7 +66,7 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
         for fields in measurements:
             self.validate_measurement_margin(*fields)
             for field in fields:
-                if 'skin_folds' in field:
+                if 'skin_folds' in field and 'third' not in field:
                     visit_skin_fold_messure = self.cleaned_data.get(
                         'visit_skin_fold_messure')
                     field_required = self.cleaned_data.get(field)
