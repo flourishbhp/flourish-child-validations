@@ -53,7 +53,7 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
     def breastfeeding_validations(self):
 
         fields_required = ['bf_start_dt', 'bf_start_dt_est', 'recent_bf_dt',
-                           'continuing_to_bf', 'child_weaned']
+                           'continuing_to_bf']
         for field in fields_required:
             self.required_if(
                 YES,
@@ -61,6 +61,11 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
                 field_required=field)
 
         if self.previous_feeding_instance():
+            self.required_if(
+                YES,
+                field='ever_breastfed',
+                field_required='child_weaned')
+
             self.required_if(
                 YES,
                 field='child_weaned',
@@ -139,7 +144,7 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
             field='taken_solid_foods',
             m2m_field='solid_foods')
 
-        solid_foods = self.cleaned_data.get('solid_foods')
+        solid_foods = self.cleaned_data.get('solid_foods_past_week')
         selected = [solid.short_name for solid in solid_foods]
         value_field = {'food_grains': 'grain_intake_freq',
                        'food_legume': 'legumes_intake_freq',
@@ -164,9 +169,10 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
 
     def validate_date_weaned(self):
         dt_weaned = self.cleaned_data.get('dt_weaned', None)
-        dt_formula_introduced = self.cleaned_data.get('dt_formula_introduced', None)
+        dt_formula_introduced = self.cleaned_data.get(
+            'dt_formula_introduced', None)
         bf_start_dt = self.cleaned_data.get('bf_start_dt', None)
-        
+
         previous_instance = self.previous_feeding_instance()
         previous_wean_dt = getattr(previous_instance, 'dt_weaned', None)
         if previous_wean_dt and dt_weaned:
@@ -184,7 +190,8 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
             field='child_weaned',
             field_applicable='freq_milk_rec')
 
-        prev_formula_dt = getattr(previous_instance, 'dt_formula_introduced', None)
+        prev_formula_dt = getattr(
+            previous_instance, 'dt_formula_introduced', None)
         if prev_formula_dt and dt_formula_introduced:
             consistent = (dt_formula_introduced == prev_formula_dt)
             if not consistent:
