@@ -28,8 +28,10 @@ class ChildPennCNBFormValidator(ChildFormValidatorMixin, FormValidator):
         fields = ['date_deployed', 'start_time', 'stop_time', 'claim_experience',
                   'staff_assisting', 'laptop_used']
 
+        responses = (YES, 'start_not_complete')
+
         for field in fields:
             self.required_if(
-                YES,
+                *responses,
                 field='completed',
                 field_required=field)
