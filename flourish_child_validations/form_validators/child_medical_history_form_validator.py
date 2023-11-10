@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from edc_constants.constants import YES, NO, NOT_APPLICABLE, NONE, OTHER
 from edc_form_validators import FormValidator
 from .form_validator_mixin import ChildFormValidatorMixin
+from django.apps import apps as django_apps
 
 
 class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
@@ -16,8 +17,12 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
         self.current_medication_validations()
 
     def chronic_illness_validations(self):
-        self.m2m_required_if(YES, field='chronic_since',
-                             m2m_field='child_chronic')
+
+        chronic_since = self.cleaned_data.get('chronic_since')
+        child_chronic = self.cleaned_data.get('child_chronic')
+
+        self.not_applicable_not_allowed('chist_na', field=chronic_since,
+                                        m2m_field=child_chronic)
 
         self.m2m_other_specify(m2m_field='child_chronic',
                                field_other='child_chronic_other')
@@ -47,3 +52,21 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
         self.required_if(YES,
                          field='currently_taking_medications',
                          field_required='duration_of_medications')
+
+    def not_applicable_not_allowed(self, *selections, field=None, m2m_field=None):
+
+        if m2m_field and field:
+            selected = {obj.short_name: obj.name for obj in m2m_field if
+                        m2m_field is not None}
+            if field == YES and m2m_field:
+                for selection in selections:
+                    if selection in selected:
+                        message = {'child_chronic': 'This field is applicable'}
+                        self._errors.update(message)
+                        raise ValidationError(message)
+            elif field in [NO, NOT_APPLICABLE]:
+                if 'chist_na' not in selected:
+                    message = {
+                        'child_chronic': 'You can only select \'Not Applicable\''}
+                    self._errors.update(message)
+                    raise ValidationError(message)
