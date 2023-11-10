@@ -38,8 +38,6 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
             field='is_child_preg',
             field_required='child_hip_circ')
 
-        self.validate_skin_folds_followup()
-
         self.required_if_true(
             self.child_age >= 1.5,
             field_required='child_height',
@@ -65,19 +63,15 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
 
         for fields in measurements:
             self.validate_measurement_margin(*fields)
-
-    def validate_skin_folds_followup(self):
-
-        child_visit = self.cleaned_data.get('child_visit')
-
-        req_fields = ['skin_folds_triceps', 'skin_folds_subscapular',
-                      'skin_folds_suprailiac']
-
-        for req_field in req_fields:
-            self.required_if_true(
-                child_visit.visit_code == '3000',
-                field_required=req_field,
-                inverse=False)
+            for field in fields:
+                if 'skin_folds' in field and 'third' not in field:
+                    visit_skin_fold_messure = self.cleaned_data.get(
+                        'visit_skin_fold_messure')
+                    field_required = self.cleaned_data.get(field)
+                    if (visit_skin_fold_messure == YES and (
+                            not field_required or field_required == '')):
+                        msg = {field: 'This field is required.'}
+                        raise ValidationError(msg)
 
     def validate_bp(self, cleaned_data):
         child_systolic_bp = cleaned_data.get('child_systolic_bp')
