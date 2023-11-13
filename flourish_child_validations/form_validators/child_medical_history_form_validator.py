@@ -60,6 +60,10 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
                 field='currently_taking_medications',
             )
 
+        self.required_if(YES,
+                         field='had_op_visit',
+                         field_required='op_visit_count')
+
         super().clean()
 
     def not_applicable_not_allowed(self, *selections, field=None, m2m_field=None):
