@@ -24,6 +24,8 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
         self.not_applicable_not_allowed('chist_na', field=chronic_since,
                                         m2m_field=child_chronic)
 
+        self.m2m_single_selection_if('chist_na', m2m_field='child_chronic')
+
         self.m2m_other_specify(m2m_field='child_chronic',
                                field_other='child_chronic_other')
 
