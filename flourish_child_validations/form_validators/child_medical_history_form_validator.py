@@ -26,7 +26,7 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
 
         self.m2m_single_selection_if('chist_na', m2m_field='child_chronic')
 
-        self.m2m_other_specify(OTHER, m2m_field='child_chronic',
+        self.m2m_other_specify('chist_other', m2m_field='child_chronic',
                                field_other='child_chronic_other')
 
     def current_illness_validations(self):
