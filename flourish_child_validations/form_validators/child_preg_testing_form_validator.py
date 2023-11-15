@@ -38,12 +38,17 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
                          field_required='comments',
                          inverse=False)
 
-        self.required_if(YES,
-                         field='menarche',
-                         field_required='last_menstrual_period')
+        fields_required = ['menstrual_start_dt', 'last_menstrual_period']
+        for field in fields_required:
+            self.required_if(YES,
+                             field='menarche',
+                             field_required=field)
 
         self.required_if_not_none(field='last_menstrual_period',
                                   field_required='is_lmp_date_estimated')
+
+        self.required_if_not_none(field='menstrual_start_dt',
+                                  field_required='menstrual_start_est')
 
         test_done_fields = ['test_date', 'preg_test_result', ]
         for field in test_done_fields:
