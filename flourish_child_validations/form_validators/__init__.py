@@ -48,3 +48,4 @@ from .tb_adol_validations import TbReferralOutcomesFormValidator
 from .tb_adol_validations import TbScreeningDuringEncountersFormValidator
 from .tb_adol_validations import TbVisitScreeningFormValidator
 from .young_adult_locator_validator import YoungAdultLocatorFormValidator
+from .child_social_work_referral_form_validator import ChildSocialWorkReferralValidator
