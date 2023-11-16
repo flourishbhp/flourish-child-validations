@@ -29,13 +29,13 @@ class ChildOutpatientFormValidator(ChildFormValidatorMixin, FormValidator):
                          field='op_new_dx',
                          field_required='op_new_dx_details')
 
-        self.required_if(YES,
-                         field='op_meds_prescribed',
-                         field_required='op_meds_received')
+        self.m2m_required_if(YES,
+                             field='op_meds_prescribed',
+                             m2m_field='op_meds_received')
 
-        self.required_if(OTHER,
-                         field='op_meds_received',
-                         field_required='op_meds_other')
+        self.m2m_other_specify('opmeds_other',
+                               m2m_field='op_meds_received',
+                               field_other='op_meds_other')
 
         symptoms = self.cleaned_data.get('op_symptoms', None)
         self.required_if_true(
