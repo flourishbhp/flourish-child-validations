@@ -1,6 +1,6 @@
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
-from edc_constants.constants import YES, NO
+from edc_constants.constants import YES, NO, NOT_SURE
 from edc_form_validators import FormValidator
 
 from .crf_offstudy_form_validator import CrfOffStudyFormValidator
@@ -87,6 +87,11 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
             YES,
             field='took_formula',
             field_required='dt_formula_introduced')
+
+        self.not_applicable_if(
+            *(NO, NOT_SURE),
+            field='took_formula',
+            field_applicable='formula_first_report')
 
         self.required_if_not_none(
             field='dt_formula_introduced',
