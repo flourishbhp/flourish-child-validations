@@ -53,7 +53,7 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
     def breastfeeding_validations(self):
 
         fields_required = ['bf_start_dt', 'bf_start_dt_est', 'recent_bf_dt',
-                           'continuing_to_bf', 'child_weaned']
+                           'continuing_to_bf', ]
         for field in fields_required:
             self.required_if(
                 YES,
@@ -61,6 +61,11 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
                 field_required=field)
 
         if self.previous_feeding_instance():
+            self.required_if(
+                YES,
+                field='ever_breastfed',
+                field_required='child_weaned')
+
             self.required_if(
                 YES,
                 field='child_weaned',
