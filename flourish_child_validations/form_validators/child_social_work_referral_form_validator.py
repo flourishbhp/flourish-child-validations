@@ -1,5 +1,5 @@
-from flourish_form_validations.form_validators import SocialWorkReferralValidatorMixin
-
+from flourish_form_validations.form_validators.social_work_referral_validator_mixin \
+    import SocialWorkReferralValidatorMixin
 from .form_validator_mixin import ChildFormValidatorMixin
 
 
