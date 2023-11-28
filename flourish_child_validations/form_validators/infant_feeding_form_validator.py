@@ -144,17 +144,15 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
                 field='taken_solid_foods',
                 field_required=field)
 
-        for field in ['solid_foods', 'solid_foods_past_week']:
-            self.m2m_required_if(
-                YES,
-                field='taken_solid_foods',
-                m2m_field=field)
+        self.m2m_required_if(
+            YES,
+            field='taken_solid_foods',
+            m2m_field='solid_foods')
 
-        for field in ['solid_foods', 'solid_foods_past_week']:
-            self.m2m_required_if(
-                YES,
-                field='provide_response_solid',
-                m2m_field=field)
+        self.m2m_required_if(
+            YES,
+            field='provide_response_solid',
+            m2m_field='solid_foods_past_week')
 
         solid_foods = self.cleaned_data.get('solid_foods_past_week')
         selected = [solid.short_name for solid in solid_foods]
