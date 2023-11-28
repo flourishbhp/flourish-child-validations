@@ -8,6 +8,7 @@ from edc_form_validators import FormValidator
 from edc_visit_tracking.constants import COMPLETED_PROTOCOL_VISIT
 from edc_visit_tracking.constants import LOST_VISIT, MISSED_VISIT, UNSCHEDULED
 from edc_visit_tracking.form_validators import VisitFormValidator
+from flourish_child.visit_sequence import VisitSequence
 from flourish_prn.action_items import CHILDOFF_STUDY_ACTION
 
 from .crf_offstudy_form_validator import CrfOffStudyFormValidator
@@ -18,6 +19,7 @@ class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
                               ChildFormValidatorMixin, FormValidator):
 
     caregiver_child_consent_model = 'flourish_caregiver.caregiverchildconsent'
+    visit_sequence_cls = VisitSequence
 
     @property
     def caregiver_child_consent_cls(self):
