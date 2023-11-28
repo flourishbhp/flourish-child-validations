@@ -24,11 +24,6 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
                               field_required='test_done',
                               inverse=False)
 
-        if visit_code == '3000':
-            self.required_if(YES,
-                             field='experienced_pregnancy',
-                             field_required='last_menstrual_period')
-
         self.applicable_if(NO,
                            field='experienced_pregnancy',
                            field_applicable='test_done')
@@ -38,17 +33,29 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
                          field_required='comments',
                          inverse=False)
 
-        fields_required = ['menstrual_start_dt', 'last_menstrual_period']
+        fields_required = ['menarche_start_dt', 'last_menstrual_period']
         for field in fields_required:
             self.required_if(YES,
                              field='menarche',
                              field_required=field)
+    
+        experienced_pregnancy = self.cleaned_data.get(
+            'experienced_pregnancy', None)
+        menarche = self.cleaned_data.get(
+            'menarche', None)
+        if experienced_pregnancy and menarche:
+            if menarche == NO and experienced_pregnancy == YES:
+                raise ValidationError(
+                    {'experienced_pregnancy':
+                     'Child has not reached mernache.'}) 
 
         self.required_if_not_none(field='last_menstrual_period',
                                   field_required='is_lmp_date_estimated')
 
-        self.required_if_not_none(field='menstrual_start_dt',
-                                  field_required='menstrual_start_est')
+        menarche_start_dt = self.cleaned_data.get('menarche_start_dt', None)
+        self.applicable_if_true(
+            bool(menarche_start_dt),
+            field_applicable='menarche_start_est', )
 
         test_done_fields = ['test_date', 'preg_test_result', ]
         for field in test_done_fields:
