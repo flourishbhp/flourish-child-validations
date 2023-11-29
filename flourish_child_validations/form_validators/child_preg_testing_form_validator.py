@@ -18,44 +18,30 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
             'child_visit').appointment.subject_identifier
         super().clean()
 
-        visit_code = self.cleaned_data.get('child_visit').visit_code
-
-        self.required_if_true(visit_code == '2000',
-                              field_required='test_done',
-                              inverse=False)
-
-        self.applicable_if(NO,
-                           field='experienced_pregnancy',
-                           field_applicable='test_done')
-
-        self.required_if(NO,
-                         field='test_done',
-                         field_required='comments',
-                         inverse=False)
-
-        fields_required = ['menarche_start_dt', 'last_menstrual_period']
-        for field in fields_required:
-            self.required_if(YES,
-                             field='menarche',
-                             field_required=field)
-    
-        experienced_pregnancy = self.cleaned_data.get(
-            'experienced_pregnancy', None)
-        menarche = self.cleaned_data.get(
-            'menarche', None)
-        if experienced_pregnancy and menarche:
-            if menarche == NO and experienced_pregnancy == YES:
-                raise ValidationError(
-                    {'experienced_pregnancy':
-                     'Child has not reached mernache.'}) 
-
-        self.required_if_not_none(field='last_menstrual_period',
-                                  field_required='is_lmp_date_estimated')
+        self.required_if(YES,
+                         field='menarche',
+                         field_required='menarche_start_dt')
 
         menarche_start_dt = self.cleaned_data.get('menarche_start_dt', None)
         self.applicable_if_true(
             bool(menarche_start_dt),
             field_applicable='menarche_start_est', )
+
+        self.applicable_if(YES,
+                           field='menarche',
+                           field_applicable='experienced_pregnancy')
+
+        self.required_if(YES,
+                         field='experienced_pregnancy',
+                         field_required='last_menstrual_period')
+
+        self.required_if_not_none(field='last_menstrual_period',
+                                  field_required='is_lmp_date_estimated')
+
+        self.required_if(NO,
+                         field='test_done',
+                         field_required='comments',
+                         inverse=False)
 
         test_done_fields = ['test_date', 'preg_test_result', ]
         for field in test_done_fields:
@@ -84,29 +70,28 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         and if it is then the pregnancy test is required
         """
         threshold_date = (get_utcnow() - relativedelta(months=2)).date()
-        lmp = self.cleaned_data.get('last_menstrual_period')
-        consent = self.caregiver_child_obj
+        lmp = self.cleaned_data.get('last_menstrual_period', None)
+        consented = self.caregiver_child_obj
         today_dt = get_utcnow().date()
-        childvisit = self.cleaned_data.get('child_visit')
-        test_done = self.cleaned_data.get('test_done')
-        menarche = self.cleaned_data.get('menarche')
+        menarche_start_dt = self.cleaned_data.get('menarche_start_dt', None)
+        experienced_pregnancy = self.cleaned_data.get('experienced_pregnancy', None)
 
-        if consent:
-            if any(item in childvisit.schedule_name for item in ['qt', 'quart']):
-                if menarche == YES:
-                    if lmp:
-                        if lmp == today_dt:
-                            message = {'last_menstrual_period': (
-                                'Last Menstrual Period date cannot be today.')}
-                            self._errors.update(message)
-                            raise ValidationError(message)
-                        elif lmp <= threshold_date and test_done != YES:
-                                message = {'test_done': 'A pregnancy test is needed'}
-                                self._errors.update(message)
-                                raise ValidationError(message)
+        if consented:
+            if lmp and (lmp == today_dt):
+                message = {'last_menstrual_period':
+                           'Last Menstrual Period date cannot be today.'}
+                self._errors.update(message)
+                raise ValidationError(message)
+            if lmp and (lmp <= menarche_start_dt):
+                message = {'last_menstrual_period':
+                           'Date of LMP can not be before start of menarche.'}
+                self._errors.update(message)
+                raise ValidationError(message)
 
-                    else:
-                        message = {'last_menstrual_period': (
-                            'Last Menstrual Period date cannot be left blank.')}
-                        self._errors.update(message)
-                        raise ValidationError(message)
+            lmp_condition = (experienced_pregnancy == NO) or (
+                lmp and lmp <= threshold_date)
+            self.applicable_if_true(
+                lmp_condition,
+                field_applicable='test_done',
+                applicable_msg='A pregnancy test is needed')
+
