@@ -17,7 +17,7 @@ class ChildSocialWorkReferralValidator(ChildFormValidatorMixin,
                                m2m_field='referral_reason',
                                field_other='reason_other')
 
-        referral_reason = self.cleaned_data.get('referral_reason')
+        referral_reason = self.cleaned_data.get('referral_reason', [])
         selected = [reason.short_name for reason in referral_reason]
         value_field = {'local_medical_facility': 'comment', }
 
