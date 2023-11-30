@@ -38,11 +38,6 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         self.required_if_not_none(field='last_menstrual_period',
                                   field_required='is_lmp_date_estimated')
 
-        self.required_if(NO,
-                         field='test_done',
-                         field_required='comments',
-                         inverse=False)
-
         test_done_fields = ['test_date', 'preg_test_result', ]
         for field in test_done_fields:
             self.required_if(YES,
