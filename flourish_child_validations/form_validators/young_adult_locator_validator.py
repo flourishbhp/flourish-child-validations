@@ -21,6 +21,8 @@ class YoungAdultLocatorFormValidator(FormValidator):
             field='may_visit_home',
             field_required='physical_address')
 
+        self.required_if(YES, field='may_call', field_required='subject_cell')
+
         self.validate_may_call_fields()
         self.validate_work_contact()
         self.validate_contact_details()
@@ -56,9 +58,11 @@ class YoungAdultLocatorFormValidator(FormValidator):
         self.required_if(
             YES, field='may_contact_indirectly',
             field_required='indirect_contact_physical_address')
+        self.required_if(
+            YES, field='may_contact_indirectly',
+            field_required='indirect_contact_cell')
 
-        for field in ['indirect_contact_cell', 'indirect_contact_cell_alt',
-                      'indirect_contact_phone']:
+        for field in ['indirect_contact_cell_alt', 'indirect_contact_phone']:
             self.not_required_if(
                 NO, field='may_contact_indirectly', field_required=field,
                 inverse=False)

@@ -3,11 +3,11 @@ from django.core.exceptions import ValidationError
 from django.test import tag, TestCase
 from django.utils import timezone
 from edc_base.utils import get_utcnow
-from edc_constants.constants import FEMALE
+from edc_constants.constants import FEMALE, NO, YES
 
 from .models import Appointment, CaregiverChildConsent, ChildVisit, RegisteredSubject
-from ..form_validators import ChildClinicalMeasurementsFormValidator
 from .test_model_mixin import TestModelMixin
+from ..form_validators import ChildClinicalMeasurementsFormValidator
 
 
 @tag('cmf')
@@ -192,3 +192,54 @@ class TestClinicalMeasurementForm(TestModelMixin, TestCase):
             cleaned_data=cleaned_data)
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn('child_hip_circ_third', form_validator._errors)
+
+    def test_skin_folds_measurement_required_when_visit_skin_fold_messure_is_yes(self):
+        cleaned_data = {
+            'child_visit': self.child_visit,
+            'visit_skin_fold_messure': YES,
+            'child_systolic_bp': 120,
+            'skin_folds_triceps': None,
+            'skin_folds_subscapular': None,
+            'skin_folds_suprailiac': None,
+            'child_diastolic_bp': 80,
+        }
+
+        form_validator = ChildClinicalMeasurementsFormValidator(
+            cleaned_data=cleaned_data)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('skin_folds_triceps', form_validator._errors)
+
+    def test_skin_folds_measurement_not_required_when_visit_skin_fold_messure_is_no(self):
+        cleaned_data = {
+            'child_visit': self.child_visit,
+            'visit_skin_fold_messure': NO,
+            'child_systolic_bp': 120,
+            'skin_folds_triceps': None,
+            'skin_folds_subscapular': None,
+            'skin_folds_suprailiac': None,
+            'child_diastolic_bp': 80,
+        }
+
+        form_validator = ChildClinicalMeasurementsFormValidator(
+            cleaned_data=cleaned_data)
+        try:
+            form_validator.validate()
+        except ValidationError as e:
+            self.fail(f'ValidationError unexpectedly raised. Got{e}')
+
+    def test_skin_folds_measurement_margin_of_error(self):
+        cleaned_data = {
+            'child_visit': self.child_visit,
+            'child_systolic_bp': 120,
+            'skin_folds_triceps': 5.4,
+            'skin_folds_triceps_second': 6.4,
+            'skin_folds_triceps_third': None,
+            'skin_folds_subscapular': None,
+            'skin_folds_suprailiac': None,
+            'child_diastolic_bp': 80,
+        }
+
+        form_validator = ChildClinicalMeasurementsFormValidator(
+            cleaned_data=cleaned_data)
+        self.assertRaises(ValidationError, form_validator.validate)
+        self.assertIn('skin_folds_triceps_third', form_validator._errors)

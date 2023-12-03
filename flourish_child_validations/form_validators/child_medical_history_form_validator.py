@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from edc_constants.constants import NO, NONE, NOT_APPLICABLE, OTHER, YES
+from edc_constants.constants import YES, NO, NOT_APPLICABLE, OTHER
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
@@ -12,55 +12,56 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
         self.subject_identifier = self.cleaned_data.get(
             'child_visit').appointment.subject_identifier
 
-        self.validate_consent_version_obj(self.subject_identifier)
+        self.chronic_illness_validations()
+        self.current_illness_validations()
+        self.current_medication_validations()
+
+        self.required_if(YES,
+                         field='had_op_visit',
+                         field_required='op_visit_count')
+
+        super().clean()
+
+    def chronic_illness_validations(self):
+
         chronic_since = self.cleaned_data.get('chronic_since')
         child_chronic = self.cleaned_data.get('child_chronic')
 
-        self.m2m_single_selection_if('chist_na', m2m_field='child_chronic')
-
-        self.m2m_other_specify(
-            'chist_other',
-            m2m_field='child_chronic',
-            field_other='child_chronic_other')
-
-        self.m2m_single_selection_if(NONE, m2m_field='who')
-
-        self.not_applicable_not_allowed('chist_na', field=chronic_since,
+        self.not_applicable_not_allowed('chist_na',
+                                        field=chronic_since,
                                         m2m_field=child_chronic)
 
-        currently_taking_medications_fields = ['current_medications',
-                                               'duration_of_medications', ]
+        self.m2m_single_selection_if('chist_na', m2m_field='child_chronic')
 
-        for field in currently_taking_medications_fields:
-            self.required_if(
-                YES,
-                field_required=field,
-                field='currently_taking_medications',
-            )
+        self.m2m_other_specify('chist_other',
+                               m2m_field='child_chronic',
+                               field_other='child_chronic_other')
 
-        self.required_if(
-            OTHER,
-            field_required='current_medications_other',
-            field='current_medications',
-        )
+    def current_illness_validations(self):
+        self.m2m_required_if(YES, field='current_illness',
+                             m2m_field='current_symptoms')
 
-        self.required_if(
-            OTHER,
-            field_required='current_symptoms_other',
-            field='current_symptoms',
-        )
+        self.m2m_other_specify(
+            OTHER, m2m_field='current_symptoms',
+            field_other='current_symptoms_other')
 
-        current_illness_fields = ['current_symptoms', 'symptoms_start_date',
-                                  'seen_at_local_clinic']
+        for field in ['symptoms_start_date', 'seen_at_local_clinic']:
+            self.required_if(YES, field='current_illness',
+                             field_required=field)
 
-        for field in current_illness_fields:
-            self.required_if(
-                YES,
-                field_required=field,
-                field='currently_taking_medications',
-            )
+    def current_medication_validations(self):
 
-        super().clean()
+        self.m2m_required_if(
+            YES, field='currently_taking_medications',
+            m2m_field='current_medications')
+
+        self.m2m_other_specify(
+            OTHER, m2m_field='current_medications',
+            field_other='current_medications_other')
+
+        self.required_if(YES,
+                         field='currently_taking_medications',
+                         field_required='duration_of_medications')
 
     def not_applicable_not_allowed(self, *selections, field=None, m2m_field=None):
 
@@ -75,20 +76,7 @@ class ChildMedicalHistoryFormValidator(ChildFormValidatorMixin, FormValidator):
                         raise ValidationError(message)
             elif field in [NO, NOT_APPLICABLE]:
                 if 'chist_na' not in selected:
-                    message = {'child_chronic': 'You can only select \'Not Applicable\''}
+                    message = {
+                        'child_chronic': 'You can only select \'Not Applicable\''}
                     self._errors.update(message)
                     raise ValidationError(message)
-
-    def validate_m2m_na(self, m2m_field, na_response='chist_na', message=None):
-        qs = self.cleaned_data.get(m2m_field)
-        message = message or 'This field is not applicable.'
-        if qs and qs.count() > 0:
-            selected = {obj.short_name: obj.name for obj in qs}
-            if na_response not in selected:
-                msg = {m2m_field: message}
-                self._errors.update(msg)
-                raise ValidationError(msg)
-
-            self.m2m_single_selection_if(
-                na_response,
-                m2m_field=m2m_field)
