@@ -237,3 +237,6 @@ class MaternalDelivery(BaseUuidModel):
 class ChildOffStudy(BaseUuidModel):
     action_name = 'submit-childoff-study'
     subject_identifier = models.CharField(max_length=25)
+
+class ARTMedicationReasons(ListModelMixin, BaseUuidModel):
+    pass
