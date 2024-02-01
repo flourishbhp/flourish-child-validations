@@ -26,7 +26,7 @@ class InfantArvProphylaxisPostFollowFormValidator(ChildFormValidatorMixin, FormV
 
         self.validate_field_required_m2m(
             field='days_completed',
-            response='completed_after_28_days',
+            response='after_28_days',
             m2m_field='arv_status',
         )
 
