@@ -23,6 +23,7 @@ from .child_previous_hospitalisations_form_validator import (
     ChildPreHospitalisationInlineFormValidator, ChildPreviousHospitalisationFormValidator)
 from .child_referral_form_validator import ChildReferralFormValidator
 from .child_referral_fu_form_validator import ChildReferralFUFormValidator
+from .child_social_work_referral_form_validator import ChildSocialWorkReferralValidator
 from .child_socio_demographic_form_validator import ChildSocioDemographicFormValidator
 from .child_tanner_staging_form_validator import ChildTannerStagingFormValidator
 from .child_tb_referral_form_validator import ChildTBReferralFormValidator
@@ -35,6 +36,8 @@ from .form_validator_mixin import ChildFormValidatorMixin
 from .infant_arv_exposure_form_validation import InfantArvExposureFormValidator
 from .infant_arv_prophylaxis_form_validator import ChildArvProphDatesFormValidator
 from .infant_arv_prophylaxis_form_validator import InfantArvProphylaxisFormValidator
+from .infant_arv_prophylaxis_post_follow_form_validator import \
+    InfantArvProphylaxisPostFollowFormValidator
 from .infant_congenital_anomalies_form_validation import *
 from .infant_feeding_form_validator import InfantFeedingFormValidator
 from .infant_hiv_testing_form_validation import InfantHIVTestingFormValidator
@@ -52,4 +55,3 @@ from .tb_adol_validations import TbReferralOutcomesFormValidator
 from .tb_adol_validations import TbScreeningDuringEncountersFormValidator
 from .tb_adol_validations import TbVisitScreeningFormValidator
 from .young_adult_locator_validator import YoungAdultLocatorFormValidator
-from .child_social_work_referral_form_validator import ChildSocialWorkReferralValidator
