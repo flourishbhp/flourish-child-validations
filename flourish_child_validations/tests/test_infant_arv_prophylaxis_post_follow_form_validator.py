@@ -17,7 +17,7 @@ class TestInfantArvProphylaxisPostFollowFormValidator(TestCase):
         m2m_relation_mock.count.return_value = 1
         self.form_data = {
             'arv_status': m2m_relation_mock,
-            'prophylactic_med_last_visit': 'YES',
+            'last_visit': 'YES',
             'reason_no_art': m2m_relation_mock,
         }
         self.form = InfantArvProphylaxisPostFollowFormValidator(

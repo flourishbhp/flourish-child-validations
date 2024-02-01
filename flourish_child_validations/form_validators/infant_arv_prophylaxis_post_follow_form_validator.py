@@ -11,12 +11,12 @@ class InfantArvProphylaxisPostFollowFormValidator(ChildFormValidatorMixin, FormV
     def clean(self):
         self.m2m_required_if(
             response=YES,
-            field='prophylactic_med_last_visit',
+            field='last_visit',
             m2m_field='arv_status', )
 
         self.m2m_required_if(
             response=NO,
-            field='prophylactic_med_last_visit',
+            field='last_visit',
             m2m_field='reason_no_art', )
 
         self.m2m_other_specify_applicable(
@@ -31,7 +31,7 @@ class InfantArvProphylaxisPostFollowFormValidator(ChildFormValidatorMixin, FormV
         )
 
         self.validate_field_required_m2m(
-            field='arv_status_incomplete_reason',
+            field='incomplete_reason',
             response='incomplete',
             m2m_field='arv_status',
         )
@@ -58,25 +58,25 @@ class InfantArvProphylaxisPostFollowFormValidator(ChildFormValidatorMixin, FormV
 
         self.required_if(
             YES,
-            field='modification_starting_arv',
-            field_required='modification_date',
+            field='mod_starting_arv',
+            field_required='mod_date',
         )
 
         self.m2m_required_if(
             response=YES,
-            field='modification_starting_arv',
-            m2m_field='modification_reason',
+            field='mod_starting_arv',
+            m2m_field='mod_reason',
         )
 
         self.validate_field_required_m2m(
-            field='modification_reason_side_effects',
+            field='mod_reason_side_effects',
             response='side_effects',
-            m2m_field='modification_reason',
+            m2m_field='mod_reason',
         )
 
         self.m2m_other_specify_applicable(
-            field_other='modification_reason_other',
-            m2m_field='modification_reason',
+            field_other='mod_reason_other',
+            m2m_field='mod_reason',
         )
 
         missed_dose_questions = ['missed_dose_count', 'reason_missed']
