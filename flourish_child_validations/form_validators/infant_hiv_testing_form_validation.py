@@ -29,11 +29,13 @@ class InfantHIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         )
 
         self.m2m_other_specify(
+            OTHER,
             m2m_field='reason_child_not_tested',
             field_other='reason_child_not_tested_other',
         )
 
         self.m2m_other_specify(
+            OTHER,
             m2m_field='test_visit',
             field_other='test_visit_other',
         )
