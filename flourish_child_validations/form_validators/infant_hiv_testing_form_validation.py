@@ -10,10 +10,10 @@ class InfantHIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
     def clean(self):
         super().clean()
 
-        self.required_if(
-            YES,
+        self.m2m_required_if(
+            response=YES,
             field='child_tested_for_hiv',
-            field_required='test_visit',
+            m2m_field='test_visit',
         )
 
         self.required_if(
