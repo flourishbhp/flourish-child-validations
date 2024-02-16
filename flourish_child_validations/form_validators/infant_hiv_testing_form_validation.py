@@ -1,5 +1,6 @@
 from django.forms import ValidationError
 from edc_constants.choices import NO, YES
+from edc_constants.constants import OTHER
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
