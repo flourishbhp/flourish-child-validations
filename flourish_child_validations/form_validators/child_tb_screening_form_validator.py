@@ -1,4 +1,4 @@
-from edc_constants.constants import YES
+from edc_constants.constants import OTHER, YES
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
@@ -21,6 +21,7 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
                          field_required='clinic_visit_date')
 
         self.m2m_other_specify(
+            OTHER,
             m2m_field='tb_tests',
             field_other='other_test',
         )
