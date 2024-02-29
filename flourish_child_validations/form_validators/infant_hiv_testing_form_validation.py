@@ -17,12 +17,6 @@ class InfantHIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         )
 
         self.required_if(
-            YES,
-            field='child_tested_for_hiv',
-            field_required='pref_location',
-        )
-
-        self.required_if(
             NO,
             field='child_tested_for_hiv',
             field_required='not_tested_reason',
