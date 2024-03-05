@@ -67,10 +67,6 @@ class InfantArvExposureFormValidator(ChildFormValidatorMixin,
                 required_msg=messages[0],
                 not_required_msg=messages[1])
 
-        self.required_if(NO,
-                         field='sdnvp_after_birth',
-                         field_required='nvp_cont_dosing')
-
         fields_required = ['arvs_specify', 'date_1st_arv_dose']
         for field in fields_required:
             self.required_if(YES,
