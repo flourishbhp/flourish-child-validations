@@ -89,7 +89,7 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
             field_required='dt_formula_introduced')
 
         self.not_applicable_if(
-            *(NO, NOT_SURE),
+            *(NO, NOT_SURE, None),
             field='took_formula',
             field_applicable='formula_first_report')
 
