@@ -1,5 +1,3 @@
-from django.forms import ValidationError
-from edc_constants.constants import NO, YES, OTHER
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
@@ -9,31 +7,21 @@ class ChildSafiStigmaFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
         super().clean()
-        self.validate_other()
         self.validate_period_required()
-
-    def validate_other(self):
-        fields = ['child_other_discrimination_other',
-                  'child_other_discrimination_period']
-
-        for field in fields:
-            self.required_if('ever_happened',
-                             field='child_other_discrimination',
-                             field_required=field)
 
     def validate_period_required(self):
         fields = [
             'lost_friends',
-            'discriminated',
-            'child_home_discrimination',
-            'child_neighborhood_discrimination',
-            'child_religious_place_discrimination',
-            'child_clinic_discrimination',
-            'child_school_discrimination',
-            'child_social_effect',
-            'child_emotional_effect',
-            'child_education_effect',
-            'child_future_pespective_changed'
+            'bullied',
+            'home_discr',
+            'neighborhood_discr',
+            'religious_place_discr',
+            'clinic_discr',
+            'school_discr',
+            'lose_fin_support',
+            'lose_social_support',
+            'stressed_or_anxious',
+            'depressed_or_sad'
         ]
 
         for field in fields:
@@ -43,3 +31,7 @@ class ChildSafiStigmaFormValidator(ChildFormValidatorMixin, FormValidator):
                 field=field,
                 field_required=f'{field}_period'
             )
+
+        self.required_if_not_none(
+            field='other_place_discr',
+            field_required='other_place_discr_period', )
