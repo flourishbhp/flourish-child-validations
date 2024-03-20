@@ -25,10 +25,6 @@ class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
     def caregiver_child_consent_cls(self):
         return django_apps.get_model(self.caregiver_child_consent_model)
 
-    @property
-    def child_continued_consent_cls(self):
-        return django_apps.get_model(self.child_continued_consent_model)
-
     def clean(self):
         cleaned_data = self.cleaned_data
         self.report_datetime = cleaned_data.get('report_datetime')
