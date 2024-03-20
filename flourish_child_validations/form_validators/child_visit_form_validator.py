@@ -19,7 +19,6 @@ class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
                               ChildFormValidatorMixin, FormValidator):
 
     caregiver_child_consent_model = 'flourish_caregiver.caregiverchildconsent'
-    child_continued_consent_model = 'flourish_child.childcontinuedconsent'
     visit_sequence_cls = VisitSequence
 
     @property
