@@ -1,5 +1,6 @@
 from django.forms import ValidationError
-from edc_constants.constants import YES, NO, OTHER
+from edc_base import get_utcnow
+from edc_constants.constants import NO, OTHER, YES
 from edc_form_validators import FormValidator
 
 from .crf_offstudy_form_validator import CrfOffStudyFormValidator
@@ -9,7 +10,6 @@ from .form_validator_mixin import ChildFormValidatorMixin
 class InfantArvProphylaxisFormValidator(ChildFormValidatorMixin,
                                         CrfOffStudyFormValidator,
                                         FormValidator):
-
     infant_birth_model = 'flourish_child.childbirth'
 
     def clean(self):
@@ -58,7 +58,7 @@ class InfantArvProphylaxisFormValidator(ChildFormValidatorMixin,
             report_datetime=date_arvs_modified,
             date_attr='dob',
             message={'date_arvs_modified':
-                     'Date ARVs were modified can not be before child DOB.'})
+                         'Date ARVs were modified can not be before child DOB.'})
 
         self.required_if('side_effects',
                          field='reason_modified',
@@ -77,16 +77,16 @@ class InfantArvProphylaxisFormValidator(ChildFormValidatorMixin,
             self.required_if(YES,
                              field='missed_dose',
                              field_required=field_required)
-            
+
+
 class ChildArvProphDatesFormValidator(ChildFormValidatorMixin,
                                       CrfOffStudyFormValidator,
                                       FormValidator):
-
     infant_birth_model = 'flourish_child.childbirth'
 
     def clean(self):
         self.subject_identifier = self.cleaned_data.get(
-             'infant_arv_proph').child_visit.subject_identifier
+            'infant_arv_proph').child_visit.subject_identifier
         super().clean()
 
         stop_date = self.cleaned_data.get('arv_stop_date', None)
@@ -94,23 +94,26 @@ class ChildArvProphDatesFormValidator(ChildFormValidatorMixin,
         art_status = getattr(infant_arv_proph, 'art_status', None)
         if art_status == 'in_progress' and stop_date:
             message = {'arv_stop_date':
-                       'ARV status is still in progress, do not provide stop date.'}
+                           'ARV status is still in progress, do not provide stop date.'}
             raise ValidationError(message)
         elif art_status != 'in_progress' and not stop_date:
             message = {'arv_stop_date':
-                       f'ARV status is `{art_status}`, please provide stop date.'}
+                           f'ARV status is `{art_status}`, please provide stop date.'}
             raise ValidationError(message)
 
         start_date = self.cleaned_data.get('arv_start_date', None)
         stop_date = self.cleaned_data.get('arv_stop_date', None)
+        today_date = get_utcnow().date()
         self.validate_against_birth_date(
             infant_identifier=self.subject_identifier,
             report_datetime=start_date,
             date_attr='dob',
-            message={'arv_start_date':
-                     'ARV start date can not be before child DOB.'})
+            message={'arv_start_date': 'ARV start date can not be before child DOB.'})
 
         if stop_date and stop_date < start_date:
-            message = {'arv_stop_date':
-                       'ARV stop date can not before start date.'}
+            message = {'arv_stop_date': 'ARV stop date can not before start date.'}
+            raise ValidationError(message)
+
+        if start_date == today_date:
+            message = {'arv_start_date': 'ARV start date cannot be Today'}
             raise ValidationError(message)
