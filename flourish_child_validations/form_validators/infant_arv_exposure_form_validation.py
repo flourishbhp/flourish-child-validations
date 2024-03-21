@@ -77,17 +77,12 @@ class InfantArvExposureFormValidator(ChildFormValidatorMixin,
                          field='arvs_specify',
                          field_required='arvs_specify_other')
 
-        self.validate_nvp_cont_dosing()
-
     def validate_nvp_cont_dosing(self):
-        nvp_cont_dosing = self.cleaned_data.get('nvp_cont_dosing')
-        sdnvp_after_birth = self.cleaned_data.get('sdnvp_after_birth')
+        nvp_cont_dosing = self.cleaned_data('nvp_cont_dosing')
+        sdnvp_after_birth = self.cleaned_data('sdnvp_after_birth')
 
-        allowed_options = [YES, UNKNOWN]
-
-        if (sdnvp_after_birth not in allowed_options and nvp_cont_dosing in
-                allowed_options):
-            msg = {'nvp_cont_dosing': 'This Question should be NO if the child did not  '
-                                      'received NVP after birth'}
-            self._errors.update(msg)
-            raise ValidationError(msg)
+        if (not (nvp_cont_dosing == UNKNOWN or nvp_cont_dosing == YES) and
+                sdnvp_after_birth == YES):
+            raise ValidationError({
+                'nvp_cont_dosing': 'This Question can only be NO if the child did not '
+            })
