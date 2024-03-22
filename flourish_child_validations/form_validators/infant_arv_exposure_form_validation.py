@@ -84,5 +84,6 @@ class InfantArvExposureFormValidator(ChildFormValidatorMixin,
         if (not (nvp_cont_dosing == UNKNOWN or nvp_cont_dosing == YES) and
                 sdnvp_after_birth == YES):
             raise ValidationError({
-                'nvp_cont_dosing': 'This Question can only be NO if the child did not '
+                'nvp_cont_dosing': 'This Question can only be NO if the child did not  '
+                                   'received NVP after birth'
             })
