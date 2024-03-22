@@ -37,7 +37,7 @@ from .infant_arv_prophylaxis_form_validator import ChildArvProphDatesFormValidat
 from .infant_arv_prophylaxis_form_validator import InfantArvProphylaxisFormValidator
 from .infant_congenital_anomalies_form_validation import *
 from .infant_feeding_form_validator import InfantFeedingFormValidator
-from .infant_hiv_testing_form_validation import InfantHIVTestingFormValidator
+from .infant_hiv_testing_form_validation import *
 from .pre_flourish_birth_data_form_validator import PreFlourishBirthDataFormValidator
 from .tb_adol_validations import AnthropometricFormValidator
 from .tb_adol_validations import Covid19AdolFormValidator
