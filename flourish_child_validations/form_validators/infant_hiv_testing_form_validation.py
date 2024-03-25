@@ -1,7 +1,9 @@
-from edc_form_validators import FormValidator
-from edc_constants.choices import YES, NO, OTHER
-from .form_validator_mixin import ChildFormValidatorMixin
 from django.forms import ValidationError
+from edc_constants.choices import NO, YES
+from edc_constants.constants import OTHER
+from edc_form_validators import FormValidator
+
+from .form_validator_mixin import ChildFormValidatorMixin
 
 
 class InfantHIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
@@ -9,78 +11,62 @@ class InfantHIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
     def clean(self):
         super().clean()
 
-        self.required_if(
-            YES,
+        self.m2m_required_if(
+            response=YES,
             field='child_tested_for_hiv',
-            field_required='child_test_date',
-        )
-
-        self.required_if_not_none(
-            field='child_test_date',
-            field_required='child_test_date_estimated',
-        )
-
-        self.required_if(
-            YES,
-            field='child_tested_for_hiv',
-            field_required='results_received',
-        )
-
-        self.required_if(
-            YES,
-            field='results_received',
-            field_required='recall_result_date',
-        )
-
-        self.required_if(
-            YES,
-            field='recall_result_date',
-            field_required='received_date',
-        )
-
-        self.required_if_not_none(
-            field='received_date',
-            field_required='result_date_estimated',
-        )
-
-        self.required_if_not_none(
-            field='result_date_estimated',
-            field_required='hiv_test_result',
-        )
-
-        self.required_if(
-            YES,
-            field='results_received',
-            field_required='hiv_test_result',
+            m2m_field='test_visit',
         )
 
         self.required_if(
             NO,
             field='child_tested_for_hiv',
-            field_required='reason_child_not_tested',
+            field_required='not_tested_reason',
+        )
+
+        self.m2m_other_specify(
+            OTHER,
+            m2m_field='reason_child_not_tested',
+            field_other='reason_child_not_tested_other',
+        )
+
+        self.m2m_other_specify(
+            OTHER,
+            m2m_field='test_visit',
+            field_other='test_visit_other',
         )
 
         self.validate_other_specify(
-            field='reason_child_not_tested',
-            other_specify_field='reason_child_not_tested_other',
+            field='pref_location',
+            other_specify_field='pref_location_other',
+        )
+
+
+class InfantHIVTestingAdminFormValidatorRepeat(ChildFormValidatorMixin,
+                                               FormValidator):
+
+    def clean(self):
+        super().clean()
+        self.validate_other_specify(
+            field='test_location',
+            other_specify_field='test_location_other',
         )
 
         self.required_if(
-            NO,
-            field='child_tested_for_hiv',
-            field_required='preferred_clinic_for_testing',
+            YES,
+            field='results_received',
+            field_required='received_date',
         )
 
         self.required_if(
-            OTHER,
-            field='reason_child_not_tested',
-            field_required='reason_child_not_tested_other',
+            YES,
+            field='results_received',
+            field_required='result_date_estimated',
         )
 
         self.required_if(
-            *[OTHER, 'no_testing'],
-            field='preferred_clinic_for_testing',
-            field_required='additional_comments',
+            YES,
+            field='results_received',
+            field_required='hiv_test_result',
         )
 
         self.validate_test_date()
@@ -91,5 +77,4 @@ class InfantHIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
 
         if child_test_date and received_date and child_test_date > received_date:
             raise ValidationError(
-                {'received_date':
-                     'Received date cannot be before test date.'})
+                {'received_date': 'Received date cannot be before test date.'})
