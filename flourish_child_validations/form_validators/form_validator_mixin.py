@@ -17,6 +17,8 @@ class ChildFormValidatorMixin:
     child_offstudy_model = 'flourish_prn.childoffstudy'
     consent_version_model = 'flourish_caregiver.flourishconsentversion'
     registered_subject_model = 'edc_registration.registeredsubject'
+    child_consent_model = 'flourish_caregiver.caregiverchildconsent'
+    cohort_model = 'flourish_caregiver.cohort'
 
     @property
     def infant_birth_cls(self):
@@ -37,6 +39,23 @@ class ChildFormValidatorMixin:
     @property
     def registered_subject_cls(self):
         return django_apps.get_model(self.registered_subject_model)
+
+    @property
+    def caregiver_child_consent_cls(self):
+        return django_apps.get_model(self.child_consent_model)
+
+    @property
+    def cohort_model_cls(self):
+        return django_apps.get_model(self.cohort_model)
+
+    @property
+    def child_consent_model_obj(self):
+        try:
+            return self.caregiver_child_consent_cls.objects.filter(
+                subject_identifier=self.subject_identifier).latest(
+                    'consent_datetime')
+        except self.caregiver_child_consent_cls.DoesNotExist:
+            return None
 
     @property
     def action_item_model_cls(self):
@@ -134,3 +153,12 @@ class ChildFormValidatorMixin:
 
         if subject_consents:
             return subject_consents.latest('consent_datetime')
+
+    def cohort_model_obj(self):
+        try:
+            return self.cohort_model_cls.objects.filter(
+                subject_identifier=self.subject_identifier).latest('assign_datetime')
+        except self.cohort_model_cls.DoesNotExist:
+            raise ValidationError(
+                {'__all__':
+                 'Child does not have a cohort instance. Please contact administrator for assistance'})
