@@ -19,11 +19,21 @@ class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
                               ChildFormValidatorMixin, FormValidator):
 
     caregiver_child_consent_model = 'flourish_caregiver.caregiverchildconsent'
+    continued_consent_model = 'flourish_child.childcontinuedconsent'
     visit_sequence_cls = VisitSequence
 
     @property
     def caregiver_child_consent_cls(self):
         return django_apps.get_model(self.caregiver_child_consent_model)
+
+    @property
+    def continued_consent_cls(self):
+        return django_apps.get_model(self.continued_consent_model)
+
+    @property
+    def continued_consent_exists(self):
+        return self.continued_consent_cls.objects.filter(
+            subject_identifier=self.subject_identifier).exists()
 
     def clean(self):
         cleaned_data = self.cleaned_data
@@ -75,8 +85,9 @@ class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
                      'participant if participant is present.'})
 
         information_provider = self.cleaned_data.get('information_provider')
+
         if (information_provider == 'self' and
-                self.cleaned_data.get('is_present') == NO):
+                self.cleaned_data.get('is_present') == NO and not self.continued_consent_exists):
             msg = {'is_present':
                    'The child provided most of the information, participant is '
                    'present can not be `No`'}
