@@ -35,11 +35,6 @@ class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
     @property
     def caregiver_child_consent_cls(self):
         return django_apps.get_model(self.caregiver_child_consent_model)
-    
-    @property
-    def continued_consent_exists(self):
-        return self.continued_consent_cls.objects.filter(
-            subject_identifier=self.subject_identifier).exists()
 
     @property
     def continued_consent_cls(self):
@@ -100,13 +95,10 @@ class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
             
             if info_source not in ['other_contact', PARTICIPANT]:
                 raise ValidationError({'info_source':'Participant is to provide the information'})
-        else:
-            if info_source in ['other_contact', PARTICIPANT]:
-                raise ValidationError({'info_source': 'Participant not present'})
-
 
         if info_source != PARTICIPANT and is_present == YES:
-             raise ValidationError({'is_present':'Participant visited the clinic'})
+             raise ValidationError({'is_present':
+                                    'Source of information must be from present can not be No'})
 
     def validate_death(self):
         if (self.cleaned_data.get('survival_status') == DEAD
