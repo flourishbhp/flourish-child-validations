@@ -21,8 +21,6 @@ class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
     caregiver_child_consent_model = 'flourish_caregiver.caregiverchildconsent'
     continued_consent_model = 'flourish_child.childcontinuedconsent'
     visit_sequence_cls = VisitSequence
-    continued_consent_model = 'flourish_child.childcontinuedconsent'
-
 
     @property
     def caregiver_child_consent_cls(self):
