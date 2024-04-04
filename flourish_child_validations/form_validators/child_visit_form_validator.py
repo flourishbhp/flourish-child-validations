@@ -88,7 +88,7 @@ class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
 
         if info_source != PARTICIPANT and is_present == YES:
              raise ValidationError({'is_present':
-                                    'Source of information must be from present can not be No'})
+                                    'Source of information must be from participant if participant is present.'})
 
     def validate_death(self):
         if (self.cleaned_data.get('survival_status') == DEAD
