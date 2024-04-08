@@ -1,12 +1,12 @@
 from django.core.exceptions import ValidationError
-from django.test import TestCase, tag
+from django.test import tag, TestCase
 from django.utils import timezone
 from edc_base.utils import get_utcnow
-from edc_constants.constants import YES, NO, NOT_APPLICABLE
+from edc_constants.constants import NO, NOT_APPLICABLE, YES
 
-from ..form_validators import InfantArvExposureFormValidator
-from .models import ChildVisit, Appointment, RegisteredSubject
+from .models import Appointment, ChildVisit, RegisteredSubject
 from .test_model_mixin import TestModelMixin
+from ..form_validators import InfantArvExposureFormValidator
 
 
 @tag('mm')
@@ -44,6 +44,7 @@ class TestInfantArvExposureFormValidator(TestModelMixin, TestCase):
         cleaned_data = {
             'child_visit': self.child_visit,
             'azt_after_birth': YES,
+            'azt_within_72h': YES,
             'azt_dose_date': get_utcnow().date()
         }
         form_validator = InfantArvExposureFormValidator(cleaned_data=cleaned_data)
@@ -78,6 +79,7 @@ class TestInfantArvExposureFormValidator(TestModelMixin, TestCase):
         cleaned_data = {
             'child_visit': self.child_visit,
             'azt_after_birth': YES,
+            'azt_within_72h': YES,
             'azt_dose_date': get_utcnow().date(),
             'azt_additional_dose': NOT_APPLICABLE
         }
@@ -89,6 +91,7 @@ class TestInfantArvExposureFormValidator(TestModelMixin, TestCase):
         cleaned_data = {
             'child_visit': self.child_visit,
             'azt_after_birth': YES,
+            'azt_within_72h': YES,
             'azt_dose_date': get_utcnow().date(),
             'azt_additional_dose': 'Unknown'
         }
@@ -136,6 +139,7 @@ class TestInfantArvExposureFormValidator(TestModelMixin, TestCase):
         cleaned_data = {
             'child_visit': self.child_visit,
             'sdnvp_after_birth': YES,
+            'snvp_dose_within_72h': YES,
             'nvp_dose_date': get_utcnow().date()
         }
         form_validator = InfantArvExposureFormValidator(cleaned_data=cleaned_data)
@@ -165,3 +169,28 @@ class TestInfantArvExposureFormValidator(TestModelMixin, TestCase):
             form_validator.validate()
         except ValidationError as e:
             self.fail(f'ValidationError raised unepectedly. Got{e}')
+
+    @tag('vnpc')
+    def test_validate_nvp_cont_dosing_raises_validation_error(self):
+        cleaned_data = {
+            'child_visit': self.child_visit,
+            'sdnvp_after_birth': NO,
+            'nvp_cont_dosing': YES,
+        }
+        form_validator = InfantArvExposureFormValidator(cleaned_data=cleaned_data)
+        self.assertRaises(ValidationError, form_validator.clean)
+        self.assertIn('nvp_cont_dosing', form_validator._errors)
+
+    def test_validate_nvp_cont_dosing_no_validation_error(self):
+        cleaned_data = {
+            'child_visit': self.child_visit,
+            'sdnvp_after_birth': YES,
+            'nvp_cont_dosing': YES,
+            'snvp_dose_within_72h': YES,
+            'nvp_dose_date': get_utcnow(),
+        }
+        form_validator = InfantArvExposureFormValidator(cleaned_data=cleaned_data)
+        try:
+            form_validator.clean()
+        except ValidationError as e:
+            self.fail(f'ValidationError raised unexpectedly. Got {e}')
