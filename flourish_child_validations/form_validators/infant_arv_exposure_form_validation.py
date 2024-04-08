@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from edc_constants.constants import YES, UNKNOWN, NO, OTHER
+from edc_constants.constants import OTHER, UNKNOWN, YES
 from edc_form_validators import FormValidator
 
 from .crf_offstudy_form_validator import CrfOffStudyFormValidator
@@ -41,7 +41,7 @@ class InfantArvExposureFormValidator(ChildFormValidatorMixin,
                 and self.cleaned_data.get('azt_after_birth') == UNKNOWN):
             if self.cleaned_data.get('azt_additional_dose') != UNKNOWN:
                 msg = {'azt_additional_dose': 'If Q3 is \'Unknown\', '
-                       'this field must be \'Unknown.\''}
+                                              'this field must be \'Unknown.\''}
                 self._errors.update(msg)
                 raise ValidationError(msg)
         else:
@@ -67,10 +67,6 @@ class InfantArvExposureFormValidator(ChildFormValidatorMixin,
                 required_msg=messages[0],
                 not_required_msg=messages[1])
 
-        self.required_if(NO,
-                         field='sdnvp_after_birth',
-                         field_required='nvp_cont_dosing')
-
         fields_required = ['arvs_specify', 'date_1st_arv_dose']
         for field in fields_required:
             self.required_if(YES,
@@ -80,3 +76,14 @@ class InfantArvExposureFormValidator(ChildFormValidatorMixin,
         self.required_if(OTHER,
                          field='arvs_specify',
                          field_required='arvs_specify_other')
+
+    def validate_nvp_cont_dosing(self):
+        nvp_cont_dosing = self.cleaned_data('nvp_cont_dosing')
+        sdnvp_after_birth = self.cleaned_data('sdnvp_after_birth')
+
+        if (not (nvp_cont_dosing == UNKNOWN or nvp_cont_dosing == YES) and
+                sdnvp_after_birth == YES):
+            raise ValidationError({
+                'nvp_cont_dosing': 'This Question can only be NO if the child did not  '
+                                   'received NVP after birth'
+            })
