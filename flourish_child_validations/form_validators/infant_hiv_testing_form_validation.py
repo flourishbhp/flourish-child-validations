@@ -20,7 +20,7 @@ class InfantHIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         self.required_if(
             NO,
             field='child_tested_for_hiv',
-            field_required='not_tested_reason',
+            field_required='reason_child_not_tested',
         )
 
         self.m2m_other_specify(
