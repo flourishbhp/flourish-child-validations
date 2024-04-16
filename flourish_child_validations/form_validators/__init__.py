@@ -54,3 +54,4 @@ from .tb_adol_validations import TbVisitScreeningFormValidator
 from .young_adult_locator_validator import YoungAdultLocatorFormValidator
 from .child_social_work_referral_form_validator import ChildSocialWorkReferralValidator
 from .child_safi_stigma_form_validator import ChildSafiStigmaFormValidator
+from .child_aid_form_validator import ChildCageAidFormValidator
