@@ -1,4 +1,4 @@
-from edc_constants.constants import OTHER, YES
+from edc_constants.constants import OTHER, YES, POS
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
@@ -7,17 +7,17 @@ from .form_validator_mixin import ChildFormValidatorMixin
 class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
-        firelds = ['clinic_name',
-                   'tests_performed',
-                   'diagnosed_with_tb']
-
-        for field in firelds:
+        fields = ['clinic_name',
+                  'tests_performed',
+                  'diagnosed_with_tb']
+        breakpoint()
+        for field in fields:
             self.required_if(
                 YES,
                 field='tb_evaluation',
                 field_required=field
             )
-
+        breakpoint()
         self.validate_other_specify(
             field='clinic_name',
             other_specify_field='clinic_name_other'
