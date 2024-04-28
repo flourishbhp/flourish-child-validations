@@ -120,12 +120,9 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
         - False if no error is raised.
         """
         queryset = self.cleaned_data.get(field_contains)
-        print(queryset)
         if queryset:
             value_exists = any(response in str(item) for item in queryset)
             was_none_selected = any('None' in str(item) for item in queryset)
-            print(value_exists)
-            print(was_none_selected)
             if was_none_selected and self.cleaned_data.get(field_required):
                 message = {field_required: required_msg or 'This field is not required '
                                                            'as none has been selected.'}
