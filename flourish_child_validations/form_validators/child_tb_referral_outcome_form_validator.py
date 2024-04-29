@@ -13,58 +13,32 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
                   'tests_performed',
                   'diagnosed_with_tb']
 
-        self.make_field_required_if_contains(
-            response='Sputum sample',
-            field_required='sputum_sample_results',
-            field_contains='tests_performed'
-        )
+        queryset = self.cleaned_data.get('tests_performed')
+        sputum_value_exists = any('Sputum sample' in str(item) for item in queryset)
+        other_value_exists = any('other' in str(item) for item in queryset)
+        chest_xray_value_exists = any('Chest Xray' in str(item) for item in queryset)
+        stool_value_exists = any('Stool sample' in str(item) for item in queryset)
+        urine_value_exists = any('Urine test' in str(item) for item in queryset)
+        skin_value_exists = any('Skin test' in str(item) for item in queryset)
+        blood_value_exists = any('Blood test' in str(item) for item in queryset)
 
-        self.make_field_required_if_contains(
-            response='other',
-            field_contains='tests_performed',
-            field_required='other_test_specify'
-        )
-        self.make_field_required_if_contains(
-            response='Chest Xray',
-            field_required='chest_xray_results',
-            field_contains='tests_performed'
-        )
+        self.m2m_single_selection_if('None',
+                                     m2m_field='tests_performed')
 
-        self.make_field_required_if_contains(
-            response='Chest Xray',
-            field_required='chest_xray_results',
-            field_contains='tests_performed'
-        )
+        self.required_if_true(sputum_value_exists, 'sputum_sample_results')
 
-        self.make_field_required_if_contains(
-            response='Stool sample',
-            field_required='stool_sample_results',
-            field_contains='tests_performed'
-        )
+        self.required_if_true(other_value_exists,
+                              'other_test_specify')
+        self.required_if_true(other_value_exists, 'other_test_results')
+        self.required_if_true(chest_xray_value_exists, 'chest_xray_results')
 
-        self.make_field_required_if_contains(
-            response='Urine test',
-            field_required='urine_test_results',
-            field_contains='tests_performed'
-        )
+        self.required_if_true(stool_value_exists, 'stool_sample_results')
 
-        self.make_field_required_if_contains(
-            response='Skin test',
-            field_required='skin_test_results',
-            field_contains='tests_performed'
-        )
+        self.required_if_true(urine_value_exists, 'urine_test_results')
 
-        self.make_field_required_if_contains(
-            response='Blood test',
-            field_required='blood_test_results',
-            field_contains='tests_performed'
-        )
+        self.required_if_true(skin_value_exists, 'skin_test_results')
 
-        self.make_field_required_if_contains(
-            response='other',
-            field_required='other_test_results',
-            field_contains='tests_performed'
-        )
+        self.required_if_true(blood_value_exists, 'blood_test_results')
 
         for field in fields:
             self.required_if(
@@ -104,35 +78,3 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
             field='tb_isoniazid_preventative_therapy',
             other_specify_field='other_tb_isoniazid_preventative_therapy'
         )
-
-    def make_field_required_if_contains(self, field_contains=None, field_required=None,
-                                        response=None, required_msg=None):
-        """
-        Makes a field required if another field contains a certain value.
-
-        Parameters:
-        - field_contains: The field to check for the value.
-        - field_required: The field to make required.
-        - response: The value that triggers the requirement.
-        - required_msg: Optional custom error message if the field is required.
-
-        Returns:
-        - False if no error is raised.
-        """
-        queryset = self.cleaned_data.get(field_contains)
-        if queryset:
-            value_exists = any(response in str(item) for item in queryset)
-            was_none_selected = any('None' in str(item) for item in queryset)
-            if was_none_selected and self.cleaned_data.get(field_required):
-                message = {field_required: required_msg or 'This field is not required '
-                                                           'as none has been selected.'}
-                self._errors.update(message)
-                self._error_codes.append(NOT_REQUIRED_ERROR)
-                raise ValidationError(message, code=NOT_REQUIRED_ERROR)
-            if value_exists:
-                if not self.cleaned_data.get(field_required):
-                    message = {field_required: required_msg or 'This field is required.'}
-                    self._errors.update(message)
-                    self._error_codes.append(REQUIRED_ERROR)
-                    raise ValidationError(message, code=REQUIRED_ERROR)
-        return False
