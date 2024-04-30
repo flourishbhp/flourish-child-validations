@@ -24,7 +24,7 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
                                           'Stool sample', 'Urine test', 'Skin test',
                                           'Blood test'])
 
-        self.m2m_single_selection_if('None', m2m_field='tests_performed')
+        self.m2m_single_selection_if('none', m2m_field='tests_performed')
 
         for value, exists in value_checks.items():
             self.required_if_true(exists, f'{value.lower().replace(" ", "_")}_results')
