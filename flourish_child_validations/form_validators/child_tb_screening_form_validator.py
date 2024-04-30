@@ -49,9 +49,9 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
                          field='child_diagnosed_with_tb',
                          field_required='child_on_tb_preventive_therapy')
 
-        self.required_if_true(condition=YES,
-                              field='evaluated_for_tb',
-                              field_required='tb_tests')
+        self.required_if(YES,
+                         field='evaluated_for_tb',
+                         field_required='tb_tests')
 
         self.field_cannot_be(field_1='child_diagnosed_with_tb',
                              field_2='child_on_tb_preventive_therapy',
