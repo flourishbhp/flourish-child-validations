@@ -19,11 +19,21 @@ class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
                               ChildFormValidatorMixin, FormValidator):
 
     caregiver_child_consent_model = 'flourish_caregiver.caregiverchildconsent'
+    continued_consent_model = 'flourish_child.childcontinuedconsent'
     visit_sequence_cls = VisitSequence
 
     @property
     def caregiver_child_consent_cls(self):
         return django_apps.get_model(self.caregiver_child_consent_model)
+    
+    @property
+    def continued_consent_cls(self):
+        return django_apps.get_model(self.continued_consent_model)
+
+    @property
+    def continued_consent_exists(self):
+        return self.continued_consent_cls.objects.filter(
+            subject_identifier=self.subject_identifier).exists()
 
     def clean(self):
         cleaned_data = self.cleaned_data
@@ -51,34 +61,34 @@ class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
     def validate_is_present(self):
 
         reason = self.cleaned_data.get('reason')
+        is_present = self.cleaned_data.get('is_present')
+        info_source = self.cleaned_data.get('info_source')
+        study_status = self.cleaned_data.get('study_status')
 
-        if (reason == LOST_VISIT and
-                self.cleaned_data.get('study_status') != OFF_STUDY):
+        if (reason == LOST_VISIT and study_status != OFF_STUDY):
             msg = {'study_status': 'Participant has been lost to follow up, '
                    'study status should be off study.'}
             self._errors.update(msg)
             raise ValidationError(msg)
-        if (reason == COMPLETED_PROTOCOL_VISIT and
-                self.cleaned_data.get('study_status') != OFF_STUDY):
+        if (reason == COMPLETED_PROTOCOL_VISIT and study_status != OFF_STUDY):
             msg = {'study_status': 'Participant is completing protocol, '
                    'study status should be off study.'}
             self._errors.update(msg)
             raise ValidationError(msg)
 
-        if self.cleaned_data.get('is_present') == YES:
-            if self.cleaned_data.get('info_source') != PARTICIPANT:
-                raise forms.ValidationError(
-                    {'info_source': 'Source of information must be from '
-                     'participant if participant is present.'})
-
         information_provider = self.cleaned_data.get('information_provider')
-        if (information_provider == 'self' and
-                self.cleaned_data.get('is_present') == NO):
-            msg = {'is_present':
-                   'The child provided most of the information, participant is '
-                   'present can not be `No`'}
-            self._errors.update(msg)
-            raise ValidationError(msg)
+
+        if information_provider == 'self':
+            
+            if not self.continued_consent_exists:
+                raise ValidationError({'information_provider':'Continued consent not filled, hence the child cannot provide information without a guardian'})
+            
+            if info_source not in ['other_contact', PARTICIPANT]:
+                raise ValidationError({'info_source':'Participant is to provide the information'})
+
+        if info_source != PARTICIPANT and is_present == YES:
+             raise ValidationError({'is_present':
+                                    'Source of information must be from participant if participant is present.'})
 
     def validate_death(self):
         if (self.cleaned_data.get('survival_status') == DEAD
