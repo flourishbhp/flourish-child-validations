@@ -27,7 +27,7 @@ class ChildSafiStigmaFormValidator(ChildFormValidatorMixin, FormValidator):
             'depressed_or_sad'
         ]
 
-        for field in fields:
+        for field in fields + discriminated_fields:
 
             self.required_if(
                 'ever_happened',
