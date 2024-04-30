@@ -24,6 +24,16 @@ class ChildSafiStigmaFormValidator(ChildFormValidatorMixin, FormValidator):
             'depressed_or_sad'
         ]
 
+        discriminated_fields = [
+            'lost_friends',
+            'bullied',
+            'home_discr',
+            'neighborhood_discr',
+            'religious_place_discr',
+            'clinic_discr',
+            'school_discr',
+        ]
+
         for field in fields:
 
             self.required_if(
@@ -32,10 +42,10 @@ class ChildSafiStigmaFormValidator(ChildFormValidatorMixin, FormValidator):
                 field_required=f'{field}_period'
             )
         discriminated = any(
-            [self.cleaned_data.get(field, None) == 'ever_happened' for field in fields])
+            [self.cleaned_data.get(field, None) == 'ever_happened' for field in discriminated_fields])
         discriminated_at_other = bool(
             self.cleaned_data.get('other_place_discr', None))
-        for field in fields:
+        for field in discriminated_fields:
             self.applicable_if_true(
                 discriminated or discriminated_at_other,
                 field_applicable=field,
