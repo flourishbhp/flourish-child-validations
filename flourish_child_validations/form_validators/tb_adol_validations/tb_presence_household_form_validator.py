@@ -56,10 +56,9 @@ class TbPresenceHouseholdMembersAdolFormValidator(ChildFormValidatorMixin, FormV
         required_fields = [
             'tb_ind_rel', 'tb_referral'
         ]
-        
+
         for field in required_fields:
             self.required_if(
                 YES,
                 field='tb_diagnosed',
-                field_required=field
-            )
+                field_required=field)
