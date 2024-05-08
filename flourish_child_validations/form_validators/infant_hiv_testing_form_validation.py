@@ -7,6 +7,9 @@ from .form_validator_mixin import ChildFormValidatorMixin
 
 
 class InfantHIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
+    child_assent_model = 'flourish_child.childassent'
+    caregiver_child_consent_model = 'flourish_caregiver.caregiverchildconsent'
+    maternal_delivery_model = 'flourish_caregiver.maternaldelivery'
 
     def clean(self):
         super().clean()
@@ -39,6 +42,26 @@ class InfantHIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
             field='pref_location',
             other_specify_field='pref_location_other',
         )
+
+        self.validate_test_against_age()
+
+    def validate_test_against_age(self):
+        test_visit = self.cleaned_data.get('test_visit')
+        selected = {obj.short_name: obj.name for obj in test_visit}
+        age_in_weeks = self.child_age * 52
+        age_in_months = self.child_age * 12
+
+        age_ranges = {
+            '6_to_8_weeks': 6,
+            '9_months': 9,
+            '18_months': 18
+        }
+
+        for visit, max_age_months in age_ranges.items():
+            if age_in_weeks < max_age_months * 4 and visit in selected:
+                raise ValidationError(
+                    {'test_visit': f'Child is less than {visit}'}
+                )
 
 
 class InfantHIVTestingAdminFormValidatorRepeat(ChildFormValidatorMixin,

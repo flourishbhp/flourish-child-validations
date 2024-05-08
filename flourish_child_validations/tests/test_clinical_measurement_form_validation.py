@@ -121,6 +121,7 @@ class TestClinicalMeasurementForm(TestModelMixin, TestCase):
 
         cleaned_data = {
             'child_visit': child_visit,
+            'visit_skin_fold_messure': YES,
             'child_systolic_bp': 100,
             'child_diastolic_bp': 100,
             'skin_folds_triceps': None,

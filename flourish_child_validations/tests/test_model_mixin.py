@@ -46,6 +46,9 @@ class TestModelMixin:
         validator_class.maternal_delivery_model = \
             'flourish_child_validations.maternaldelivery'
 
+        validator_class.infant_birth_model = \
+            'flourish_child_validations.childbirth'
+
         validator_class.action_item_model_cls = ActionItem
 
     class Meta:

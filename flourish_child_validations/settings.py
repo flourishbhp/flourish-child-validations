@@ -29,7 +29,6 @@ DEBUG = True
 
 SITE_ID = 40
 
-
 ALLOWED_HOSTS = []
 
 # Application definition
@@ -42,9 +41,13 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'flourish_prn.apps.AppConfig',
+    'edc_action_item.apps.AppConfig',
     'django_crypto_fields.apps.AppConfig',
     'edc_device.apps.AppConfig',
     'edc_protocol.apps.AppConfig',
+    'flourish_child_validations.apps.EdcAppointmentAppConfig',
+    'flourish_child_validations.apps.EdcTimepointAppConfig',
     'flourish_child_validations.apps.AppConfig',
 ]
 
@@ -95,7 +98,8 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.password_validation'
+                '.UserAttributeSimilarityValidator',
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
@@ -132,7 +136,6 @@ DASHBOARD_URL_NAMES = {
 STATIC_URL = '/static/'
 
 if 'test' in sys.argv:
-
     class DisableMigrations:
 
         def __contains__(self, item):
@@ -140,6 +143,7 @@ if 'test' in sys.argv:
 
         def __getitem__(self, item):
             return None
+
 
     MIGRATION_MODULES = DisableMigrations()
     PASSWORD_HASHERS = ('django.contrib.auth.hashers.MD5PasswordHasher',)
