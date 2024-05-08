@@ -104,61 +104,6 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
                 self._errors.update(msg)
                 raise ValidationError(msg)
 
-    @property
-    def child_assent_obj(self):
-        child_assent_model_cls = django_apps.get_model(self.child_assent_model)
-        child_assent_objs = child_assent_model_cls.objects.filter(
-            subject_identifier=self.subject_identifier)
-
-        if child_assent_objs:
-            return child_assent_objs.latest('consent_datetime')
-
-    @property
-    def child_caregiver_consent_obj(self):
-        child_caregiver_consent_model_cls = django_apps.get_model(
-            self.caregiver_child_consent_model)
-        try:
-            model_obj = child_caregiver_consent_model_cls.objects.filter(
-                subject_identifier=self.subject_identifier).latest('consent_datetime')
-        except child_caregiver_consent_model_cls.DoesNotExist:
-            return None
-        else:
-            return model_obj
-
-    @property
-    def maternal_delivery_obj(self):
-        maternal_delivery_model_cls = django_apps.get_model(
-            self.maternal_delivery_model)
-        maternal_identifier = caregiver_subject_identifier(
-            subject_identifier=self.subject_identifier,
-            registered_subject_cls=self.registered_subject_cls)
-        try:
-            model_obj = maternal_delivery_model_cls.objects.get(
-                subject_identifier=maternal_identifier)
-        except maternal_delivery_model_cls.DoesNotExist:
-            return None
-        else:
-            return model_obj
-
-    @property
-    def child_age(self):
-
-        if self.child_assent_obj:
-            birth_date = self.child_assent_obj.dob
-            years = age(birth_date, get_utcnow()).years + age(
-                birth_date, get_utcnow()).months / 12
-            return years
-        elif self.child_caregiver_consent_obj:
-            birth_date = self.child_caregiver_consent_obj.child_dob
-            years = age(birth_date, get_utcnow()).years + age(
-                birth_date, get_utcnow()).months / 12
-            return years
-        elif self.maternal_delivery_obj:
-            birth_date = self.maternal_delivery_obj.delivery_datetime.date()
-            years = age(birth_date, get_utcnow()).months / 12
-            return years
-        return 0
-
     def validate_measurement_margin(self, first_measurement_field,
                                     second_measurement_field, third_measurement_field):
         first_measurement = self.cleaned_data.get(first_measurement_field, None)
