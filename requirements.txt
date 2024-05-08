@@ -5,14 +5,14 @@ git+https://github.com/botswana-harvard/edc-appointment.git@develop#egg=edc-appo
 git+https://github.com/botswana-harvard/edc-base.git@develop#egg=edc_base
 git+https://github.com/botswana-harvard/edc-constants.git@develop#egg=edc_constants
 git+https://github.com/botswana-harvard/edc-device.git@develop#egg=edc_device
-git+https://github.com/botswana-harvard/edc-identifier.git@develop#egg=edc_identifier
 git+https://github.com/botswana-harvard/edc-form-validators.git@develop#egg=edc_form_validators
+git+https://github.com/botswana-harvard/edc-identifier.git@develop#egg=edc_identifier
+git+https://github.com/botswana-harvard/edc-metadata.git@develop#egg=edc-metadata
 git+https://github.com/botswana-harvard/edc-model-wrapper.git@develop#egg=edc_model_wrapper
 git+https://github.com/botswana-harvard/edc-prn.git@develop#egg=edc_prn
 git+https://github.com/botswana-harvard/edc-protocol.git@develop#egg=edc_protocol
+git+https://github.com/botswana-harvard/edc-reference.git@develop#egg=edc-reference
 git+https://github.com/botswana-harvard/edc-timepoint.git@develop#egg=edc-timepoint
 git+https://github.com/botswana-harvard/edc-visit-schedule.git@develop#egg=edc_visit_schedule
 git+https://github.com/botswana-harvard/edc-visit-tracking.git@develop#egg=edc_visit_tracking
 git+https://github.com/flourishbhp/flourish-prn.git@develop#egg=flourish_prn
-git+https://github.com/botswana-harvard/edc-metadata.git@develop#egg=edc-metadata
-django_revision
