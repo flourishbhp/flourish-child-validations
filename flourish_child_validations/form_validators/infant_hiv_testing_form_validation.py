@@ -45,23 +45,24 @@ class InfantHIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
 
         self.validate_test_against_age()
 
+    def check_age(self, age_in_weeks, min_age_months, visit, selected):
+        if age_in_weeks < min_age_months and visit in selected:
+            raise ValidationError(
+                {'test_visit': f'Child is less than {visit}'}
+            )
+
     def validate_test_against_age(self):
         test_visit = self.cleaned_data.get('test_visit')
         selected = {obj.short_name: obj.name for obj in test_visit}
         age_in_weeks = self.child_age * 52
-        age_in_months = self.child_age * 12
 
         age_ranges = {
             '6_to_8_weeks': 6,
-            '9_months': 9,
-            '18_months': 18
+            '9_months': 9 * 4,
+            '18_months': 18 * 4
         }
-
-        for visit, max_age_months in age_ranges.items():
-            if age_in_weeks < max_age_months * 4 and visit in selected:
-                raise ValidationError(
-                    {'test_visit': f'Child is less than {visit}'}
-                )
+        for visit, min_age_weeks in age_ranges.items():
+            self.check_age(age_in_weeks, min_age_weeks, visit, selected)
 
 
 class InfantHIVTestingAdminFormValidatorRepeat(ChildFormValidatorMixin,
