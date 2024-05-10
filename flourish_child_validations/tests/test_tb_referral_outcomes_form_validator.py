@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase, tag
 from edc_constants.constants import (YES, NO, NEG, POS)
 
+from flourish_form_validations.tests.test_model_mixin import TestModeMixin
 from ..form_validators import TbReferralOutcomesFormValidator
 from .models import ListModel
 from .test_model_mixin import TestModelMixin

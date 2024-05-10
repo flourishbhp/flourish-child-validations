@@ -1,12 +1,12 @@
 from django.core.exceptions import ValidationError
-from django.test import TestCase, tag
+from django.test import tag, TestCase
 from django.utils import timezone
 from edc_base.utils import get_utcnow
-from edc_constants.constants import YES, NO, NOT_APPLICABLE
+from edc_constants.constants import NO, NOT_APPLICABLE, YES
 
-from ..form_validators import InfantFeedingFormValidator
-from .models import ChildVisit, Appointment, RegisteredSubject
+from .models import Appointment, ChildBirth, ChildVisit, ListModel, RegisteredSubject
 from .test_model_mixin import TestModelMixin
+from ..form_validators import InfantFeedingFormValidator
 
 
 @tag('inff')
@@ -30,6 +30,13 @@ class TestInfantFeedingFormValidator(TestModelMixin, TestCase):
             subject_identifier=appointment.subject_identifier,
             relative_identifier='2334432', )
 
+        ChildBirth.objects.create(
+            subject_identifier=appointment.subject_identifier,
+            dob=get_utcnow(),
+            report_datetime=get_utcnow())
+
+        self.subject_identifier = appointment.subject_identifier
+
         self.options = {
             'report_datetime': timezone.now(),
             'child_visit': self.child_visit,
@@ -38,7 +45,10 @@ class TestInfantFeedingFormValidator(TestModelMixin, TestCase):
             'rec_liquids': NO,
             'formula_water': 'blah blah',
             'taken_solid_foods': NO,
-            'solid_foods': []
+            'solid_foods': ListModel.objects.filter(
+                short_name='xx'),
+            'solid_foods_past_week': ListModel.objects.filter(
+                short_name='xx')
         }
 
     def test_form_valid(self):
@@ -80,7 +90,7 @@ class TestInfantFeedingFormValidator(TestModelMixin, TestCase):
             'taken_solid_foods': NO,
             'solid_foods': [],
             'took_formula': YES,
-            'dt_formula_introduced': get_utcnow()
+            'dt_formula_introduced': get_utcnow().date()
         }
         form_validator = InfantFeedingFormValidator(
             cleaned_data=self.options)

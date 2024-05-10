@@ -1,18 +1,16 @@
 from django import forms
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
-from edc_constants.constants import NEW
-
 from edc_action_item.site_action_items import site_action_items
-from flourish_prn.action_items import CHILDOFF_STUDY_ACTION
+from edc_base.utils import age, get_utcnow
+from edc_constants.constants import NEW
 
 from ..utils import caregiver_subject_identifier
 
 
 class ChildFormValidatorMixin:
 
-    infant_birth_model = None
-
+    infant_birth_model = 'flourish_child.childbirth'
     subject_consent_model = 'flourish_caregiver.subjectconsent'
     child_offstudy_model = 'flourish_prn.childoffstudy'
     consent_version_model = 'flourish_caregiver.flourishconsentversion'
@@ -70,7 +68,8 @@ class ChildFormValidatorMixin:
             self.validate_against_visit_datetime(
                 self.cleaned_data.get('report_datetime'))
         else:
-            self.subject_identifier = getattr(self, 'subject_identifier', None) or self.cleaned_data.get(
+            self.subject_identifier = getattr(self, 'subject_identifier',
+                                              None) or self.cleaned_data.get(
                 'subject_identifier', None)
 
         self.validate_offstudy_model()
@@ -90,7 +89,8 @@ class ChildFormValidatorMixin:
         else:
             if (report_datetime and
                     report_datetime < getattr(infant_birth, f'{date_attr}')):
-                message = message or 'Report datetime cannot be before enrollment datetime.'
+                message = message or ('Report datetime cannot be before enrollment '
+                                      'datetime.')
                 raise forms.ValidationError(message)
             else:
                 return infant_birth
@@ -106,7 +106,7 @@ class ChildFormValidatorMixin:
                 self.cleaned_data.get('child_visit').report_datetime.date():
             raise forms.ValidationError({
                 'offstudy_date':
-                'offstudy date cannot be before visit date.'
+                    'offstudy date cannot be before visit date.'
             })
 
     def validate_offstudy_model(self):
@@ -114,7 +114,7 @@ class ChildFormValidatorMixin:
         try:
             self.action_item_model_cls.objects.get(
                 subject_identifier=self.subject_identifier,
-                action_type__name=CHILDOFF_STUDY_ACTION,
+                action_type__name='submit-childoff-study',
                 status=NEW)
         except self.action_item_model_cls.DoesNotExist:
             try:
@@ -141,7 +141,8 @@ class ChildFormValidatorMixin:
                     screening_identifier=latest_consent_obj.screening_identifier)
             except self.consent_version_cls.DoesNotExist:
                 raise forms.ValidationError(
-                    'Consent version form has not been completed, kindly complete it before'
+                    'Consent version form has not been completed, kindly complete it '
+                    'before'
                     ' continuing.')
 
     def latest_consent_obj(self, subject_identifier):
@@ -161,4 +162,59 @@ class ChildFormValidatorMixin:
         except self.cohort_model_cls.DoesNotExist:
             raise ValidationError(
                 {'__all__':
-                 'Child does not have a cohort instance. Please contact administrator for assistance'})
+                     'Child does not have a cohort instance. Please contact '
+                     'administrator for assistance'})
+
+    @property
+    def child_assent_obj(self):
+        child_assent_model_cls = django_apps.get_model(self.child_assent_model)
+        child_assent_objs = child_assent_model_cls.objects.filter(
+            subject_identifier=self.subject_identifier)
+
+        if child_assent_objs:
+            return child_assent_objs.latest('consent_datetime')
+
+    @property
+    def child_caregiver_consent_obj(self):
+        child_caregiver_consent_model_cls = django_apps.get_model(
+            self.caregiver_child_consent_model)
+        try:
+            model_obj = child_caregiver_consent_model_cls.objects.filter(
+                subject_identifier=self.subject_identifier).latest('consent_datetime')
+        except child_caregiver_consent_model_cls.DoesNotExist:
+            return None
+        else:
+            return model_obj
+
+    @property
+    def maternal_delivery_obj(self):
+        maternal_delivery_model_cls = django_apps.get_model(
+            self.maternal_delivery_model)
+        maternal_identifier = caregiver_subject_identifier(
+            subject_identifier=self.subject_identifier,
+            registered_subject_cls=self.registered_subject_cls)
+        try:
+            model_obj = maternal_delivery_model_cls.objects.get(
+                subject_identifier=maternal_identifier)
+        except maternal_delivery_model_cls.DoesNotExist:
+            return None
+        else:
+            return model_obj
+
+    @property
+    def child_age(self):
+        if self.child_assent_obj:
+            birth_date = self.child_assent_obj.dob
+            years = age(birth_date, get_utcnow()).years + age(
+                birth_date, get_utcnow()).months / 12
+            return years
+        elif self.child_caregiver_consent_obj:
+            birth_date = self.child_caregiver_consent_obj.child_dob
+            years = age(birth_date, get_utcnow()).years + age(
+                birth_date, get_utcnow()).months / 12
+            return years
+        elif self.maternal_delivery_obj:
+            birth_date = self.maternal_delivery_obj.delivery_datetime.date()
+            years = age(birth_date, get_utcnow()).months / 12
+            return years
+        return 0

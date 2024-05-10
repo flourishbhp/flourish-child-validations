@@ -13,12 +13,11 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
 
     breast_feeding_model = 'flourish_caregiver.breastfeedingquestionnaire'
     infant_feeding_model = 'flourish_child.infantfeeding'
-    infant_birth_model = 'flourish_child.childbirth'
 
     def clean(self):
+        super().clean()
         self.subject_identifier = self.cleaned_data.get(
             'child_visit').appointment.subject_identifier
-        super().clean()
         self.validate_consent_version_obj(self.subject_identifier)
 
         self.validate_against_visit_datetime(
