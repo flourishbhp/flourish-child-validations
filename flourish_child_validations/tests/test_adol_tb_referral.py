@@ -4,7 +4,7 @@ from edc_constants.constants import OTHER
 from django.core.exceptions import ValidationError
 
 from ..form_validators import TbReferralAdolFormValidator
-from .models import ChildVisit, Appointment, RegisteredSubject
+from .models import ChildVisit, Appointment, RegisteredSubject, Schedule
 from .test_model_mixin import TestModelMixin
 
 

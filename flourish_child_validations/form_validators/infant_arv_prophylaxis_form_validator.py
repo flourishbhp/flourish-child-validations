@@ -77,7 +77,8 @@ class InfantArvProphylaxisFormValidator(ChildFormValidatorMixin,
             self.required_if(YES,
                              field='missed_dose',
                              field_required=field_required)
-            
+
+
 class ChildArvProphDatesFormValidator(ChildFormValidatorMixin,
                                       CrfOffStudyFormValidator,
                                       FormValidator):

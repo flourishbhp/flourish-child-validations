@@ -24,7 +24,7 @@ class BirthFeedingAndVaccineFormValidator(ChildFormValidatorMixin,
         self.validate_feeding()
 
         self.validate_breastfeed_dt()
-        
+
         super().clean()
 
     def validate_feeding(self):

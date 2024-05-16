@@ -28,14 +28,14 @@ class BirthDataFormValidator(ChildFormValidatorMixin, CrfOffStudyFormValidator,
         of this study
         """
         gestational_age = self.cleaned_data.get('gestational_age', 0)
-        
+
         if gestational_age:
 
-            if  22 > gestational_age or gestational_age > 43:
+            if 22 > gestational_age or gestational_age > 43:
                 raise forms.ValidationError(
                     {'gestational_age':
                      'Gestational age should be between 22 and 43.'})
-                
+
         else:
             raise forms.ValidationError({'gestational_age':
                                          'Gestational age is required'})

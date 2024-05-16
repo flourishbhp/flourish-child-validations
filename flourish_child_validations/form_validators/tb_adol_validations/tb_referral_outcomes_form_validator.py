@@ -86,8 +86,8 @@ class TbReferralOutcomesFormValidator(ChildFormValidatorMixin, FormValidator):
         answers = [sputum_sample, chest_xray,
                    gene_xpert, tst_or_mentoux, covid_19]
 
-        answers = list(filter(lambda element: element in [POS, ABNORMAL]
-                                              and element != None, answers))
+        answers = list(
+            filter(lambda element: element in [POS, ABNORMAL] and element != None, answers))
 
         if answers and tb_treat_start == NO:
             raise ValidationError(

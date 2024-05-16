@@ -75,6 +75,7 @@ class TestChildPregnacyFormValidator(TestModelMixin, TestCase):
 
         field_name = 'is_lmp_date_estimated'
         self.options['last_menstrual_period'] = (get_utcnow() - relativedelta(months=1)).date()
+        self.options['menarche_start_dt'] = (get_utcnow() - relativedelta(months=1)).date()
 
         self.options[field_name] = None
 
@@ -95,6 +96,7 @@ class TestChildPregnacyFormValidator(TestModelMixin, TestCase):
         self.options.update({'last_menstrual_period': (get_utcnow() - relativedelta(months=1)).date() })
         self.options.update({'test_done': None})
         self.options.update({'test_date': None})
+        self.options.update({'menarche_start_dt': 'blah'})
         self.options.update({'preg_test_result': None})
 
         form_validator = ChildPregTestingFormValidator(cleaned_data=self.options)

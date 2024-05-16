@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from edc_constants.constants import YES, FEMALE
+from edc_constants.constants import FEMALE
 from flourish_form_validations.form_validators.social_work_referral_validator_mixin \
     import SocialWorkReferralValidatorMixin
 
@@ -46,7 +46,7 @@ class ChildSocialWorkReferralValidator(ChildFormValidatorMixin,
         exposure_status = self.cleaned_data.get('child_exposure_status', None)
         cohort_exposure = self.cohort_model_obj().check_exposure()
         child_exposed = cohort_exposure == 'EXPOSED'
-        child_unexposed =  cohort_exposure == 'UNEXPOSED'
+        child_unexposed = cohort_exposure == 'UNEXPOSED'
         if (child_exposed and exposure_status != 'heu'):
             raise ValidationError(
                 {'child_exposure_status': 'This child is HIV exposed, please correct. '})
