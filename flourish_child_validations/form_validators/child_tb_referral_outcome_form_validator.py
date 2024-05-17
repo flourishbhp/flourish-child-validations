@@ -1,7 +1,5 @@
-from edc_constants.constants import OTHER, YES, POS
+from edc_constants.constants import NO, YES
 from edc_form_validators import FormValidator
-from edc_form_validators.base_form_validator import REQUIRED_ERROR, NOT_REQUIRED_ERROR
-from django.forms import ValidationError
 
 from .form_validator_mixin import ChildFormValidatorMixin
 
@@ -20,9 +18,9 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
 
         queryset = self.cleaned_data.get('tests_performed')
         value_checks = check_values(queryset,
-                                         ['Sputum sample', 'other', 'Chest Xray',
-                                          'Stool sample', 'Urine test', 'Skin test',
-                                          'Blood test'])
+                                    ['Sputum sample', 'other', 'Chest Xray',
+                                     'Stool sample', 'Urine test', 'Skin test',
+                                     'Blood test'])
 
         self.m2m_single_selection_if('none', m2m_field='tests_performed')
 
@@ -69,4 +67,10 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
         self.validate_other_specify(
             field='tb_isoniazid_preventative_therapy',
             other_specify_field='other_tb_isoniazid_preventative_therapy'
+        )
+
+        self.required_if(
+            NO,
+            field='tb_evaluation',
+            field_required='reasons',
         )
