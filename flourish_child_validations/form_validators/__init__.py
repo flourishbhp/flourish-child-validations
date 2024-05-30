@@ -4,6 +4,7 @@ from .birth_exam_form_validation import BirthExamFormValidator
 from .birth_feeding_and_vaccine_validator import BirthFeedingAndVaccineFormValidator
 from .brief_2_forms_validators import Brief2ParentFormsValidators, \
     Brief2SelfReportedFormsValidators
+from .child_aid_form_validator import ChildCageAidFormValidator
 from .child_assent_form_validator import ChildAssentFormValidator
 from .child_birth_form_validation import ChildBirthFormValidator
 from .child_cbl_form_validators import ChildCBCLSection4FormValidator
@@ -23,6 +24,8 @@ from .child_previous_hospitalisations_form_validator import (
     ChildPreHospitalisationInlineFormValidator, ChildPreviousHospitalisationFormValidator)
 from .child_referral_form_validator import ChildReferralFormValidator
 from .child_referral_fu_form_validator import ChildReferralFUFormValidator
+from .child_safi_stigma_form_validator import ChildSafiStigmaFormValidator
+from .child_social_work_referral_form_validator import ChildSocialWorkReferralValidator
 from .child_socio_demographic_form_validator import ChildSocioDemographicFormValidator
 from .child_tanner_staging_form_validator import ChildTannerStagingFormValidator
 from .child_tb_referral_form_validator import ChildTBReferralFormValidator
@@ -31,6 +34,8 @@ from .child_tb_referral_outcome_form_validator import ChildTBReferralOutcomeForm
 from .child_tb_screening_form_validator import ChildTBScreeningFormValidator
 from .child_visit_form_validator import ChildVisitFormValidator
 from .child_working_status_form_validator import ChildWorkingStatusFormValidator
+from .childhood_lead_exposure_risk_form_validator import \
+    ChildhoodLeadExposureRiskFormValidator
 from .form_validator_mixin import ChildFormValidatorMixin
 from .infant_arv_exposure_form_validation import InfantArvExposureFormValidator
 from .infant_arv_prophylaxis_form_validator import ChildArvProphDatesFormValidator
@@ -52,6 +57,3 @@ from .tb_adol_validations import TbReferralOutcomesFormValidator
 from .tb_adol_validations import TbScreeningDuringEncountersFormValidator
 from .tb_adol_validations import TbVisitScreeningFormValidator
 from .young_adult_locator_validator import YoungAdultLocatorFormValidator
-from .child_social_work_referral_form_validator import ChildSocialWorkReferralValidator
-from .child_safi_stigma_form_validator import ChildSafiStigmaFormValidator
-from .child_aid_form_validator import ChildCageAidFormValidator
