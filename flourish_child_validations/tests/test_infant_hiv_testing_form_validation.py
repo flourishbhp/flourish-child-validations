@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.test import tag, TestCase
 from django.utils import timezone
 from edc_base import get_utcnow
-from edc_constants.constants import FEMALE, NEG, NO, OTHER, YES
+from edc_constants.constants import FEMALE, NEG, NO, OTHER, PENDING, YES
 
 from .models import Appointment, CaregiverChildConsent, ChildVisit, ListModel
 from .test_model_mixin import TestModelMixin
@@ -191,3 +191,17 @@ class TestHIVInfantTestingFormValidator(TestModelMixin, TestCase):
             cleaned_data=form_data)
         self.assertRaises(ValidationError, form_validator.validate)
         self.assertIn('test_visit', form_validator._errors)
+
+    def test_validate_results_pending(self):
+        form_data = {
+            'results_received': YES,
+            'received_date': get_utcnow(),
+            'result_date_estimated': NO,
+            'hiv_test_result': PENDING
+        }
+        form = InfantHIVTestingAdminFormValidatorRepeat(form_data)
+
+        with self.assertRaises(ValidationError) as cm:
+            form.clean()
+
+        self.assertIn('hiv_test_result', str(cm.exception))

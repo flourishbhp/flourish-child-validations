@@ -1,5 +1,6 @@
 from django.forms import ValidationError
 from edc_constants.choices import NO, YES
+from edc_constants.constants import OTHER, PENDING
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
@@ -22,7 +23,7 @@ class InfantHIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         self.required_if(
             NO,
             field='child_tested_for_hiv',
-            field_required='not_tested_reason',
+            field_required='reason_child_not_tested',
         )
 
         self.m2m_other_specify(
@@ -86,11 +87,7 @@ class InfantHIVTestingAdminFormValidatorRepeat(ChildFormValidatorMixin,
             field_required='result_date_estimated',
         )
 
-        self.required_if(
-            YES,
-            field='results_received',
-            field_required='hiv_test_result',
-        )
+        self.validate_results_pending()
 
         self.validate_test_date()
 
@@ -101,3 +98,12 @@ class InfantHIVTestingAdminFormValidatorRepeat(ChildFormValidatorMixin,
         if child_test_date and received_date and child_test_date > received_date:
             raise ValidationError(
                 {'received_date': 'Received date cannot be before test date.'})
+
+    def validate_results_pending(self):
+        results_received = self.cleaned_data.get('results_received')
+        hiv_test_result = self.cleaned_data.get('hiv_test_result')
+        if hiv_test_result == PENDING and results_received == YES:
+            raise ValidationError(
+                {'hiv_test_result': 'HIV test result cannot be pending if results are '
+                                    'received.'}
+            )
