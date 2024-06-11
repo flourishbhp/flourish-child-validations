@@ -1,57 +1,23 @@
-from edc_form_validators import FormValidator
-from edc_constants.choices import YES, NO, OTHER
-from .form_validator_mixin import ChildFormValidatorMixin
 from django.forms import ValidationError
+from edc_constants.choices import NO, YES
+from edc_constants.constants import OTHER, PENDING
+from edc_form_validators import FormValidator
+
+from .form_validator_mixin import ChildFormValidatorMixin
 
 
 class InfantHIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
+    child_assent_model = 'flourish_child.childassent'
+    caregiver_child_consent_model = 'flourish_caregiver.caregiverchildconsent'
+    maternal_delivery_model = 'flourish_caregiver.maternaldelivery'
 
     def clean(self):
         super().clean()
 
-        self.required_if(
-            YES,
+        self.m2m_required_if(
+            response=YES,
             field='child_tested_for_hiv',
-            field_required='child_test_date',
-        )
-
-        self.required_if_not_none(
-            field='child_test_date',
-            field_required='child_test_date_estimated',
-        )
-
-        self.required_if(
-            YES,
-            field='child_tested_for_hiv',
-            field_required='results_received',
-        )
-
-        self.required_if(
-            YES,
-            field='results_received',
-            field_required='recall_result_date',
-        )
-
-        self.required_if(
-            YES,
-            field='recall_result_date',
-            field_required='received_date',
-        )
-
-        self.required_if_not_none(
-            field='received_date',
-            field_required='result_date_estimated',
-        )
-
-        self.required_if_not_none(
-            field='result_date_estimated',
-            field_required='hiv_test_result',
-        )
-
-        self.required_if(
-            YES,
-            field='results_received',
-            field_required='hiv_test_result',
+            m2m_field='test_visit',
         )
 
         self.required_if(
@@ -60,28 +26,68 @@ class InfantHIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
             field_required='reason_child_not_tested',
         )
 
-        self.validate_other_specify(
-            field='reason_child_not_tested',
-            other_specify_field='reason_child_not_tested_other',
-        )
-
-        self.required_if(
-            NO,
-            field='child_tested_for_hiv',
-            field_required='preferred_clinic_for_testing',
-        )
-
-        self.required_if(
+        self.m2m_other_specify(
             OTHER,
-            field='reason_child_not_tested',
-            field_required='reason_child_not_tested_other',
+            m2m_field='reason_child_not_tested',
+            field_other='reason_child_not_tested_other',
+        )
+
+        self.m2m_other_specify(
+            OTHER,
+            m2m_field='test_visit',
+            field_other='test_visit_other',
+        )
+
+        self.validate_other_specify(
+            field='pref_location',
+            other_specify_field='pref_location_other',
+        )
+
+        self.validate_test_against_age()
+
+    def check_age(self, age_in_weeks, min_age_months, visit, selected):
+        if age_in_weeks < min_age_months and visit in selected:
+            raise ValidationError(
+                {'test_visit': f'Child is less than {visit}'}
+            )
+
+    def validate_test_against_age(self):
+        test_visit = self.cleaned_data.get('test_visit')
+        selected = {obj.short_name: obj.name for obj in test_visit}
+        age_in_weeks = self.child_age * 52
+
+        age_ranges = {
+            '6_to_8_weeks': 6,
+            '9_months': 9 * 4,
+            '18_months': 18 * 4
+        }
+        for visit, min_age_weeks in age_ranges.items():
+            self.check_age(age_in_weeks, min_age_weeks, visit, selected)
+
+
+class InfantHIVTestingAdminFormValidatorRepeat(ChildFormValidatorMixin,
+                                               FormValidator):
+
+    def clean(self):
+        super().clean()
+        self.validate_other_specify(
+            field='test_location',
+            other_specify_field='test_location_other',
         )
 
         self.required_if(
-            *[OTHER, 'no_testing'],
-            field='preferred_clinic_for_testing',
-            field_required='additional_comments',
+            YES,
+            field='results_received',
+            field_required='received_date',
         )
+
+        self.required_if(
+            YES,
+            field='results_received',
+            field_required='result_date_estimated',
+        )
+
+        self.validate_results_pending()
 
         self.validate_test_date()
 
@@ -91,5 +97,13 @@ class InfantHIVTestingFormValidator(ChildFormValidatorMixin, FormValidator):
 
         if child_test_date and received_date and child_test_date > received_date:
             raise ValidationError(
-                {'received_date':
-                     'Received date cannot be before test date.'})
+                {'received_date': 'Received date cannot be before test date.'})
+
+    def validate_results_pending(self):
+        results_received = self.cleaned_data.get('results_received')
+        hiv_test_result = self.cleaned_data.get('hiv_test_result')
+        if hiv_test_result == PENDING and results_received == YES:
+            raise ValidationError(
+                {'hiv_test_result': 'HIV test result cannot be pending if results are '
+                                    'received.'}
+            )

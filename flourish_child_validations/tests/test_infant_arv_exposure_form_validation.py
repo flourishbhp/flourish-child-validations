@@ -45,7 +45,9 @@ class TestInfantArvExposureFormValidator(TestModelMixin, TestCase):
             'child_visit': self.child_visit,
             'azt_after_birth': YES,
             'azt_within_72h': YES,
-            'azt_dose_date': get_utcnow().date()
+            'azt_dose_date': get_utcnow().date(),
+            'azt_within_72h': 'blah',
+            'snvp_dose_within_72h': 'blah'
         }
         form_validator = InfantArvExposureFormValidator(cleaned_data=cleaned_data)
         try:
@@ -81,7 +83,8 @@ class TestInfantArvExposureFormValidator(TestModelMixin, TestCase):
             'azt_after_birth': YES,
             'azt_within_72h': YES,
             'azt_dose_date': get_utcnow().date(),
-            'azt_additional_dose': NOT_APPLICABLE
+            'azt_additional_dose': NOT_APPLICABLE,
+            'azt_within_72h': 'blah'
         }
         form_validator = InfantArvExposureFormValidator(cleaned_data=cleaned_data)
         self.assertRaises(ValidationError, form_validator.validate)
@@ -93,7 +96,8 @@ class TestInfantArvExposureFormValidator(TestModelMixin, TestCase):
             'azt_after_birth': YES,
             'azt_within_72h': YES,
             'azt_dose_date': get_utcnow().date(),
-            'azt_additional_dose': 'Unknown'
+            'azt_additional_dose': 'Unknown',
+            'azt_within_72h':'blah'
         }
         form_validator = InfantArvExposureFormValidator(cleaned_data=cleaned_data)
         try:
@@ -140,7 +144,8 @@ class TestInfantArvExposureFormValidator(TestModelMixin, TestCase):
             'child_visit': self.child_visit,
             'sdnvp_after_birth': YES,
             'snvp_dose_within_72h': YES,
-            'nvp_dose_date': get_utcnow().date()
+            'nvp_dose_date': get_utcnow().date(),
+            'snvp_dose_within_72h':'blah'
         }
         form_validator = InfantArvExposureFormValidator(cleaned_data=cleaned_data)
         try:
