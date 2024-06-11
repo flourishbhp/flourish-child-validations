@@ -28,6 +28,9 @@ class ActionItem(BaseUuidModel):
 
     status = models.CharField(max_length=25, default=NEW, )
 
+    def action_cls(self, reference_model_obj=None):
+        pass
+
 
 class Appointment(BaseUuidModel):
     subject_identifier = models.CharField(max_length=25)
@@ -237,3 +240,13 @@ class MaternalDelivery(BaseUuidModel):
 class ChildOffStudy(BaseUuidModel):
     action_name = 'submit-childoff-study'
     subject_identifier = models.CharField(max_length=25)
+
+
+class ChildBirth(BaseUuidModel):
+    subject_identifier = models.CharField(
+        max_length=50)
+
+    report_datetime = models.DateTimeField(
+        verbose_name="Date and Time infant enrolled", )
+
+    dob = models.DateField()
