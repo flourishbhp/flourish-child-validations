@@ -1,12 +1,11 @@
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
-
 from edc_base.utils import age, get_utcnow
 from edc_constants.choices import NO, YES
 from edc_form_validators import FormValidator
 
-from ..utils import caregiver_subject_identifier
 from .form_validator_mixin import ChildFormValidatorMixin
+from ..utils import caregiver_subject_identifier
 
 
 class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator):
@@ -30,6 +29,20 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
         super().clean()
         self.subject_identifier = self.cleaned_data.get(
             'child_visit').appointment.subject_identifier
+
+        self.validate_other_specify(
+            field='primary_caretaker'
+        )
+
+        self.validate_other_specify(
+            field='secondary_caretaker'
+        )
+
+        self.required_if(
+            YES,
+            field='house_painted',
+            field_required='paint_peeling'
+        )
 
         self.validate_consent_version_obj(self.subject_identifier)
 
@@ -80,8 +93,8 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
                         caregiver_model_obj.stay_with_child != cleaned_data.get(
                             'stay_with_caregiver')):
                     msg = {'stay_with_caregiver':
-                           'Response should match the response provided '
-                           'on the caregiver socio demographic data form'}
+                               'Response should match the response provided '
+                               'on the caregiver socio demographic data form'}
                     self._errors.update(msg)
                     raise ValidationError(msg)
 
@@ -92,10 +105,10 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
         if older_than18 and (older_than18 >
                              house_people_number):
             msg = {'older_than18':
-                   f'Number of people ({older_than18}) who are older than 18 '
-                   f'and live in the household cannot be more than the total '
-                   f'number ({house_people_number}) of people living in the '
-                   f'household'}
+                       f'Number of people ({older_than18}) who are older than 18 '
+                       f'and live in the household cannot be more than the total '
+                       f'number ({house_people_number}) of people living in the '
+                       f'household'}
             self._errors.update(msg)
             raise ValidationError(msg)
 
@@ -105,16 +118,16 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
         if (attend_school == YES and
                 self.cleaned_data.get('education_level') == 'no_schooling'):
             msg = {'education_level':
-                   'This child is said to be attending school, Please specify '
-                   'education level.'}
+                       'This child is said to be attending school, Please specify '
+                       'education level.'}
             self._errors.update(msg)
             raise ValidationError(msg)
 
         if (attend_school == NO and
                 self.cleaned_data.get('education_level') != 'no_schooling'):
             msg = {'education_level':
-                   'This child is not attending school, Please specify '
-                   'education level as `No schooling` to indicate this.'}
+                       'This child is not attending school, Please specify '
+                       'education level as `No schooling` to indicate this.'}
             self._errors.update(msg)
             raise ValidationError(msg)
 
@@ -164,7 +177,7 @@ class ChildSocioDemographicFormValidator(ChildFormValidatorMixin, FormValidator)
             self.maternal_delivery_model)
         maternal_identifier = caregiver_subject_identifier(
             subject_identifier=self.subject_identifier,
-            registered_subject_cls=self.registered_subject_cls,)
+            registered_subject_cls=self.registered_subject_cls, )
         try:
             model_obj = maternal_delivery_model_cls.objects.get(
                 subject_identifier=maternal_identifier)
