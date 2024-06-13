@@ -21,22 +21,6 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
                          field='evaluated_for_tb',
                          field_required='clinic_visit_date')
 
-        self.m2m_required_if(
-            YES,
-            m2m_field='tb_tests',
-            field='evaluated_for_tb',
-        )
-
-        self.m2m_other_specify(
-            OTHER,
-            m2m_field='tb_tests',
-            field_other='other_test',
-        )
-
-        self.required_if(YES,
-                         field='child_diagnosed_with_tb',
-                         field_required='child_on_tb_treatment')
-
         field_responses = {
             'chest_xray': 'chest_xray_results',
             'sputum_sample': 'sputum_sample_results',
@@ -52,6 +36,28 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
                 field_other=field,
             )
 
+        self.m2m_required_if(
+            YES,
+            m2m_field='tb_tests',
+            field='evaluated_for_tb',
+        )
+
+        self.m2m_other_specify(
+            OTHER,
+            m2m_field='tb_tests',
+            field_other='other_test',
+        )
+
+        self.m2m_other_specify(
+            'none',
+            m2m_field='tb_tests',
+            field_other='child_diagnosed_with_tb',
+        )
+
+        self.required_if(YES,
+                         field='child_diagnosed_with_tb',
+                         field_required='child_on_tb_treatment')
+
         self.required_if(NO,
                          field='child_diagnosed_with_tb',
                          field_required='child_on_tb_preventive_therapy')
@@ -60,6 +66,18 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
                              field_2='child_on_tb_preventive_therapy',
                              field_one_condition=YES,
                              field_two_condition=YES)
+
+        self.validate_other_specify(
+            field='child_diagnosed_with_tb',
+        )
+
+        self.validate_other_specify(
+            field='child_on_tb_treatment',
+        )
+
+        self.validate_other_specify(
+            field='child_on_tb_preventive_therapy',
+        )
 
     def field_cannot_be(self, field_1, field_2, field_one_condition,
                         field_two_condition):
@@ -70,7 +88,7 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
         field_2_value = cleaned_data.get(field_2)
 
         if field_1_value == field_one_condition and field_2_value == field_two_condition:
-            message = (f'Q.26 cannot be {field_two_condition} when '
-                       f'Q.24 is {field_two_condition}.')
+            message = {field_2: f'cannot be {field_two_condition} when '
+                                f'is {field_two_condition}.'}
             raise ValidationError(message, code='message')
         return False
