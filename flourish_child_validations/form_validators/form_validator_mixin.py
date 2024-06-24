@@ -162,8 +162,8 @@ class ChildFormValidatorMixin:
         except self.cohort_model_cls.DoesNotExist:
             raise ValidationError(
                 {'__all__':
-                     'Child does not have a cohort instance. Please contact '
-                     'administrator for assistance'})
+                 'Child does not have a cohort instance. Please contact '
+                 'administrator for assistance'})
 
     @property
     def child_assent_obj(self):
