@@ -34,8 +34,6 @@ from .child_tb_referral_outcome_form_validator import ChildTBReferralOutcomeForm
 from .child_tb_screening_form_validator import ChildTBScreeningFormValidator
 from .child_visit_form_validator import ChildVisitFormValidator
 from .child_working_status_form_validator import ChildWorkingStatusFormValidator
-from .childhood_lead_exposure_risk_form_validator import \
-    ChildhoodLeadExposureRiskFormValidator
 from .form_validator_mixin import ChildFormValidatorMixin
 from .infant_arv_exposure_form_validation import InfantArvExposureFormValidator
 from .infant_arv_prophylaxis_form_validator import ChildArvProphDatesFormValidator
