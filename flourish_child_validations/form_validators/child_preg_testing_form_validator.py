@@ -119,7 +119,7 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         try:
             child_preg_testing = self.child_preg_testing_model_cls.objects.get(
                 child_visit=previous_visit)
-        except self.child_preg_testing_model.DoesNotExist:
+        except self.child_preg_testing_model_cls.DoesNotExist:
             return None
         else:
             return child_preg_testing.menarche_start_dt
