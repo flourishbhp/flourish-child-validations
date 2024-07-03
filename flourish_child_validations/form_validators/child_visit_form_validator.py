@@ -79,7 +79,6 @@ class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
         information_provider = self.cleaned_data.get('information_provider')
 
         if information_provider == 'self':
-
             if not self.continued_consent_exists:
                 raise ValidationError(
                     {'information_provider':
