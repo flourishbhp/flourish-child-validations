@@ -17,6 +17,12 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
                              field=field,
                              field_required=f'{field}_duration')
 
+        self.required_if(
+            YES,
+            field='household_diagnosed_with_tb',
+            field_required='evaluated_for_tb'
+        )
+
         self.required_if(YES,
                          field='evaluated_for_tb',
                          field_required='clinic_visit_date')
