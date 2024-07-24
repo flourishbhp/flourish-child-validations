@@ -1,5 +1,5 @@
 from django.forms import ValidationError
-from edc_constants.constants import NO, OTHER, YES
+from edc_constants.constants import NO, NONE, OTHER, YES
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
@@ -16,12 +16,6 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
             self.required_if(YES,
                              field=field,
                              field_required=f'{field}_duration')
-
-        self.required_if(
-            YES,
-            field='household_diagnosed_with_tb',
-            field_required='evaluated_for_tb'
-        )
 
         self.required_if(YES,
                          field='evaluated_for_tb',
@@ -55,7 +49,7 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
         )
 
         self.m2m_other_specify(
-            'none',
+            NONE,
             m2m_field='tb_tests',
             field_other='child_diagnosed_with_tb',
         )
