@@ -1,4 +1,5 @@
-from edc_constants.constants import YES
+from django.forms import ValidationError
+from edc_constants.constants import NO, NONE, OTHER, YES
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
@@ -20,31 +21,74 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
                          field='evaluated_for_tb',
                          field_required='clinic_visit_date')
 
-        self.validate_other_specify(
-            field='tb_tests',
-            other_specify_field='other_test',
+        field_responses = {
+            'chest_xray': 'chest_xray_results',
+            'sputum_sample': 'sputum_sample_results',
+            'urine_test': 'urine_test_results',
+            'skin_test': 'skin_test_results',
+            'blood_test': 'blood_test_results',
+        }
+
+        for response, field in field_responses.items():
+            self.m2m_other_specify(
+                response,
+                m2m_field='tb_tests',
+                field_other=field,
+            )
+
+        self.m2m_required_if(
+            YES,
+            m2m_field='tb_tests',
+            field='evaluated_for_tb',
         )
 
-        self.required_if('chest_xray',
-                         field='tb_tests',
-                         field_required='chest_xray_results')
+        self.m2m_other_specify(
+            OTHER,
+            m2m_field='tb_tests',
+            field_other='other_test',
+        )
 
-        self.required_if('sputum_sample',
-                         field='tb_tests',
-                         field_required='sputum_sample_results')
+        self.m2m_other_specify(
+            NONE,
+            m2m_field='tb_tests',
+            field_other='child_diagnosed_with_tb',
+        )
 
-        self.required_if('stool_sample',
-                         field='tb_tests',
-                         field_required='stool_sample_results')
+        self.required_if(YES,
+                         field='child_diagnosed_with_tb',
+                         field_required='child_on_tb_treatment')
 
-        self.required_if('urine_test',
-                         field='tb_tests',
-                         field_required='urine_test_results')
+        self.required_if(NO,
+                         field='child_diagnosed_with_tb',
+                         field_required='child_on_tb_preventive_therapy')
 
-        self.required_if('skin_test',
-                         field='tb_tests',
-                         field_required='skin_test_results')
+        self.field_cannot_be(field_1='child_diagnosed_with_tb',
+                             field_2='child_on_tb_preventive_therapy',
+                             field_one_condition=YES,
+                             field_two_condition=YES)
 
-        self.required_if('blood_test',
-                         field='tb_tests',
-                         field_required='blood_test_results')
+        self.validate_other_specify(
+            field='child_diagnosed_with_tb',
+        )
+
+        self.validate_other_specify(
+            field='child_on_tb_treatment',
+        )
+
+        self.validate_other_specify(
+            field='child_on_tb_preventive_therapy',
+        )
+
+    def field_cannot_be(self, field_1, field_2, field_one_condition,
+                        field_two_condition):
+        """Raises an exception based on the condition between field_1 and field_2
+        values."""
+        cleaned_data = self.cleaned_data
+        field_1_value = cleaned_data.get(field_1)
+        field_2_value = cleaned_data.get(field_2)
+
+        if field_1_value == field_one_condition and field_2_value == field_two_condition:
+            message = {field_2: f'cannot be {field_two_condition} when '
+                                f'is {field_two_condition}.'}
+            raise ValidationError(message, code='message')
+        return False
