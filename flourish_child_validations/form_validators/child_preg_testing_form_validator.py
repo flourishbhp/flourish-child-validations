@@ -119,7 +119,7 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         previous_visit = child_visit.previous_visit
         try:
             child_preg_testing = self.child_preg_testing_model_cls.objects.filter(
-                child_visit=previous_visit)
+                child_visit=previous_visit).latest('report_datetime')
         except self.child_preg_testing_model_cls.DoesNotExist:
             return None
         else:
