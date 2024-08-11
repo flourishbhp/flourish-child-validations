@@ -64,15 +64,16 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
             return caregiver_chld_consents.latest('consent_datetime')
 
     def validate_lmp_required(self):
-        """ Require lmp date if participant is pregnant, or has reached menarche and it
+        """ Require lmp date if participant is pregnant, or has reached menarche, and it
             is not the first time.
         """
         experienced_preg = self.cleaned_data.get('experienced_pregnancy', '') == YES
+        stated_menarche = self.cleaned_data.get('menarche') == YES
         menarche_dt = self.cleaned_data.get('menarche_start_dt', None)
         prev_menarche_dt = self.check_prev_menarche_dt
 
         self.required_if_true(
-            experienced_preg or (menarche_dt and prev_menarche_dt),
+            experienced_preg or stated_menarche,
             field_required='last_menstrual_period', )
 
         if prev_menarche_dt and menarche_dt != prev_menarche_dt:
@@ -117,8 +118,8 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         child_visit = self.cleaned_data.get('child_visit', None)
         previous_visit = child_visit.previous_visit
         try:
-            child_preg_testing = self.child_preg_testing_model_cls.objects.get(
-                child_visit=previous_visit)
+            child_preg_testing = self.child_preg_testing_model_cls.objects.filter(
+                child_visit=previous_visit).latest('report_datetime')
         except self.child_preg_testing_model_cls.DoesNotExist:
             return None
         else:
