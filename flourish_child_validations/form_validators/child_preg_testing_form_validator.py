@@ -9,7 +9,6 @@ from .form_validator_mixin import ChildFormValidatorMixin
 
 
 class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
-
     caregiver_child_consent_model = 'flourish_caregiver.caregiverchildconsent'
     child_preg_testing_model = 'flourish_child.childpregtesting'
 
@@ -55,10 +54,18 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         return django_apps.get_model(self.child_preg_testing_model)
 
     @property
+    def child_visit(self):
+        return self.cleaned_data.get('child_visit', None)
+
+    @property
+    def tanner_staging_model_cls(self):
+        return django_apps.get_model('flourish_child.childtannerstaging')
+
+    @property
     def caregiver_child_obj(self):
 
         caregiver_chld_consents = self.child_caregiver_consent_model_cls.objects.filter(
-                subject_identifier=self.subject_identifier)
+            subject_identifier=self.subject_identifier)
 
         if caregiver_chld_consents:
             return caregiver_chld_consents.latest('consent_datetime')
@@ -71,15 +78,17 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         stated_menarche = self.cleaned_data.get('menarche') == YES
         menarche_dt = self.cleaned_data.get('menarche_start_dt', None)
         prev_menarche_dt = self.check_prev_menarche_dt
+        not_first_start = (self.prev_objs.filter(menarche=YES).exists() or
+                           self.tanner_staging_objs.exists())
 
         self.required_if_true(
-            experienced_preg or stated_menarche,
+            experienced_preg or (stated_menarche and not_first_start),
             field_required='last_menstrual_period', )
 
         if prev_menarche_dt and menarche_dt != prev_menarche_dt:
             message = {'menarche_start_dt':
-                       f'Previous menarche start date is {prev_menarche_dt}. '
-                       'Date provided does not match this, please correct.'}
+                           f'Previous menarche start date is {prev_menarche_dt}. '
+                           'Date provided does not match this, please correct.'}
             self._errors.update(message)
             raise ValidationError(message)
 
@@ -97,17 +106,17 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         if consented:
             if lmp and (lmp == today_dt):
                 message = {'last_menstrual_period':
-                           'Last Menstrual Period date cannot be today.'}
+                               'Last Menstrual Period date cannot be today.'}
                 self._errors.update(message)
                 raise ValidationError(message)
             if lmp and (lmp <= menarche_start_dt):
                 message = {'last_menstrual_period':
-                           'Date of LMP can not be before start of menarche.'}
+                               'Date of LMP can not be before start of menarche.'}
                 self._errors.update(message)
                 raise ValidationError(message)
 
             lmp_condition = (experienced_pregnancy == NO) or (
-                lmp and lmp <= threshold_date)
+                    lmp and lmp <= threshold_date)
             self.applicable_if_true(
                 lmp_condition,
                 field_applicable='test_done',
@@ -115,8 +124,7 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
 
     @property
     def check_prev_menarche_dt(self):
-        child_visit = self.cleaned_data.get('child_visit', None)
-        previous_visit = child_visit.previous_visit
+        previous_visit = self.child_visit.previous_visit
         try:
             child_preg_testing = self.child_preg_testing_model_cls.objects.filter(
                 child_visit=previous_visit).latest('report_datetime')
@@ -124,3 +132,14 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
             return None
         else:
             return child_preg_testing.menarche_start_dt
+
+    @property
+    def prev_objs(self):
+        return self.child_preg_testing_model_cls.objects.filter(
+            child_visit__subject_identifier=self.child_visit.subject_identifier)
+
+    @property
+    def tanner_staging_objs(self):
+        return self.tanner_staging_model_cls.objects.filter(
+            manarche_dt_avail=YES,
+            child_visit__subject_identifier=self.child_visit.subject_identifier)
