@@ -11,6 +11,7 @@ from .form_validator_mixin import ChildFormValidatorMixin
 class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
     caregiver_child_consent_model = 'flourish_caregiver.caregiverchildconsent'
     child_preg_testing_model = 'flourish_child.childpregtesting'
+    tanner_staging_model = 'flourish_child.childtannerstaging'
 
     def clean(self):
 
@@ -59,7 +60,7 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
 
     @property
     def tanner_staging_model_cls(self):
-        return django_apps.get_model('flourish_child.childtannerstaging')
+        return django_apps.get_model(self.tanner_staging_model)
 
     @property
     def caregiver_child_obj(self):
@@ -77,20 +78,12 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         experienced_preg = self.cleaned_data.get('experienced_pregnancy', '') == YES
         stated_menarche = self.cleaned_data.get('menarche') == YES
         menarche_dt = self.cleaned_data.get('menarche_start_dt', None)
-        prev_menarche_dt = self.check_prev_menarche_dt
         not_first_start = (self.prev_objs.filter(menarche=YES).exists() or
                            self.tanner_staging_objs.exists())
 
         self.required_if_true(
             experienced_preg or (stated_menarche and not_first_start),
             field_required='last_menstrual_period', )
-
-        if prev_menarche_dt and menarche_dt != prev_menarche_dt:
-            message = {'menarche_start_dt':
-                           f'Previous menarche start date is {prev_menarche_dt}. '
-                           'Date provided does not match this, please correct.'}
-            self._errors.update(message)
-            raise ValidationError(message)
 
     def validate_lmp(self):
         """A function to validate the lmp if it is below the 2months threshold
@@ -121,17 +114,6 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
                 lmp_condition,
                 field_applicable='test_done',
                 applicable_msg='A pregnancy test is needed')
-
-    @property
-    def check_prev_menarche_dt(self):
-        previous_visit = self.child_visit.previous_visit
-        try:
-            child_preg_testing = self.child_preg_testing_model_cls.objects.filter(
-                child_visit=previous_visit).latest('report_datetime')
-        except self.child_preg_testing_model_cls.DoesNotExist:
-            return None
-        else:
-            return child_preg_testing.menarche_start_dt
 
     @property
     def prev_objs(self):
