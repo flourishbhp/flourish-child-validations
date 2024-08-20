@@ -181,6 +181,17 @@ class ChildVisit(BaseUuidModel):
     visit_code_sequence = models.CharField(
         max_length=25, )
 
+    @property
+    def previous_visit(self):
+        previous_visit = None
+        previous_appointment = self.appointment.model_cls.objects.filter(
+            subject_identifier=self.subject_identifier).order_by(
+            '-visit_code_sequence').first()
+        if previous_appointment:
+            previous_visit = self.model_cls.objects.get(
+                appointment=previous_appointment)
+        return previous_visit
+
 
 class RegisteredSubject(BaseUuidModel):
     subject_identifier = models.CharField(
@@ -250,3 +261,18 @@ class ChildBirth(BaseUuidModel):
         verbose_name="Date and Time infant enrolled", )
 
     dob = models.DateField()
+
+
+class ChildPregTesting(BaseUuidModel):
+    child_visit = models.OneToOneField(ChildVisit, on_delete=PROTECT)
+
+    menarche = models.CharField(
+        max_length=50)
+
+
+class ChildTannerStaging(BaseUuidModel):
+    child_visit = models.OneToOneField(ChildVisit, on_delete=PROTECT)
+
+    manarche_dt_avail = models.CharField(
+        max_length=50)
+
