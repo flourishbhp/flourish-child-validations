@@ -48,10 +48,10 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
             field_other='other_test',
         )
 
-        self.m2m_other_specify(
-            NONE,
-            m2m_field='tb_tests',
-            field_other='child_diagnosed_with_tb',
+        self.required_if(
+            YES,
+            field='evaluated_for_tb',
+            field_required='diagnosed_with_TB',
         )
 
         self.required_if(YES,
@@ -79,6 +79,8 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
             field='child_on_tb_preventive_therapy',
         )
 
+        self.validate_started_on_tb_treatment()
+
     def field_cannot_be(self, field_1, field_2, field_one_condition,
                         field_two_condition):
         """Raises an exception based on the condition between field_1 and field_2
@@ -92,3 +94,15 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
                                 f'is {field_two_condition}.'}
             raise ValidationError(message, code='message')
         return False
+
+    def validate_started_on_tb_treatment(self):
+        qs = self.cleaned_data.get('tb_tests')
+        diagnosed_with_TB = self.cleaned_data.get('diagnosed_with_TB')
+
+        if qs and qs.count() > 0:
+            selected = {obj.short_name: obj.name for obj in qs}
+
+            self.required_if_true(
+                NONE in selected or diagnosed_with_TB == YES,
+                field_required='started_on_TB_treatment',
+            )
