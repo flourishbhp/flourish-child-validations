@@ -110,6 +110,7 @@ class ChildFormValidatorMixin:
             })
 
     def validate_offstudy_model(self):
+        report_datetime = self.cleaned_data.get('report_datetime', get_utcnow())
 
         try:
             self.action_item_model_cls.objects.get(
@@ -119,7 +120,8 @@ class ChildFormValidatorMixin:
         except self.action_item_model_cls.DoesNotExist:
             try:
                 self.child_offstudy_cls.objects.get(
-                    subject_identifier=self.subject_identifier)
+                    subject_identifier=self.subject_identifier,
+                    offstudy_date__lt=report_datetime.date())
             except self.child_offstudy_cls.DoesNotExist:
                 pass
             else:
