@@ -1,6 +1,7 @@
 from django import forms
 from django.apps import apps as django_apps
 from edc_constants.constants import NEW, NO
+from edc_base.utils import get_utcnow
 
 from edc_action_item.site_action_items import site_action_items
 from flourish_prn.action_items import CHILDOFF_STUDY_ACTION
@@ -14,6 +15,7 @@ class CrfOffStudyFormValidator:
         super().clean()
 
     def validate_offstudy_model(self):
+        report_datetime = self.cleaned_data.get('report_datetime', get_utcnow())
         child_offstudy_cls = django_apps.get_model(
             'flourish_prn.childoffstudy')
         action_cls = site_action_items.get(
@@ -30,7 +32,8 @@ class CrfOffStudyFormValidator:
         except action_item_model_cls.DoesNotExist:
             try:
                 child_offstudy_cls.objects.get(
-                    subject_identifier=self.subject_identifier)
+                    subject_identifier=self.subject_identifier,
+                    offstudy_date__lt=report_datetime.date())
             except child_offstudy_cls.DoesNotExist:
                 pass
             else:
