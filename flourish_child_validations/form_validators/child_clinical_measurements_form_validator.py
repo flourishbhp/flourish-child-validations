@@ -1,11 +1,8 @@
-from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
-from edc_base.utils import age, get_utcnow
 from edc_constants.constants import FEMALE, YES
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
-from ..utils import caregiver_subject_identifier
 
 
 class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValidator):
@@ -99,8 +96,8 @@ class ChildClinicalMeasurementsFormValidator(ChildFormValidatorMixin, FormValida
         if child_systolic_bp and child_diastolic_bp:
             if child_systolic_bp < child_diastolic_bp:
                 msg = {'child_diastolic_bp':
-                           'Systolic blood pressure cannot be lower than the '
-                           'diastolic blood pressure. Please correct.'}
+                       'Systolic blood pressure cannot be lower than the '
+                       'diastolic blood pressure. Please correct.'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
 
