@@ -17,8 +17,20 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
                              field=field,
                              field_required=f'{field}_duration')
 
+        self.applicable_if_true(
+            self.child_age <= 12,
+            field_applicable='fatigue_or_reduced_playfulness',
+            applicable_msg=(f'Child age is {self.child_age}, '
+                            'question is required for children ≤ 12'),
+            not_applicable_msg=(f'Child age is {self.child_age}, '
+                                'question is only for children ≤ 12'))
+
         self.required_if(YES,
                          field='evaluated_for_tb',
+                         field_required='flourish_referral')
+
+        self.required_if(NO,
+                         field='flourish_referral',
                          field_required='clinic_visit_date')
 
         field_responses = {
@@ -88,7 +100,7 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
         field_2_value = cleaned_data.get(field_2)
 
         if field_1_value == field_one_condition and field_2_value == field_two_condition:
-            message = {field_2: f'cannot be {field_two_condition} when '
-                                f'is {field_two_condition}.'}
+            message = {field_2: (f'cannot be {field_two_condition} when '
+                                 f'is {field_two_condition}.')}
             raise ValidationError(message, code='message')
         return False
