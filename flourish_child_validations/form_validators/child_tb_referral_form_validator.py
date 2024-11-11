@@ -1,4 +1,4 @@
-from edc_constants.constants import YES, NO
+from edc_constants.constants import YES, NO, OTHER
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
@@ -17,6 +17,10 @@ class ChildTBReferralFormValidator(ChildFormValidatorMixin, FormValidator):
         self.required_if(NO,
                          field='referred',
                          field_required='no_referral_reason')
+
+        self.required_if(OTHER,
+                         field='no_referral_reason',
+                         field_required='no_referral_reason_other')
 
         self.validate_other_specify(
             field='reason_for_referral',
