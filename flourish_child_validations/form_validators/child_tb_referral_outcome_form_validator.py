@@ -89,3 +89,8 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
             field='tb_evaluation',
             field_required='reasons',
         )
+
+        self.validate_other_specify(
+            field='reasons',
+            other_specify_field='other_reasons'
+        )
