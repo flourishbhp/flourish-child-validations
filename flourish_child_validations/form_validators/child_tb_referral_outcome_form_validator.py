@@ -57,17 +57,12 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
             other_specify_field='clinic_name_other'
         )
 
-        tb_preventative_fields = [
-            'tb_preventative_therapy',
-            'tb_isoniazid_preventative_therapy',
-        ]
-
-        for field in tb_preventative_fields:
-            self.required_if(
-                YES,
-                field='tb_treatment',
-                field_required=field
-            )
+       
+        self.required_if(
+            YES,
+            field='tb_treatment',
+            field_required='tb_preventative_therapy'
+        )
 
         self.validate_other_specify(
             field='tb_treatment',
@@ -77,11 +72,6 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
         self.validate_other_specify(
             field='tb_preventative_therapy',
             other_specify_field='other_tb_preventative_therapy'
-        )
-
-        self.validate_other_specify(
-            field='tb_isoniazid_preventative_therapy',
-            other_specify_field='other_tb_isoniazid_preventative_therapy'
         )
 
         self.required_if(
