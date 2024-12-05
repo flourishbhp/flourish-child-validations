@@ -240,16 +240,20 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
 
         prev_recent_bf_dt = getattr(previous_instance, 'recent_bf_dt', None)
         if recent_bf_dt:
-            if continuing_to_bf and prev_recent_bf_dt and continuing_to_bf == YES and recent_bf_dt <= prev_recent_bf_dt:
+            if continuing_to_bf and prev_recent_bf_dt:
+                date_consistent = ( continuing_to_bf == YES and recent_bf_dt <= prev_recent_bf_dt)
+                if date_consistent:
                     raise ValidationError(
-                    {'recent_bf_dt':
-                            'Caregiver continued to breastfeed, the recent breast feeding date '
-                            f'cannot be the same or be before the one provided in previous visit {previous_instance.child_visit.visit_code}'})
+                        {'recent_bf_dt':
+                                'Caregiver continued to breastfeed, the recent breast feeding date '
+                                f'cannot be the same or be before the one provided in previous visit 
+                                {previous_instance.child_visit.visit_code}'})
             
-
-            if child_weaned and dt_weaned and child_weaned==YES  and dt_weaned != recent_bf_dt:
-                raise ValidationError(
-                    {'dt_weaned':
-                            'The date of the recent breast feeding date '
-                            f'should be the same as date weaned'})
+            if child_weaned and dt_weaned:
+                weaned_consistent = (child_weaned==YES  and dt_weaned != recent_bf_dt)
+                if weaned_consistent:
+                    raise ValidationError(
+                        {'dt_weaned':
+                                'The date of the recent breast feeding date '
+                                f'should be the same as date weaned'})
 
