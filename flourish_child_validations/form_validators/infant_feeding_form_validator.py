@@ -230,7 +230,6 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
                 self._errors.update(message)
                 raise ValidationError(message)
             
-            field='continuing_to_bf',
     def validate_continuing_to_bf(self):
         continuing_to_bf = self.cleaned_data.get('continuing_to_bf', None)
         recent_bf_dt = self.cleaned_data.get('recent_bf_dt', None)
