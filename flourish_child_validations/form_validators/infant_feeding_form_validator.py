@@ -33,6 +33,8 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
 
         self.solid_foods_validations()
 
+        self.validate_continuing_to_bf()
+
     def previous_feeding_instance(self):
         infant_feeding_cls = django_apps.get_model(self.infant_feeding_model)
 
@@ -227,3 +229,28 @@ class InfantFeedingFormValidator(ChildFormValidatorMixin,
                            ' Date provided is not consistent with this date.'}
                 self._errors.update(message)
                 raise ValidationError(message)
+            
+            field='continuing_to_bf',
+    def validate_continuing_to_bf(self):
+        continuing_to_bf = self.cleaned_data.get('continuing_to_bf', None)
+        recent_bf_dt = self.cleaned_data.get('recent_bf_dt', None)
+        dt_weaned = self.cleaned_data.get('dt_weaned', None)
+        child_weaned = self.cleaned_data.get('child_weaned', None)
+        
+        previous_instance = self.previous_feeding_instance()
+
+        prev_recent_bf_dt = getattr(previous_instance, 'recent_bf_dt', None)
+        if recent_bf_dt:
+            if continuing_to_bf and prev_recent_bf_dt and continuing_to_bf == YES and recent_bf_dt <= prev_recent_bf_dt:
+                    raise ValidationError(
+                    {'recent_bf_dt':
+                            'Caregiver continued to breastfeed, the recent breast feeding date '
+                            f'cannot be the same or be before the one provided in previous visit {previous_instance.child_visit.visit_code}'})
+            
+
+            if child_weaned and dt_weaned and child_weaned==YES  and dt_weaned != recent_bf_dt:
+                raise ValidationError(
+                    {'dt_weaned':
+                            'The date of the recent breast feeding date '
+                            f'should be the same as date weaned'})
+
