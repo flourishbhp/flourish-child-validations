@@ -45,6 +45,12 @@ class ChildVisitFormValidator(VisitFormValidator, CrfOffStudyFormValidator,
 
         self.validate_other_specify('information_provider')
 
+        self.validate_other_specify(
+            field='reason_unscheduled',
+            other_specify_field='reason_unscheduled_other',
+            required_msg='Please give reason for unscheduled visit'
+        )
+
         if self.instance:
             if not self.instance.id:
                 self.validate_study_status()
