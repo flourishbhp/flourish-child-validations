@@ -77,7 +77,7 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         """
         experienced_preg = self.cleaned_data.get('experienced_pregnancy', '') == YES
         stated_menarche = self.cleaned_data.get('menarche') == YES
-        menarche_dt = self.cleaned_data.get('menarche_start_dt', None)
+
         not_first_start = (self.prev_objs.filter(menarche=YES).exists() or
                            self.tanner_staging_objs.exists())
 
@@ -99,12 +99,12 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         if consented:
             if lmp and (lmp == today_dt):
                 message = {'last_menstrual_period':
-                               'Last Menstrual Period date cannot be today.'}
+                           'Last Menstrual Period date cannot be today.'}
                 self._errors.update(message)
                 raise ValidationError(message)
-            if lmp and (lmp <= menarche_start_dt):
+            if lmp and (lmp < menarche_start_dt):
                 message = {'last_menstrual_period':
-                               'Date of LMP can not be before start of menarche.'}
+                           'Date of LMP can not be before start of menarche.'}
                 self._errors.update(message)
                 raise ValidationError(message)
 
