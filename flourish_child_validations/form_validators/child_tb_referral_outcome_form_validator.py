@@ -12,9 +12,11 @@ def check_values(queryset, values):
 class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
-        fields = ['clinic_name',
-                  'tests_performed',
-                  'diagnosed_with_tb']
+        self.required_if(
+                YES,
+                field='tb_evaluation',
+                field_required='clinic_name'
+            )
 
         queryset = self.cleaned_data.get('tests_performed')
         value_checks = check_values(queryset,
@@ -30,12 +32,6 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
                 self.required_if_true(exists, 'other_test_specify')
                 self.required_if_true(exists, 'other_test_results')
 
-        for field in fields:
-            self.required_if(
-                YES,
-                field='tb_evaluation',
-                field_required=field
-            )
 
         self.required_if(
             YES,
@@ -89,3 +85,14 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
             field='tb_evaluation',
             field_required='reasons',
         )
+
+        required_fields =['tests_performed','diagnosed_with_tb','tb_treatment',
+                         'tb_preventative_therapy' ]
+        for field in required_fields:
+            self.required_if(
+                    YES,
+                    field='evaluated',
+                    field_required=field
+                )
+
+
