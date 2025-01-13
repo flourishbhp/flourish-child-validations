@@ -1,5 +1,5 @@
 from django.forms import ValidationError
-from edc_constants.constants import NO, NONE, OTHER, YES
+from edc_constants.constants import NO, NONE, OTHER, YES, POS, NEG
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
@@ -91,6 +91,34 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
         self.validate_other_specify(
             field='child_on_tb_preventive_therapy',
         )
+        self.validate_results_tb_treatment_and_prevention()
+
+    def validate_results_tb_treatment_and_prevention(self):
+        child_on_tb_treatment = self.cleaned_data.get('child_on_tb_treatment')
+        child_on_tb_preventive_therapy = self.cleaned_data.get('child_on_tb_preventive_therapy')
+        test_results = [
+            self.cleaned_data.get('chest_xray_results'),
+            self.cleaned_data.get('sputum_sample_results'),
+            self.cleaned_data.get('urine_test_results'),
+            self.cleaned_data.get('skin_test_results'),
+            self.cleaned_data.get('blood_test_results'),
+        ]
+
+        any_positive = POS in test_results
+        all_negative = all(result == NEG for result in test_results)
+
+
+        if any_positive:
+            if child_on_tb_treatment != YES and child_on_tb_preventive_therapy != YES:
+                raise ValidationError({
+                    'child_on_tb_treatment': 'If any test result is positive, this field must be Yes',
+                    'child_on_tb_preventive_therapy': 'If any test result is positive, this field must be Yes.',
+                })
+        if all_negative:
+            if child_on_tb_treatment != NO :
+                raise ValidationError({
+                    'child_on_tb_treatment': 'If all test results are negative, this field must not be Yes or Other.',
+                    })    
 
     def field_cannot_be(self, field_1, field_2, field_one_condition,
                         field_two_condition):
