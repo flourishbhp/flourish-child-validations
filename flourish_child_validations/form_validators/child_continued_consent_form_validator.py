@@ -206,19 +206,21 @@ class ChildContinuedConsentFormValidator(ChildFormValidatorMixin, FormValidator)
             if field == 'identity_type' and field_value == 'country_id' and child_consent_value == 'birth_cert':
                 child_identity = getattr(self.caregiver_child_consent, 'identity', None)
                 if child_identity != identity:
-                    message = {'identity': (
-                        f'The identity value "{identity}" does not match the child consent identity value "{child_identity}" '
-                        'as required when the identity type is "country_id" and the child consent identity type is "birth_cert".'
-                    )}
-                    self._errors.update(message)
-                    raise ValidationError(message)
-            if child_consent_value and child_consent_value != field_value and field != 'identity_type':
-                message = {field:
-                           f'{field_value} does not match {child_consent_value} '
-                           'from the caregiver consent on behalf of child. Please '
-                           'correct this.'}
-                self._errors.update(message)
-                raise ValidationError(message)
+                    self.add_error(
+                    'identity',
+                    f'The identity value "{identity}" does not match the child consent identity value "{child_identity}" '
+                    'as required when the identity type is "country_id" and the child consent identity type is "birth_cert".'
+                    )
+                    continue
+
+            if child_consent_value and child_consent_value != field_value and field != 'identity':
+                self.add_error(
+                field,
+                f'{field_value} does not match {child_consent_value} '
+                'from the caregiver consent on behalf of child. Please correct this.'
+            )
+            if self.errors:
+                raise ValidationError(self.errors)
 
     @property
     def caregiver_child_consent(self):
