@@ -37,7 +37,8 @@ class ChildContinuedConsentFormValidator(ChildFormValidatorMixin, FormValidator)
 
         cleaned_data = self.cleaned_data
 
-        self.validate_consent_version_obj(self.cleaned_data.get('subject_identifier'))
+        self.validate_consent_version_obj(
+            self.cleaned_data.get('subject_identifier'))
 
         self.required_if(
             NO,
@@ -165,7 +166,7 @@ class ChildContinuedConsentFormValidator(ChildFormValidatorMixin, FormValidator)
             if consent_age and consent_age < 18:
                 msg = {'dob':
                        f'Participant is {consent_age} years of age. Child '
-                        'continued consent is not required.'}
+                       'continued consent is not required.'}
                 self._errors.update(msg)
                 raise ValidationError(msg)
         else:
@@ -199,28 +200,49 @@ class ChildContinuedConsentFormValidator(ChildFormValidatorMixin, FormValidator)
     def validate_against_child_consent(self):
         cleaned_data = self.cleaned_data
         identity = cleaned_data.get('identity')
-        fields = [key for key in cleaned_data.keys() if key != 'consent_datetime']
+        fields = [key for key in cleaned_data.keys() if key !=
+                  'consent_datetime']
         for field in fields:
-            child_consent_value = getattr(self.caregiver_child_consent, field, None)
+            child_consent_value = getattr(
+                self.caregiver_child_consent, field, None)
             field_value = cleaned_data.get(field)
-            if field == 'identity_type' and field_value == 'country_id' and child_consent_value == 'birth_cert':
-                child_identity = getattr(self.caregiver_child_consent, 'identity', None)
-                if child_identity != identity:
-                    self.add_error(
-                    'identity',
-                    f'The identity value "{identity}" does not match the child consent identity value "{child_identity}" '
-                    'as required when the identity type is "country_id" and the child consent identity type is "birth_cert".'
-                    )
-                    continue
-
-            if child_consent_value and child_consent_value != field_value and field != 'identity':
-                self.add_error(
-                field,
-                f'{field_value} does not match {child_consent_value} '
-                'from the caregiver consent on behalf of child. Please correct this.'
-            )
+            self.check_identity_fields(
+                field, field_value, identity, child_consent_value)
             if self.errors:
                 raise ValidationError(self.errors)
+
+    def check_identity_fields(self, field, field_value, identity, child_consent_value):
+        """
+        Validate the identity and child consent values, adding appropriate errors when mismatched.
+        """
+        if field == 'identity_type':
+            child_identity = getattr(
+                self.caregiver_child_consent, 'identity', None)
+
+            # Common error for mismatched identities
+            def add_identity_error(reason):
+                self.add_error(
+                    'identity',
+                    f'The identity value "{identity}" does not match the child consent identity value "{child_identity}". {reason}'
+                )
+
+            # Check identity mismatch based on field value and child consent value
+            if child_consent_value == field_value and child_identity != identity:
+                add_identity_error("")
+
+            if field_value == 'country_id' and child_consent_value == 'birth_cert' and child_identity != identity:
+                add_identity_error(
+                    'This is required when the identity type is "country_id" '
+                    'and the child consent identity type is "birth_cert".'
+                )
+                return
+        # Add error if child consent value mismatches the field value
+        if child_consent_value and child_consent_value != field_value:
+            self.add_error(
+                field,
+                f'{field_value} does not match {child_consent_value} from the caregiver consent on behalf of the child. '
+                'Please correct this.'
+            )
 
     @property
     def caregiver_child_consent(self):
@@ -228,7 +250,8 @@ class ChildContinuedConsentFormValidator(ChildFormValidatorMixin, FormValidator)
             child_consent = self.caregiver_child_consent_cls.objects.filter(
                 subject_identifier=self.cleaned_data.get('subject_identifier')).latest('version')
         except self.caregiver_child_consent_cls.DoesNotExist:
-            raise ValidationError('Caregiver child consent matching query does not exist.')
+            raise ValidationError(
+                'Caregiver child consent matching query does not exist.')
         else:
             return child_consent
 
