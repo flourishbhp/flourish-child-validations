@@ -229,6 +229,7 @@ class ChildContinuedConsentFormValidator(ChildFormValidatorMixin, FormValidator)
             # Check identity mismatch based on field value and child consent value
             if child_consent_value == field_value and child_identity != identity:
                 add_identity_error("")
+                return
 
             if field_value == 'country_id' and child_consent_value == 'birth_cert' and child_identity != identity:
                 add_identity_error(
