@@ -10,9 +10,7 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
     def clean(self):
         super().clean()
 
-        self.diagnoses_required_validation()
         self.validate_results_tb_treatment_and_prevention()
-        self.not_flourish_referral_validation()
     
 
         required_fields = ['cough', 'fever', 'sweats', 'weight_loss']
@@ -33,6 +31,8 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
         self.required_if(YES,
                          field='evaluated_for_tb',
                          field_required='flourish_referral')
+        
+        self.not_flourish_referral_validation()
 
         field_responses = {
             'chest_xray': 'chest_xray_results',
@@ -49,6 +49,10 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
                 m2m_field='tb_tests',
                 field_other=field,
             )
+        
+        self.m2m_single_selection_if(
+            'None', m2m_field='tb_tests'
+        )
 
         self.m2m_other_specify(
             OTHER,
@@ -56,7 +60,8 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
             field_other='other_test',
         )
 
-
+        self.diagnoses_required_validation()   
+             
         self.required_if(YES,
                          field='child_diagnosed_with_tb',
                          field_required='child_on_tb_treatment')
@@ -124,32 +129,20 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
     
 
     def diagnoses_required_validation(self):
-        
+
         tb_tests_responses = [obj.short_name for obj in self.cleaned_data.get('tb_tests', [])]
+        self.required_if_true(any(response != 'None' for response in tb_tests_responses),
+                              field_required='child_diagnosed_with_tb')
 
-        # Check if there are any responses that are not NONE
-        if any(response != NONE for response in tb_tests_responses):
-            if not self.cleaned_data.get('child_diagnosed_with_tb'):
-                message={
-                    'child_diagnosed_with_tb',
-                    'This field is required when a TB test other than NONE is selected.'
-                }
-
-                raise ValidationError(message)
-            
 
     def not_flourish_referral_validation(self):
-        evaluated_for_tb = self.cleaned_data.get('evaluated_for_tb')
+        referral_fields = ['clinic_visit_date','tb_tests','child_diagnosed_with_tb','child_on_tb_treatment',]
+    
+        for referral_field in referral_fields:
 
-        if evaluated_for_tb == YES:
-
-            referral_fields = ['clinic_visit_date','tb_tests','child_diagnosed_with_tb','child_on_tb_treatment',]
-        
-            for referral_field in referral_fields:
-
-                    self.required_if(NO,
-                                    field='flourish_referral',
-                                    field_required=referral_field)
+                self.required_if(NO,
+                                field='flourish_referral',
+                                field_required=referral_field)
 
 
 
