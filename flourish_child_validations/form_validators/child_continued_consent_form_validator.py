@@ -200,16 +200,16 @@ class ChildContinuedConsentFormValidator(ChildFormValidatorMixin, FormValidator)
     def validate_against_child_consent(self):
         cleaned_data = self.cleaned_data
         identity = cleaned_data.get('identity')
-        fields = [key for key in cleaned_data.keys() if key !=
-                  'consent_datetime']
+        fields = [key for key in cleaned_data.keys() if key not in 
+                  ['consent_datetime','identity_type','identity']]
         for field in fields:
             child_consent_value = getattr(
                 self.caregiver_child_consent, field, None)
             field_value = cleaned_data.get(field)
             self.check_identity_fields(
                 field, field_value, identity, child_consent_value)
-            if self.errors:
-                raise ValidationError(self.errors)
+            if self._errors:
+                raise ValidationError(self._errors)
 
     def check_identity_fields(self, field, field_value, identity, child_consent_value):
         """
@@ -221,8 +221,7 @@ class ChildContinuedConsentFormValidator(ChildFormValidatorMixin, FormValidator)
 
             # Common error for mismatched identities
             def add_identity_error(reason):
-                self.add_error(
-                    'identity',
+                self.capture_error_message(
                     f'The identity value "{identity}" does not match the child consent identity value "{child_identity}". {reason}'
                 )
 
@@ -239,8 +238,7 @@ class ChildContinuedConsentFormValidator(ChildFormValidatorMixin, FormValidator)
                 return
         # Add error if child consent value mismatches the field value
         if child_consent_value and child_consent_value != field_value:
-            self.add_error(
-                field,
+            self.capture_error_message(
                 f'{field_value} does not match {child_consent_value} from the caregiver consent on behalf of the child. '
                 'Please correct this.'
             )
