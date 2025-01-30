@@ -98,9 +98,7 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
             field='reasons',
             other_specify_field='other_reasons'
         )
-        self.validate_results_tb_treatment_and_prevention(
-         
-    )
+        self.validate_results_tb_treatment_and_prevention()
     def validate_results_tb_treatment_and_prevention(self):
         tb_treatment = self.cleaned_data.get('tb_treatment')
         diagnosed_with_tb = self.cleaned_data.get('diagnosed_with_tb')
