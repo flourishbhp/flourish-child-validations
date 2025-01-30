@@ -17,6 +17,7 @@ class ChildFormValidatorMixin:
     registered_subject_model = 'edc_registration.registeredsubject'
     child_consent_model = 'flourish_caregiver.caregiverchildconsent'
     cohort_model = 'flourish_caregiver.cohort'
+    child_assent_model = 'flourish_child.childassent'
 
     @property
     def infant_birth_cls(self):
@@ -45,6 +46,10 @@ class ChildFormValidatorMixin:
     @property
     def cohort_model_cls(self):
         return django_apps.get_model(self.cohort_model)
+
+    @property
+    def child_assent_model_cls(self):
+        return django_apps.get_model(self.child_assent_model)
 
     @property
     def child_consent_model_obj(self):
@@ -110,6 +115,7 @@ class ChildFormValidatorMixin:
             })
 
     def validate_offstudy_model(self):
+        report_datetime = self.cleaned_data.get('report_datetime', get_utcnow())
 
         try:
             self.action_item_model_cls.objects.get(
@@ -119,7 +125,8 @@ class ChildFormValidatorMixin:
         except self.action_item_model_cls.DoesNotExist:
             try:
                 self.child_offstudy_cls.objects.get(
-                    subject_identifier=self.subject_identifier)
+                    subject_identifier=self.subject_identifier,
+                    offstudy_date__lt=report_datetime.date())
             except self.child_offstudy_cls.DoesNotExist:
                 pass
             else:
@@ -167,8 +174,7 @@ class ChildFormValidatorMixin:
 
     @property
     def child_assent_obj(self):
-        child_assent_model_cls = django_apps.get_model(self.child_assent_model)
-        child_assent_objs = child_assent_model_cls.objects.filter(
+        child_assent_objs = self.child_assent_model_cls.objects.filter(
             subject_identifier=self.subject_identifier)
 
         if child_assent_objs:
@@ -176,12 +182,10 @@ class ChildFormValidatorMixin:
 
     @property
     def child_caregiver_consent_obj(self):
-        child_caregiver_consent_model_cls = django_apps.get_model(
-            self.caregiver_child_consent_model)
         try:
-            model_obj = child_caregiver_consent_model_cls.objects.filter(
+            model_obj = self.caregiver_child_consent_cls.objects.filter(
                 subject_identifier=self.subject_identifier).latest('consent_datetime')
-        except child_caregiver_consent_model_cls.DoesNotExist:
+        except self.caregiver_child_consent_cls.DoesNotExist:
             return None
         else:
             return model_obj
