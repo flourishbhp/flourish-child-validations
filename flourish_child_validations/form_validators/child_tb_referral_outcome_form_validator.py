@@ -1,6 +1,6 @@
 from edc_constants.constants import NO, OTHER, YES
 from edc_form_validators import FormValidator
-
+from django.forms import ValidationError
 from .form_validator_mixin import ChildFormValidatorMixin
 
 
@@ -38,6 +38,14 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
             field='tb_evaluation',
             field_required='evaluated',
         )
+
+        required_fields =['tests_performed','diagnosed_with_tb',]
+        for field in required_fields:
+            self.required_if(
+                    YES,
+                    field='evaluated',
+                    field_required=field
+                )
         self.required_if(
             NO,
             field='evaluated',
@@ -53,70 +61,12 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
             other_specify_field='clinic_name_other'
         )
 
-        self.m2m_other_specify(
-            m2m_field='tests_performed',
-            field_other='other_test_specify'
+       
+        self.required_if(
+            NO,
+            field='diagnosed_with_tb',
+            field_required='tb_preventative_therapy'
         )
-
-        self.m2m_required_if(
-            response='chest_xray',
-            field='chest_xray_results',
-            m2m_field='tests_performed'
-        )
-
-        self.m2m_required_if(
-            response='sputum_sample',
-            field='sputum_sample_results',
-            m2m_field='tests_performed'
-        )
-
-        self.m2m_required_if(
-            response='stool_sample',
-            field='sputum_sample_results',
-            m2m_field='tests_performed'
-        )
-
-        self.m2m_required_if(
-            response='urine_test',
-            field='urine_test_results',
-            m2m_field='tests_performed'
-        )
-
-        self.m2m_required_if(
-            response='skin_test',
-            field='skin_test_results',
-            m2m_field='tests_performed'
-        )
-
-        self.m2m_required_if(
-            response='blood_test',
-            field='blood_test_results',
-            m2m_field='tests_performed'
-        )
-
-        self.m2m_required_if(
-            response='stool_sample',
-            field='stool_sample_results',
-            m2m_field='tests_performed'
-        )
-
-        self.m2m_required_if(
-            response=OTHER,
-            field='other_test_results',
-            m2m_field='tests_performed'
-        )
-
-        tb_preventative_fields = [
-            'tb_preventative_therapy',
-            'tb_isoniazid_preventative_therapy',
-        ]
-
-        for field in tb_preventative_fields:
-            self.required_if(
-                YES,
-                field='tb_treatment',
-                field_required=field
-            )
 
         self.validate_other_specify(
             field='tb_treatment',
@@ -139,13 +89,26 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
             field_required='reasons',
         )
 
-        required_fields =['tests_performed','diagnosed_with_tb','tb_treatment',
-                         'tb_preventative_therapy' ]
-        for field in required_fields:
-            self.required_if(
-                    YES,
-                    field='evaluated',
-                    field_required=field
-                )
+        self.required_if(YES,
+                         field='diagnosed_with_tb',
+                         field_required='tb_treatment')
 
+
+        self.validate_other_specify(
+            field='reasons',
+            other_specify_field='other_reasons'
+        )
+        self.validate_results_tb_treatment_and_prevention(
+         
+    )
+    def validate_results_tb_treatment_and_prevention(self):
+        tb_treatment = self.cleaned_data.get('tb_treatment')
+        diagnosed_with_tb = self.cleaned_data.get('diagnosed_with_tb')
+        
+    
+        if tb_treatment != YES and diagnosed_with_tb == YES:
+                raise ValidationError({
+                    'tb_treatment': 'If any diagnosed with tb , this field must be Yes',
+                })
+    
 
