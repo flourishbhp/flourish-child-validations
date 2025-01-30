@@ -1,6 +1,6 @@
 from edc_constants.constants import NO, YES
 from edc_form_validators import FormValidator
-
+from django.forms import ValidationError
 from .form_validator_mixin import ChildFormValidatorMixin
 
 
@@ -38,6 +38,14 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
             field='tb_evaluation',
             field_required='evaluated',
         )
+
+        required_fields =['tests_performed','diagnosed_with_tb',]
+        for field in required_fields:
+            self.required_if(
+                    YES,
+                    field='evaluated',
+                    field_required=field
+                )
         self.required_if(
             NO,
             field='evaluated',
@@ -55,8 +63,8 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
 
        
         self.required_if(
-            YES,
-            field='tb_treatment',
+            NO,
+            field='diagnosed_with_tb',
             field_required='tb_preventative_therapy'
         )
 
@@ -76,18 +84,24 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
             field_required='reasons',
         )
 
-        required_fields =['tests_performed','diagnosed_with_tb','tb_treatment',
-                         'tb_preventative_therapy' ]
-        for field in required_fields:
-            self.required_if(
-                    YES,
-                    field='evaluated',
-                    field_required=field
-                )
+        self.required_if(YES,
+                         field='diagnosed_with_tb',
+                         field_required='tb_treatment')
 
 
         self.validate_other_specify(
             field='reasons',
             other_specify_field='other_reasons'
         )
+        self.validate_results_tb_treatment_and_prevention()
+    def validate_results_tb_treatment_and_prevention(self):
+        tb_treatment = self.cleaned_data.get('tb_treatment')
+        diagnosed_with_tb = self.cleaned_data.get('diagnosed_with_tb')
+        
+    
+        if tb_treatment != YES and diagnosed_with_tb == YES:
+                raise ValidationError({
+                    'tb_treatment': 'If any diagnosed with tb , this field must be Yes',
+                })
+    
 
