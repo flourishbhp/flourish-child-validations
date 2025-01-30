@@ -89,29 +89,12 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def validate_results_tb_treatment_and_prevention(self):
         child_on_tb_treatment = self.cleaned_data.get('child_on_tb_treatment')
-        test_results = [
-            self.cleaned_data.get('chest_xray_results'),
-            self.cleaned_data.get('sputum_sample_results'),
-            self.cleaned_data.get('urine_test_results'),
-            self.cleaned_data.get('skin_test_results'),
-            self.cleaned_data.get('blood_test_results'),
-            self.cleaned_data.get('stool_sample_results'),
-        ]
-
-        any_positive = POS in test_results
-        all_negative = all(result == NEG for result in test_results)
-
-
-        if any_positive:
-            if child_on_tb_treatment != YES:
+        child_diagnosed_with_tb = self.cleaned_data.get('child_diagnosed_with_tb')
+    
+        if child_on_tb_treatment != YES and child_diagnosed_with_tb == YES:
                 raise ValidationError({
-                    'child_on_tb_treatment': 'If any test result is positive, this field must be Yes',
+                    'child_on_tb_treatment': 'If diagnosed with tb, this field must be Yes',
                 })
-        if all_negative:
-            if child_on_tb_treatment != NO :
-                raise ValidationError({
-                    'child_on_tb_treatment': 'If all test results are negative, this field must not be Yes or Other.',
-                    })    
 
     def field_cannot_be(self, field_1, field_2, field_one_condition,
                         field_two_condition):
@@ -136,7 +119,7 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
 
 
     def not_flourish_referral_validation(self):
-        referral_fields = ['clinic_visit_date','tb_tests','child_diagnosed_with_tb','child_on_tb_treatment',]
+        referral_fields = ['clinic_visit_date','tb_tests','child_diagnosed_with_tb',]
     
         for referral_field in referral_fields:
 
