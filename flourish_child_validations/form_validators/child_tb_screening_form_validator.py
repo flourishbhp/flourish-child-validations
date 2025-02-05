@@ -1,5 +1,5 @@
 from django.forms import ValidationError
-from edc_constants.constants import NO, NONE, OTHER, YES
+from edc_constants.constants import NO, NONE, OTHER, YES, POS, NEG
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
@@ -9,6 +9,9 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
 
     def clean(self):
         super().clean()
+
+        self.validate_results_tb_treatment_and_prevention()
+    
 
         required_fields = ['cough', 'fever', 'sweats', 'weight_loss']
 
@@ -28,14 +31,13 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
         self.required_if(YES,
                          field='evaluated_for_tb',
                          field_required='flourish_referral')
-
-        self.required_if(NO,
-                         field='flourish_referral',
-                         field_required='clinic_visit_date')
+        
+        self.not_flourish_referral_validation()
 
         field_responses = {
             'chest_xray': 'chest_xray_results',
             'sputum_sample': 'sputum_sample_results',
+            'stool_sample': 'stool_sample_results',
             'urine_test': 'urine_test_results',
             'skin_test': 'skin_test_results',
             'blood_test': 'blood_test_results',
@@ -47,11 +49,9 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
                 m2m_field='tb_tests',
                 field_other=field,
             )
-
-        self.m2m_required_if(
-            YES,
-            m2m_field='tb_tests',
-            field='evaluated_for_tb',
+        
+        self.m2m_single_selection_if(
+            'None', m2m_field='tb_tests'
         )
 
         self.m2m_other_specify(
@@ -60,12 +60,8 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
             field_other='other_test',
         )
 
-        self.m2m_other_specify(
-            NONE,
-            m2m_field='tb_tests',
-            field_other='child_diagnosed_with_tb',
-        )
-
+        self.diagnoses_required_validation()   
+             
         self.required_if(YES,
                          field='child_diagnosed_with_tb',
                          field_required='child_on_tb_treatment')
@@ -91,6 +87,15 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
             field='child_on_tb_preventive_therapy',
         )
 
+    def validate_results_tb_treatment_and_prevention(self):
+        child_on_tb_treatment = self.cleaned_data.get('child_on_tb_treatment')
+        child_diagnosed_with_tb = self.cleaned_data.get('child_diagnosed_with_tb')
+    
+        if child_on_tb_treatment != YES and child_diagnosed_with_tb == YES:
+                raise ValidationError({
+                    'child_on_tb_treatment': 'If diagnosed with tb, this field must be Yes',
+                })
+
     def field_cannot_be(self, field_1, field_2, field_one_condition,
                         field_two_condition):
         """Raises an exception based on the condition between field_1 and field_2
@@ -104,3 +109,23 @@ class ChildTBScreeningFormValidator(ChildFormValidatorMixin, FormValidator):
                                  f'is {field_two_condition}.')}
             raise ValidationError(message, code='message')
         return False
+    
+
+    def diagnoses_required_validation(self):
+
+        tb_tests_responses = [obj.short_name for obj in self.cleaned_data.get('tb_tests', [])]
+        self.required_if_true(any(response != 'None' for response in tb_tests_responses),
+                              field_required='child_diagnosed_with_tb')
+
+
+    def not_flourish_referral_validation(self):
+        referral_fields = ['clinic_visit_date','tb_tests','child_diagnosed_with_tb',]
+    
+        for referral_field in referral_fields:
+
+                self.required_if(NO,
+                                field='flourish_referral',
+                                field_required=referral_field)
+
+
+
