@@ -121,16 +121,15 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
     def prev_objs(self):
         child_visit = self.cleaned_data.get('child_visit', None)
 
-        while child_visit:
-            child_visit = getattr(child_visit, 'previous_visit', False)
+        child_visit = getattr(child_visit, 'previous_visit', None)
 
-            try:
-                previous_menarche = self.child_preg_testing_model_cls.objects.get(
-                    child_visit=child_visit)
-            except self.child_preg_testing_model_cls.DoesNotExist:
-                return None
-            else:
-                return previous_menarche
+        try:
+            previous_menarche = self.child_preg_testing_model_cls.objects.get(
+                child_visit=child_visit)
+        except self.child_preg_testing_model_cls.DoesNotExist:
+            return None
+        else:
+            return previous_menarche
 
 
     @property
