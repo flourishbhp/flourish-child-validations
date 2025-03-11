@@ -2,7 +2,7 @@ from dateutil.relativedelta import relativedelta
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
 from edc_base.utils import get_utcnow
-from edc_constants.constants import NO, YES,UNKNOWN,NOT_APPLICABLE
+from edc_constants.constants import NO, YES, UNKNOWN, NOT_APPLICABLE
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
@@ -75,14 +75,15 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         """ Require lmp date if participant is pregnant, or has reached menarche, and it
             is not the first time.
         """
-        experienced_preg = self.cleaned_data.get('experienced_pregnancy', '') == UNKNOWN or self.cleaned_data.get('experienced_pregnancy', '') == NOT_APPLICABLE
+        experienced_preg = self.cleaned_data.get('experienced_pregnancy', '') == UNKNOWN or self.cleaned_data.get(
+            'experienced_pregnancy', '') == NOT_APPLICABLE
         stated_menarche = self.cleaned_data.get('menarche') == YES
 
         if self.prev_objs:
-            not_first_start = self.prev_objs.menarche == NO 
+            not_first_start = self.prev_objs.menarche == NO
         else:
             not_first_start = self.tanner_staging_objs.exists()
-        
+
         self.required_if_true(
             not experienced_preg or (stated_menarche and not_first_start),
             field_required='last_menstrual_period', )
@@ -96,7 +97,8 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         consented = self.caregiver_child_obj
         today_dt = get_utcnow().date()
         menarche_start_dt = self.cleaned_data.get('menarche_start_dt', None)
-        experienced_pregnancy = self.cleaned_data.get('experienced_pregnancy', None)
+        experienced_pregnancy = self.cleaned_data.get(
+            'experienced_pregnancy', None)
 
         if consented:
             if lmp and (lmp == today_dt):
@@ -111,7 +113,7 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
                 raise ValidationError(message)
 
             lmp_condition = (experienced_pregnancy == NO) or (
-                    lmp and lmp <= threshold_date)
+                lmp and lmp <= threshold_date)
             self.applicable_if_true(
                 lmp_condition,
                 field_applicable='test_done',
@@ -130,7 +132,6 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
             return None
         else:
             return previous_menarche
-
 
     @property
     def tanner_staging_objs(self):
