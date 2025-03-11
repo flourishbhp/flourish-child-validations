@@ -2,7 +2,7 @@ from dateutil.relativedelta import relativedelta
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
 from edc_base.utils import get_utcnow
-from edc_constants.constants import NO, YES
+from edc_constants.constants import NO, YES,UNKNOWN,NOT_APPLICABLE
 from edc_form_validators import FormValidator
 
 from .form_validator_mixin import ChildFormValidatorMixin
@@ -75,7 +75,7 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         """ Require lmp date if participant is pregnant, or has reached menarche, and it
             is not the first time.
         """
-        experienced_preg = self.cleaned_data.get('experienced_pregnancy', '') == YES
+        experienced_preg = self.cleaned_data.get('experienced_pregnancy', '') == UNKNOWN or self.cleaned_data.get('experienced_pregnancy', '') == NOT_APPLICABLE
         stated_menarche = self.cleaned_data.get('menarche') == YES
 
         if self.prev_objs:
@@ -84,7 +84,7 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
             not_first_start = self.tanner_staging_objs.exists()
         
         self.required_if_true(
-            experienced_preg or (stated_menarche and not_first_start),
+            not experienced_preg or (stated_menarche and not_first_start),
             field_required='last_menstrual_period', )
 
     def validate_lmp(self):
