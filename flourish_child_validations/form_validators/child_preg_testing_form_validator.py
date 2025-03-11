@@ -78,9 +78,11 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
         experienced_preg = self.cleaned_data.get('experienced_pregnancy', '') == YES
         stated_menarche = self.cleaned_data.get('menarche') == YES
 
-        not_first_start = (self.prev_objs.filter(menarche=YES).exists() or
-                           self.tanner_staging_objs.exists())
-
+        if self.prev_objs:
+            not_first_start = self.prev_objs.menarche == NO 
+        else:
+            not_first_start = self.tanner_staging_objs.exists()
+        
         self.required_if_true(
             experienced_preg or (stated_menarche and not_first_start),
             field_required='last_menstrual_period', )
@@ -117,8 +119,18 @@ class ChildPregTestingFormValidator(ChildFormValidatorMixin, FormValidator):
 
     @property
     def prev_objs(self):
-        return self.child_preg_testing_model_cls.objects.filter(
-            child_visit__subject_identifier=self.child_visit.subject_identifier)
+        child_visit = self.cleaned_data.get('child_visit', None)
+
+        child_visit = getattr(child_visit, 'previous_visit', None)
+
+        try:
+            previous_menarche = self.child_preg_testing_model_cls.objects.get(
+                child_visit=child_visit)
+        except self.child_preg_testing_model_cls.DoesNotExist:
+            return None
+        else:
+            return previous_menarche
+
 
     @property
     def tanner_staging_objs(self):
