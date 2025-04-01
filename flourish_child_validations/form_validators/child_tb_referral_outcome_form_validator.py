@@ -99,6 +99,6 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
         diagnosed_with_tb = self.cleaned_data.get('diagnosed_with_tb')
 
         if tb_treatment != YES and diagnosed_with_tb == YES:
-                raise ValidationError({
-                    'tb_treatment':
-                    'If any diagnosed with tb , this field must be Yes', })
+            raise ValidationError({
+                'tb_treatment': 'If any diagnosed with tb , this field must be Yes',
+            })
