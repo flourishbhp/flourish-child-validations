@@ -32,14 +32,13 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
                 self.required_if_true(exists, 'other_test_specify')
                 self.required_if_true(exists, 'other_test_results')
 
-
         self.required_if(
             YES,
             field='tb_evaluation',
             field_required='evaluated',
         )
 
-        required_fields =['tests_performed','diagnosed_with_tb',]
+        required_fields = ['tests_performed', 'diagnosed_with_tb', ]
         for field in required_fields:
             self.required_if(
                     YES,
@@ -61,7 +60,6 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
             other_specify_field='clinic_name_other'
         )
 
-       
         self.required_if(
             NO,
             field='diagnosed_with_tb',
@@ -88,20 +86,17 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
                          field='diagnosed_with_tb',
                          field_required='tb_treatment')
 
-
         self.validate_other_specify(
             field='reasons',
             other_specify_field='other_reasons'
         )
         self.validate_results_tb_treatment_and_prevention()
+
     def validate_results_tb_treatment_and_prevention(self):
         tb_treatment = self.cleaned_data.get('tb_treatment')
         diagnosed_with_tb = self.cleaned_data.get('diagnosed_with_tb')
-        
-    
-        if tb_treatment != YES and diagnosed_with_tb == YES:
-                raise ValidationError({
-                    'tb_treatment': 'If any diagnosed with tb , this field must be Yes',
-                })
-    
 
+        if tb_treatment != YES and diagnosed_with_tb == YES:
+            raise ValidationError({
+                'tb_treatment': 'If any diagnosed with tb , this field must be Yes',
+            })
