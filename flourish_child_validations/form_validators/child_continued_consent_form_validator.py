@@ -202,12 +202,13 @@ class ChildContinuedConsentFormValidator(ChildFormValidatorMixin, FormValidator)
     def validate_against_child_consent(self):
         cleaned_data = self.cleaned_data
         identity = cleaned_data.get('identity')
-        fields = [key for key in cleaned_data.keys() if key not in
-                  ['consent_datetime', 'identity_type', 'identity',
-                   'version']]
+        exclude = ['consent_datetime', 'identity_type', 'identity',
+                   'version', 'language', 'specimen_consent', ]
+        fields = [key for key in cleaned_data.keys() if key not in exclude]
         for field in fields:
             child_consent_value = getattr(
                 self.caregiver_child_consent, field, None)
+
             field_value = cleaned_data.get(field)
             self.check_identity_fields(
                 field, field_value, identity, child_consent_value)
@@ -247,8 +248,8 @@ class ChildContinuedConsentFormValidator(ChildFormValidatorMixin, FormValidator)
         # Add error if child consent value mismatches the field value
         if child_consent_value and child_consent_value != field_value:
             self.capture_error_message(
-                f'{field_value} does not match {child_consent_value} from '
-                'the caregiver consent on behalf of the child. Please '
+                f'{field_value} does not match {child_consent_value} for {field}'
+                ' from the caregiver consent on behalf of the child. Please '
                 'correct this.'
             )
 
