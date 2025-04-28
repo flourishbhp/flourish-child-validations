@@ -1,6 +1,10 @@
+from django.apps import apps as django_apps
+from django.forms import ValidationError
+from edc_base.utils import get_utcnow
 from edc_constants.constants import NO, YES
 from edc_form_validators import FormValidator
-from django.forms import ValidationError
+
+
 from .form_validator_mixin import ChildFormValidatorMixin
 
 
@@ -11,7 +15,22 @@ def check_values(queryset, values):
 
 class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator):
 
+    tb_referral_model = 'flourish_child.childtbreferral'
+    tb_referral_outcome_model = 'flourish_child.childtbreferraloutcome'
+
+    @property
+    def tb_referral_model_cls(self):
+        return django_apps.get_model(self.tb_referral_model)
+
+    @property
+    def tb_referral_outcome_model_cls(self):
+        return django_apps.get_model(self.tb_referral_outcome_model)
+
     def clean(self):
+        super().clean()
+
+        self.validate_outcomes_exists_for_referral()
+
         self.required_if(
                 YES,
                 field='tb_evaluation',
@@ -100,3 +119,27 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
             raise ValidationError({
                 'tb_treatment': 'If any diagnosed with tb , this field must be Yes',
             })
+
+    def validate_outcomes_exists_for_referral(self):
+        """ Check if there's already an outcome completed for the related referral
+        """
+        report_datetime = self.cleaned_data.get('report_datetime', None)
+        try:
+            related_referral = self.tb_referral_model_cls.objects.filter(
+                child_visit__subject_identifier=self.subject_identifier,
+                report_datetime__lt=report_datetime).latest('report_datetime')
+        except self.tb_referral_model_cls.DoesNotExist:
+            pass
+        else:
+            referral_dt = getattr(related_referral, 'report_datetime', None)
+
+            referral_outcome = self.tb_referral_outcome_model_cls.objects.filter(
+                child_visit__subject_identifier=self.subject_identifier,
+                report_datetime__range=(referral_dt, get_utcnow()))
+            if self.instance:
+                referral_outcome = referral_outcome.exclude(id=self.instance.id)
+            if referral_outcome.exists():
+                visit_code = referral_outcome.first().visit_code
+                raise ValidationError(
+                    {'__all__':
+                     f'Referral outcome already completed at visit {visit_code}'})
