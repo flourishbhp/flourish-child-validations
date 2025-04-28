@@ -116,9 +116,9 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
         diagnosed_with_tb = self.cleaned_data.get('diagnosed_with_tb')
 
         if tb_treatment != YES and diagnosed_with_tb == YES:
-            raise ValidationError({
-                'tb_treatment': 'If any diagnosed with tb , this field must be Yes',
-            })
+            raise ValidationError(
+                {'tb_treatment':
+                 'If any diagnosed with tb , this field must be Yes', })
 
     def validate_outcomes_exists_for_referral(self):
         """ Check if there's already an outcome completed for the related referral
@@ -136,9 +136,13 @@ class ChildTBReferralOutcomeFormValidator(ChildFormValidatorMixin, FormValidator
             referral_outcome = self.tb_referral_outcome_model_cls.objects.filter(
                 child_visit__subject_identifier=self.subject_identifier,
                 report_datetime__range=(referral_dt, get_utcnow()))
-            if self.instance:
-                referral_outcome = referral_outcome.exclude(id=self.instance.id)
-            if referral_outcome.exists():
+
+            child_visit = self.cleaned_data.get('child_visit', None)
+
+            instance_exists = self.tb_referral_outcome_model_cls.objects.filter(
+                child_visit=child_visit).exists()
+
+            if not instance_exists and referral_outcome.exists():
                 visit_code = referral_outcome.first().visit_code
                 raise ValidationError(
                     {'__all__':
